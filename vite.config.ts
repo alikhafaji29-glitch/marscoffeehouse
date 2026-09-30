@@ -1,34 +1,6 @@
 import { defineConfig, loadEnv } from 'vite'
 import type { Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
-import fs from 'node:fs'
-import path from 'node:path'
-
-// dev-only: lets the browser save canvas frames to .frames/ for visual checks
-function frameDump(): Plugin {
-  return {
-    name: 'frame-dump',
-    apply: 'serve',
-    configureServer(server) {
-      server.middlewares.use('/__frame', (req, res) => {
-        if (req.method !== 'POST') {
-          res.statusCode = 405
-          return res.end()
-        }
-        const name = new URL(req.url || '/', 'http://x').searchParams.get('name') || 'frame'
-        let body = ''
-        req.on('data', (c) => (body += c))
-        req.on('end', () => {
-          const b64 = body.split(',').pop() || ''
-          const dir = path.resolve('.frames')
-          fs.mkdirSync(dir, { recursive: true })
-          fs.writeFileSync(path.join(dir, name.replace(/[^a-z0-9_-]/gi, '') + '.png'), Buffer.from(b64, 'base64'))
-          res.end('ok')
-        })
-      })
-    },
-  }
-}
 
 // dev-only: "Your Mood Drink" asks Claude through the Anthropic API when ANTHROPIC_API_KEY is set
 // (the real site gets a backend function for this; without a key the browser falls back on its own)
@@ -71,7 +43,7 @@ function moodApi(): Plugin {
 }
 
 export default defineConfig({
-  plugins: [react(), frameDump(), moodApi()],
+  plugins: [react(), moodApi()],
   server: { port: 1440, host: true },
 })
 
