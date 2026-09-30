@@ -12,8 +12,7 @@ css_file = re.search(r'href="/assets/(index-[^"]+\.css)"', html).group(1)
 js = io.open(f'{dist}/assets/{js_file}', encoding='utf-8').read()
 css = io.open(f'{dist}/assets/{css_file}', encoding='utf-8').read()
 mimes = {'.jpg': 'image/jpeg', '.png': 'image/png', '.mp4': 'video/mp4'}
-assets = [('assets/logo.png', 'image/png'), ('assets/logo-white.png', 'image/png'), ('assets/drink-berry-bloom.png', 'image/png')]
-assets += [(f'assets/quiz/{os.path.basename(f)}', 'image/png') for f in glob.glob(f'{dist}/assets/quiz/*.png')]
+assets = [('assets/logo.png', 'image/png'), ('assets/logo-white.png', 'image/png')]
 assets += [(f'assets/featured/{os.path.basename(f)}', mimes[os.path.splitext(f)[1]]) for f in glob.glob(f'{dist}/assets/featured/*') if os.path.splitext(f)[1] in mimes]
 for rel, mime in assets:
     if not os.path.exists(f'{dist}/{rel}'):

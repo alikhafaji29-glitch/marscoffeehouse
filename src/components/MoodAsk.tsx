@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useLang } from '../i18n'
 import { dropsFrom } from '../fx'
@@ -9,35 +9,6 @@ import type { MoodAnswer, MoodSource } from '../mood'
 import { iqd } from '../account'
 import { MiniCup } from './MiniCup'
 import { ReviewPrompt } from './ReviewPrompt'
-
-type Step = 0 | 1 | 2 | 3
-
-const QUESTIONS: { key: TKey; options: [string, string]; alts: [string, string] }[] = [
-  { key: 'q1', options: ['/assets/quiz/mood-sad.png?v=3', '/assets/quiz/mood-happy.png?v=3'], alts: ['sad', 'happy'] },
-  { key: 'q2', options: ['/assets/quiz/choc.png?v=3', '/assets/quiz/lemon.png?v=3'], alts: ['chocolate', 'lemon'] },
-  { key: 'q3', options: ['/assets/quiz/mood-sleepy.png?v=3', '/assets/quiz/mood-energy.png?v=3'], alts: ['sleepy', 'energetic'] },
-]
-
-// answer pattern (0/1 per question) -> recommended drink
-const DRINKS: Record<string, string> = {
-  '000': 'Cozy Choco Latte',
-  '001': 'Mocha Thunder',
-  '010': 'Sunrise Lemon Tea',
-  '011': 'Citrus Cold Brew',
-  '100': 'Berry-bloom Matcha',
-  '101': 'Choco Cloud Frappé',
-  '110': 'Lemon Mint Splash',
-  '111': 'Sunny Citrus Energizer',
-}
-
-function MoodBadge() {
-  return (
-    <div className="badge">
-      <span className="script">YourMood</span>{' '}
-      <span className="tag navy">DRINK</span>
-    </div>
-  )
-}
 
 const CHIPS: TKey[] = ['chipTired', 'chipStressed', 'chipHappy', 'chipHot', 'chipFocus', 'chipSweet', 'chipLight']
 
@@ -120,82 +91,5 @@ export function MoodDialog({ onPick, onClose }: { onPick: (item: MenuItem) => vo
         <MoodAsk onPick={onPick} chips={false} onDone={onClose} />
       </div>
     </div>
-  )
-}
-
-export function MoodQuiz({ onOrder, onPick }: { onOrder: () => void; onPick: (item: MenuItem) => void }) {
-  const { t } = useLang()
-  const [step, setStep] = useState<Step>(0)
-  const [answers, setAnswers] = useState<number[]>([])
-  const [started, setStarted] = useState(false)
-  const [review, setReview] = useState(false)
-
-  const pick = (i: number) => {
-    setAnswers((a) => [...a, i])
-    setStep((s) => (s + 1) as Step)
-  }
-
-  const reset = () => {
-    setAnswers([])
-    setStep(0)
-    setStarted(false)
-  }
-
-  const drink = DRINKS[answers.join('')] ?? 'Berry-bloom Matcha'
-
-  useEffect(() => {
-    if (step !== 3) return
-    const id = setTimeout(() => dropsFrom(document.querySelector('.mood-result img'), '#f28ab2', 18, 1.2), 450)
-    return () => clearTimeout(id)
-  }, [step])
-
-  return (
-    <section className="mood" id="mood">
-      <div className="mood-inner">
-        <MoodBadge />
-        <div className="mood-title">{t('moodTitle')}</div>
-
-        <MoodAsk onPick={onPick} />
-
-        {!started ? (
-          <button className="mood-again" onClick={() => setStarted(true)}>
-            {t('moodQuizToggle')}
-          </button>
-        ) : step < 3 ? (
-          <>
-            <div className="mood-q">{t(QUESTIONS[step].key)}</div>
-            <div className="mood-choices">
-              <button className="mood-choice" onClick={() => pick(0)}>
-                <img src={QUESTIONS[step].options[0]} alt={QUESTIONS[step].alts[0]} />
-              </button>
-              <div className="divider" />
-              <button className="mood-choice" onClick={() => pick(1)}>
-                <img src={QUESTIONS[step].options[1]} alt={QUESTIONS[step].alts[1]} />
-              </button>
-            </div>
-          </>
-        ) : (
-          <div className="mood-result">
-            <div className="mood-q">{t('result')}</div>
-            <img src="/assets/drink-berry-bloom.png" alt={drink} />
-            <div className="drink-name">{drink}</div>
-            <div className="mood-actions">
-              <button className="btn-pill" onClick={onOrder}>
-                {t('orderNow')}
-              </button>
-              <button className="btn-pill ghost" onClick={() => setReview(true)}>
-                {t('rateThis')}
-              </button>
-            </div>
-            {review && <ReviewPrompt recipe={{ kind: 'mood', drink }} defaultTitle={drink} onClose={() => setReview(false)} />}
-            <div>
-              <button className="mood-again" onClick={reset}>
-                {t('tryAgain')}
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    </section>
   )
 }

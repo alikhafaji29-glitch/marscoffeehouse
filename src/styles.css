@@ -86,37 +86,9 @@ body {
   font-size: clamp(2.6rem, 7vw, 4rem);
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
 }
-.badge .tag {
-  position: relative;
-  display: inline-block;
-  background: var(--sky-deep);
-  color: var(--white);
-  font-family: var(--font-serif);
-  font-weight: 900;
-  font-style: italic;
-  letter-spacing: 0.08em;
-  font-size: clamp(1.1rem, 3vw, 1.6rem);
-  padding: 0.25em 0.7em;
-  border-radius: 0.35em;
-  transform: rotate(-4deg) translateY(-0.5em);
-  box-shadow: 0 2px 0 rgba(255,255,255,0.85);
-  animation: tag-wiggle 3.4s ease-in-out infinite;
-}
-.badge .tag::after {
-  content: '';
-  position: absolute;
-  bottom: -0.45em;
-  inset-inline-start: 1em;
-  border: 0.35em solid transparent;
-  border-top-color: var(--sky-deep);
-}
-.badge .tag.navy { background: var(--navy); }
-.badge .tag.navy::after { border-top-color: var(--navy); }
 
 /* ---------- mood quiz ---------- */
 .mood { background: var(--sky); text-align: center; padding: 3.5rem 1.2rem 3.5rem; }
-.mood-inner { max-width: 34rem; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 1.6rem; justify-content: center; }
-.mood-title { font-size: 1.1rem; font-weight: 500; max-width: 28rem; }
 /* your mood → AI barista */
 .mood-ask { width: 100%; max-width: 30rem; }
 .mood-ask form { display: flex; flex-direction: column; align-items: center; gap: 0.7rem; }
@@ -139,38 +111,6 @@ body {
 .mood-card .btn-pill:hover { background: var(--sky-deep); border-color: var(--sky-deep); color: #fff; }
 .mood-card .mood-again { align-self: center; color: var(--navy); }
 
-.mood-q { font-size: 1.15rem; font-weight: 500; opacity: 0.95; }
-
-.mood-choices { display: flex; align-items: center; gap: 2.2rem; }
-.mood-choices .divider { width: 3px; height: 9rem; background: var(--white); border-radius: 2px; }
-.mood-choice {
-  background: none;
-  border: none;
-  cursor: pointer;
-  line-height: 1;
-  padding: 0.6rem;
-  border-radius: 1rem;
-  transition: transform 0.15s, background 0.2s;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 8.4rem;
-  height: 8.4rem;
-}
-.mood-choice img {
-  max-width: 100%;
-  max-height: 100%;
-}
-.mood-choice:hover { transform: scale(1.12); background: rgba(255, 255, 255, 0.18); }
-.mood-choice:hover img { animation: wiggle 0.5s ease-in-out; }
-.mood-choice:active { transform: scale(0.92); }
-
-.mood-result img {
-  width: min(48vw, 14rem);
-  filter: drop-shadow(0 12px 22px rgba(0, 47, 109, 0.35));
-  animation: drop-in 0.8s cubic-bezier(0.2, 0.9, 0.25, 1.25), cup-float 4s ease-in-out 0.8s infinite;
-}
-.mood-result .drink-name { font-size: 1.2rem; font-weight: 600; margin: 0.8rem 0 1.2rem; }
 .mood-again { background: none; border: none; color: var(--white); text-decoration: underline; cursor: pointer; font-family: var(--font-sans); font-size: 0.9rem; margin-top: 0.6rem; opacity: 0.85; }
 
 /* ---------- build your drink ---------- */
@@ -365,23 +305,6 @@ body {
   38% { transform: translate(calc(var(--dx) * 0.45), calc(var(--h) * -1)) scale(1); opacity: 1; animation-timing-function: cubic-bezier(0.5, 0, 0.8, 0.4); }
   100% { transform: translate(var(--dx), 170px) scale(0.9, 1.5); opacity: 0; }
 }
-@keyframes tag-wiggle {
-  0%, 100% { transform: rotate(-4deg) translateY(-0.5em); }
-  50% { transform: rotate(-1deg) translateY(-0.6em); }
-}
-@keyframes cup-float {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-9px) rotate(2.5deg); }
-}
-@keyframes drop-in {
-  from { transform: translateY(-80px) rotate(-15deg) scale(0.6); opacity: 0; }
-  to { transform: translateY(0) rotate(0) scale(1); opacity: 1; }
-}
-@keyframes wiggle {
-  0%, 100% { transform: rotate(0); }
-  25% { transform: rotate(-9deg); }
-  75% { transform: rotate(9deg); }
-}
 @keyframes pop {
   0% { transform: scale(1); }
   40% { transform: scale(1.35); }
@@ -432,8 +355,6 @@ body {
   .nav { grid-area: nav; justify-self: start; padding-top: 0; gap: 0.9rem; align-items: center; }
   .nav a { font-size: 0.78rem; }
   .lang-group { grid-area: lang; justify-self: end; margin-top: 0; }
-  .mood-choices .divider { height: 7rem; }
-  .mood-choice { width: 6.4rem; height: 6.4rem; }
 }
 
 /* ======================= restructure (2026-09-09) ======================= */
@@ -486,7 +407,6 @@ a.btn-pill { text-decoration: none; display: inline-flex; align-items: center; }
 .hours-strip.live { background: linear-gradient(90deg, #002f6d, #397dc9); }
 .hours-inner { max-width: 60rem; margin: 0 auto; display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap; justify-content: center; }
 .hours-strip .badge .script { font-size: 1.6rem; }
-.hours-strip .badge .tag { font-size: 0.8rem; }
 .hours-text { display: flex; flex-direction: column; gap: 0.15rem; flex: 1 1 16rem; min-width: 0; font-size: 0.9rem; }
 .hours-line { opacity: 0.9; }
 .hours-count b { font-variant-numeric: tabular-nums; font-size: 1.05rem; }
@@ -772,7 +692,6 @@ html:has(main[data-view='home']) { scroll-snap-type: y proximity; }
 }
 
 .slide-photo .slide-title .badge .script { font-size: clamp(3rem, 12vw, 5.5rem); color: #fff; }
-.slide-photo .slide-title .badge .tag { font-size: clamp(1.1rem, 4vw, 1.8rem); }
 .slide-photo .eyebrow b { font-variant-numeric: tabular-nums; }
 .slide-shop { padding-top: 0; }
 @media (min-width: 761px) {

@@ -46,6 +46,16 @@ export default function App() {
   const openOrder = () => setOrderOpen(true)
   useEffect(() => onCheckout(() => setCartOpen(true)), []) // the mood game's Order it goes straight to checkout
   useEffect(() => { if (location.hash === '#build') openBuild() }, []) // old links to the removed soda builder screen
+  // desktop is one long page: a link that opens the site on a section (#menu, #community, #account, #gift, #join)
+  // scrolls there once React has drawn it (the browser's own jump happens before the section exists)
+  useEffect(() => {
+    if (isPhone()) return
+    const h = location.hash.replace('#', '')
+    const id = h === GIFT ? 'menu' : h === 'join' ? 'account' : h
+    if (!(VIEWS as string[]).includes(id)) return
+    const t = setTimeout(() => document.getElementById(id)?.scrollIntoView({ block: 'start', behavior: 'instant' }), 300)
+    return () => clearTimeout(t)
+  }, [])
 
   // the header sits over the hero in white; on app screens it needs navy (see styles.css body[data-view])
   useEffect(() => {
