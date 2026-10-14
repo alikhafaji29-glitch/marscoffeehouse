@@ -1,3 +1,5 @@
+import { customerBranch } from './staff/store'
+import { newUid } from './backend'
 import { useEffect, useState } from 'react'
 import { pushNotice } from './notify'
 import type { Stage } from './orders'
@@ -33,8 +35,13 @@ export interface Order {
   fulfil?: 'pickup' | 'delivery'
   delivery?: Delivery // phone to call + address, delivery orders only
   giftTo?: string // a drink sent to a friend: their number (delivery goes to them, the sender paid)
+  branch?: string // the branch picked on the Order screen (staff/store.ts); missing = the first branch
+  offer?: { name: string; price: number; fee?: number; pre?: boolean } // a combo from the dashboard's Offers (Positive Hours); pre = placed outside its hours
+  uid?: string // the order's identity in the shared backend (src/sync.ts); `id` is the short code people see
+  synced?: boolean // the backend has it
 }
-export interface Delivery { phone: string; address: string }
+export interface GeoPoint { lat: number; lng: number; acc?: number } // acc: the phone's own accuracy estimate, metres
+export interface Delivery { phone: string; address: string; location?: GeoPoint } // location: the pin from "Share my location"
 export interface Account {
   phone: string
   name: string
@@ -153,7 +160,7 @@ export function payAtPickup(total: number, items: string[], delivery?: Delivery)
   if (!account || total <= 0) return { ok: false, points: 0, reward: false, orderId: '' }
   return placeOrder(total, items, 'pickup', delivery)
 }
-function placeOrder(total: number, items: string[], pay: 'wallet' | 'pickup', delivery?: Delivery, giftTo?: string): PayResult {
+function placeOrder(total: number, items: string[], pay: 'wallet' | 'pickup', delivery?: Delivery, giftTo?: string, extra?: Partial<Order>): PayResult {
   const points = Math.floor(total / 1000) * POINTS_PER_1000
   let reward = false
   const orderId = 'M' + Date.now().toString().slice(-6)
@@ -166,23 +173,76 @@ function placeOrder(total: number, items: string[], pay: 'wallet' | 'pickup', de
       a.rewards.unshift({ id: uid(), code: code(), createdAt: Date.now(), used: false })
       reward = true
     }
-    a.orders.unshift({ id: orderId, at: Date.now(), total, items, points, pay, status: 'received', history: [{ stage: 'received', at: Date.now() }], customer: { name: a.name, phone: a.phone }, fulfil: delivery ? 'delivery' : 'pickup', delivery, giftTo })
+    a.orders.unshift({ id: orderId, at: Date.now(), total, items, points, pay, status: 'received', history: [{ stage: 'received', at: Date.now() }], customer: { name: a.name, phone: a.phone }, fulfil: delivery ? 'delivery' : 'pickup', delivery, giftTo, branch: customerBranch(), uid: newUid(), ...extra })
     if (delivery && !giftTo) a.address = delivery.address
     if (pay === 'wallet') a.txns.unshift({ id: uid(), kind: 'order', amount: -total, note: `order ${orderId}`, at: Date.now() })
   })
+  onPlaced?.()
   return { ok: true, points, reward, orderId }
 }
 /** Staff dashboard: move an order to a stage. Works whether or not the customer is signed in on this device. */
 export function setOrderStatus(id: string, stage: Stage) {
-  if (!account) return
-  const o = account.orders.find((x) => x.id === id)
+  const mine = account?.orders.find((x) => x.id === id)
+  const o = mine ?? guest.find((x) => x.id === id)
   if (!o || o.status === stage) return
   o.status = stage
   o.history = [...(o.history ?? []), { stage, at: Date.now() }]
-  account = { ...account }
-  save()
+  if (mine) { account = { ...account! }; save() } else { guest = [...guest]; saveGuest() }
 }
-/** Every order stored on this device (DEMO: the one account's orders), newest first. */
+
+/*
+ * Orders placed without signing in (the Positive Hours combo asks only for a name, a number and an address).
+ * DEMO: kept on this device (`mars-guest-orders`) beside the account's orders; the staff dashboard sees both and the
+ * Track order bar follows them. The real version is an order row with the customer's phone and no account.
+ */
+const GUEST = 'mars-guest-orders'
+let guest: Order[] = (() => { try { return JSON.parse(localStorage.getItem(GUEST) || '[]') as Order[] } catch { return [] } })()
+const saveGuest = () => {
+  try { localStorage.setItem(GUEST, JSON.stringify(guest)) } catch { /* private mode */ }
+  listeners.forEach((l) => l())
+}
+/** A combo order: on the signed-in account when there is one (points are earned), otherwise as a guest order. Cash on delivery / at pickup. */
+export function placeOfferOrder(o: { total: number; items: string[]; name: string; phone: string; address?: string; location?: GeoPoint; offer: NonNullable<Order['offer']> }): PayResult {
+  // address undefined = pickup; a delivery may carry a typed address, a shared pin, or both
+  const delivery: Delivery | undefined = o.address !== undefined ? { phone: o.phone, address: o.address, location: o.location } : undefined
+  const customer = { name: o.name, phone: o.phone }
+  if (account && session) return placeOrder(o.total, o.items, 'pickup', delivery, undefined, { offer: o.offer, customer })
+  const orderId = 'M' + Date.now().toString().slice(-6)
+  guest = [{ id: orderId, at: Date.now(), total: o.total, items: o.items, points: 0, pay: 'pickup', status: 'received', history: [{ stage: 'received', at: Date.now() }], customer, fulfil: delivery ? 'delivery' : 'pickup', delivery, branch: customerBranch(), offer: o.offer, uid: newUid() }, ...guest]
+  saveGuest()
+  onPlaced?.()
+  return { ok: true, points: 0, reward: false, orderId }
+}
+/* ---- the shared backend (src/sync.ts): it is told when an order is placed, and it brings the stages back ---- */
+let onPlaced: (() => void) | null = null
+export const setOrderPlacedHook = (fn: () => void) => { onPlaced = fn }
+/** this device's orders, the account's and the guest ones (not a hook) */
+export const myOrders = (): Order[] => [...(account?.orders ?? []), ...guest]
+const findByUid = (uid: string) => {
+  const mine = account?.orders.find((x) => x.uid === uid)
+  return { mine, o: mine ?? guest.find((x) => x.uid === uid) }
+}
+const commit = (mine: Order | undefined) => { if (mine) { account = { ...account! }; save() } else { guest = [...guest]; saveGuest() } }
+export function markSynced(uid: string) {
+  const { mine, o } = findByUid(uid)
+  if (!o || o.synced) return
+  o.synced = true
+  commit(mine)
+}
+/** the stage staff moved the order to, as the backend has it */
+export function applyRemoteStatus(uid: string, status: Stage, history?: Order['history']) {
+  const { mine, o } = findByUid(uid)
+  if (!o || (o.status === status && (history?.length ?? 0) <= (o.history?.length ?? 0))) return
+  o.status = status
+  if (history?.length) o.history = history
+  commit(mine)
+}
+/** The orders this customer can follow on this device: the signed-in account's and the guest orders, newest first. */
+export function useMyOrders(): Order[] {
+  const a = useAccount()
+  return [...(a?.orders ?? []), ...guest].sort((x, y) => y.at - x.at)
+}
+/** Every order stored on this device (DEMO: the one account's orders and the guest orders), newest first. */
 export function useAllOrders(): Order[] {
   const [, tick] = useState(0)
   useEffect(() => {
@@ -190,13 +250,16 @@ export function useAllOrders(): Order[] {
     listeners.add(l)
     return () => { listeners.delete(l) }
   }, [])
-  return account?.orders ?? []
+  return [...(account?.orders ?? []), ...guest].sort((x, y) => y.at - x.at)
 }
 // another tab (the staff dashboard, or the customer) changed the store: reload it and re-render
 if (typeof window !== 'undefined') {
   window.addEventListener('storage', (e) => {
     if (e.key === KEY) {
       try { account = JSON.parse(e.newValue || 'null') as Account | null } catch { /* ignore */ }
+      listeners.forEach((l) => l())
+    } else if (e.key === GUEST) {
+      try { guest = JSON.parse(e.newValue || '[]') as Order[] } catch { /* ignore */ }
       listeners.forEach((l) => l())
     } else if (e.key === SESSION) {
       session = e.newValue === '1'

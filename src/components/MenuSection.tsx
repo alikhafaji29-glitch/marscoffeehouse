@@ -1,18 +1,21 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLang } from '../i18n'
 import type { Lang } from '../i18n'
 import { MENU, ORDER_MENU, CURATED } from '../menu'
 import type { MenuItem } from '../menu'
 import { MiniCup } from './MiniCup'
 import { IconSearch } from './Icons'
-import { DESC, PHOTO, TINT, categoryOf } from '../menuMeta'
+import { DESC, TINT, categoryOf } from '../menuMeta'
+import { BRANCHES, activeEvent, branchLabel, setCustomerBranch, useStaff } from '../staff/store'
+import { categoryName, itemState, nameOf, photoOf } from '../menuAdmin'
+import type { BranchId } from '../staff/store'
 
 /*
  * The Order screen, after the Blank Street ordering page (owner, 2026-09-10): a round search button and a
  * branch pill on top, a scrolling row of category tabs with an underline that follows the section in view,
  * then every category as a heading + cards (photo tile, name, price, one line, SOLD OUT badge).
  */
-const CATEGORY_NAMES: Record<string, Record<Lang, string>> = {
+export const CATEGORY_NAMES: Record<string, Record<Lang, string>> = {
   positive: { en: 'Positive Energy', ar: 'طاقة إيجابية', ku: 'وزەی ئەرێنی' },
   season: { en: 'New Season', ar: 'جديد الموسم', ku: 'نوێی ئەم وەرزە' },
   signature: { en: 'Signature', ar: 'مشروباتنا المميزة', ku: 'تایبەتەکانی مارس' },
@@ -24,34 +27,38 @@ const CATEGORY_NAMES: Record<string, Record<Lang, string>> = {
   mojito: { en: 'Mojito', ar: 'موهيتو', ku: 'مۆهیتۆ' },
   smoothie: { en: 'Smoothie', ar: 'سموذي', ku: 'سموزی' },
   matcha: { en: 'Matcha Collection', ar: 'تشكيلة الماتشا', ku: 'کۆلێکشنی ماتچا' },
+  autumn: { en: 'Autumn Drinks', ar: 'مشروبات الخريف', ku: 'خواردنەوەکانی پاییز' },
   extra: { en: 'Extras', ar: 'إضافات', ku: 'زیادەکان' },
   sweets: { en: 'Sweets & Bakery', ar: 'حلويات ومخبوزات', ku: 'شیرینی و بەیکەری' },
   savory: { en: 'Sandwiches & More', ar: 'ساندويتشات وأكثر', ku: 'ساندویچ و زیاتر' },
 }
 
+/** a category's name: the branch's own (as on the live menu), else ours (Positive Energy, New Season, Signature) */
+export const catLabel = (id: string, lang: Lang) => categoryName(id, lang) ?? CATEGORY_NAMES[id]?.[lang] ?? id
+
 const BADGE_LABELS = { top: 'TOP SELLER', premium: 'PREMIUM', signature: 'SIGNATURE' }
-const BRANCHES = ['Erbil · Branch 1', 'Erbil · Branch 2'] // placeholders until the owner sends the addresses
 
-const SHOW_SOLD_OUT = false // the stock flags in menu.ts are the 2026-08-24 snapshot (46 items!); turn on with a live feed
-
-const price = (item: MenuItem, free: string) =>
-  item.price === 0 ? free : typeof item.price === 'number' ? item.price.toLocaleString('en-US') : item.price[0].toLocaleString('en-US')
 
 function Card({ item, cat, onPick }: { item: MenuItem; cat: string; onPick: (i: MenuItem) => void }) {
-  const { t } = useLang()
-  const photo = PHOTO[item.name]
-  const line = DESC[item.name] ? t(DESC[item.name]) : item.sizes ? `${item.sizes[0]} / ${item.sizes[1]}` : ''
+  const { t, lang } = useLang()
+  const photo = photoOf(item.name)
+  // the menu's own description for this branch (dashboard → Edit Item) comes first, in its own language only
+  const line = itemState(item.name)?.desc[lang] || (DESC[item.name] ? t(DESC[item.name]) : '')
+  const iqd = (n: number) => n.toLocaleString('en-US')
   return (
     <li>
-      <button type="button" className={'ocard' + (item.soldOut && SHOW_SOLD_OUT ? ' sold' : '')} onClick={() => onPick(item)}>
+      <button type="button" className={'ocard' + (item.soldOut ? ' sold' : '')} data-item={item.name} onClick={() => onPick(item)}>
         <span className="ocard-tile" aria-hidden="true">
           {photo ? <img src={photo} alt="" loading="lazy" /> : <MiniCup color={TINT[cat] || [200, 200, 200]} ice={cat === 'coldCoffee' || cat === 'refreshers' || cat === 'mojito' ? 1 : 0} size={64} />}
-          {item.soldOut && SHOW_SOLD_OUT && <span className="ocard-sold">{t('soldOut')}</span>}
+          {item.soldOut && <span className="ocard-sold">{t('soldOut')}</span>}
         </span>
         <span className="ocard-main">
           <span className="ocard-head">
-            <span className="ocard-name">{item.name}</span>
-            <span className="ocard-price" dir="ltr">{price(item, t('free'))}{item.price !== 0 && <small> IQD</small>}</span>
+            <span className="ocard-name">{nameOf(item.name, lang)}</span>
+            {/* both sizes with their prices, as on the live menu (owner, 2026-10-13) */}
+            {Array.isArray(item.price)
+              ? <span className="ocard-price two" dir="ltr">{item.price.map((p, i) => <span key={i}>{iqd(p)}<small> IQD · {item.sizes?.[i]}</small></span>)}</span>
+              : <span className="ocard-price" dir="ltr">{item.price === 0 ? t('free') : iqd(item.price)}{item.price !== 0 && <small> IQD</small>}</span>}
           </span>
           {line && <span className="ocard-line">{line}</span>}
           {item.badge && <span className={'ocard-badge ' + item.badge}>{BADGE_LABELS[item.badge]}</span>}
@@ -63,13 +70,18 @@ function Card({ item, cat, onPick }: { item: MenuItem; cat: string; onPick: (i: 
 
 export function MenuSection({ onPick, gift = false }: { onPick: (item: MenuItem) => void; gift?: boolean }) {
   const { lang, t } = useLang()
-  const [active, setActive] = useState(ORDER_MENU[0].id)
-  const [branch, setBranch] = useState(0)
+  const staff = useStaff()
+  // the New Season section is the dashboard's active event: its items, its name, its promo strip; without one it is left out
+  const event = activeEvent()
+  // an item the chosen branch does not sell is left out (menuAdmin.ts marks it hidden)
+  const sections = ORDER_MENU.map((c) => ({ id: c.id, items: c.items.filter((i) => !i.hidden) })).filter((c) => c.items.length)
+  const sectionName = (id: string) => (id === 'season' && event?.name[lang]) || catLabel(id, lang)
+  const [active, setActive] = useState(sections[0].id)
   const [searching, setSearching] = useState(false)
   const [q, setQ] = useState('')
   const tabsRef = useRef<HTMLDivElement>(null)
   const query = q.trim().toLowerCase()
-  const results = useMemo(() => (query ? MENU.flatMap((c) => c.items.filter((i) => i.name.toLowerCase().includes(query)).map((i) => ({ item: i, cat: c.id }))) : []), [query])
+  const results = query ? MENU.flatMap((c) => c.items.filter((i) => !i.hidden && [i.name, ...Object.values(itemState(i.name)?.names ?? {})].some((n) => n.toLowerCase().includes(query))).map((i) => ({ item: i, cat: c.id }))) : [] // any language
 
   // the underline follows the section in view: the last section whose top has passed the line 45% down the screen
   // (the first one at the top of the list). Worked out from positions on every scroll, so arriving on the Menu screen
@@ -126,22 +138,23 @@ export function MenuSection({ onPick, gift = false }: { onPick: (item: MenuItem)
           <a href="#menu" className="link-btn">{t('giftCancel')}</a>
         </div>
       )}
+      {event?.promo[lang] && !gift && <p className="promo-strip" role="note">{event.promo[lang]}</p>}
       <div className="order-top">
         <div className="order-bar">
           <button type="button" className={'order-search-btn' + (searching ? ' on' : '')} aria-label={t('searchMenu')} aria-expanded={searching} onClick={() => { setSearching((v) => !v); if (searching) setQ('') }}><IconSearch /></button>
           <label className="order-branch">
             <span className="sr-only">{t('branch')}</span>
-            <select value={branch} onChange={(e) => setBranch(Number(e.target.value))}>
-              {BRANCHES.map((b, i) => <option key={b} value={i}>{b}</option>)}
+            <select value={staff.customerBranch} onChange={(e) => setCustomerBranch(e.target.value as BranchId)}>
+              {BRANCHES.filter((b) => b.active).map((b) => <option key={b.id} value={b.id}>{branchLabel(b.id, lang)}</option>)}
             </select>
           </label>
         </div>
         {searching && <input className="order-search" autoFocus placeholder={t('searchMenu')} value={q} onChange={(e) => setQ(e.target.value)} aria-label={t('searchMenu')} />}
         {!query && (
           <div className="order-tabs" ref={tabsRef} role="tablist">
-            {ORDER_MENU.map((c) => (
+            {sections.map((c) => (
               <button key={c.id} type="button" role="tab" data-tab={c.id} aria-selected={c.id === active} className={'order-tab' + (c.id === active ? ' on' : '')} onClick={() => go(c.id)}>
-                {CATEGORY_NAMES[c.id][lang]}
+                {sectionName(c.id)}
               </button>
             ))}
           </div>
@@ -154,9 +167,9 @@ export function MenuSection({ onPick, gift = false }: { onPick: (item: MenuItem)
           {results.length ? <ul className="ocards">{results.map(({ item, cat }) => <Card key={item.name} item={item} cat={cat} onPick={onPick} />)}</ul> : <p className="acct-hint">{t('noResults')}</p>}
         </div>
       ) : (
-        ORDER_MENU.map((c) => (
+        sections.map((c) => (
           <div className="osection" key={c.id} id={'cat-' + c.id} data-cat={c.id}>
-            <h2 className="osection-title">{CATEGORY_NAMES[c.id][lang]}</h2>
+            <h2 className="osection-title">{sectionName(c.id)}</h2>
             <ul className="ocards">{c.items.map((item) => <Card key={item.name} item={item} cat={CURATED.includes(c.id) ? categoryOf(item.name) : c.id} onPick={onPick} />)}</ul>
           </div>
         ))

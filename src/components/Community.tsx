@@ -7,6 +7,7 @@ import type { Post, Tab } from '../community'
 import { SectionHead } from './SectionHead'
 import { MiniCup } from './MiniCup'
 import { openBarista } from '../bus'
+import { FEATURES } from '../features'
 import { TINT, categoryOf, isIced } from '../menuMeta'
 import { IconComment, IconHeart, IconStar } from './Icons'
 
@@ -97,7 +98,7 @@ export function Community() {
   const { t } = useLang()
   const { posts, hearted } = useCommunity()
   const [tab, setTab] = useState<Tab>('popular')
-  const list = selectPosts(posts, tab)
+  const list = selectPosts(posts, tab).filter((p) => FEATURES.barista || p.recipe.kind !== 'barista') // the barista games are hidden for launch
 
   const tabs: { id: Tab; label: string }[] = [
     { id: 'popular', label: t('tabPopular') },

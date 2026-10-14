@@ -4,3 +4,6 @@ dist/
 tsconfig.tsbuildinfo
 supabase/.temp/
 .frames/
+dashboard/
+# private notes with passwords: never committed
+passwords.md

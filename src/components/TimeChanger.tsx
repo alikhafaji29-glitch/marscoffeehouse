@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
 import { SHOW_TIME_CHANGER, isPreviewing, setPreviewTime, useClock } from '../clock'
+import { FEATURES } from '../features'
 
 /* Review tool for the owner (2026-09-27): a small clock button that shows the site at any time of day.
  * English only on purpose: it is not customer-facing, and SHOW_TIME_CHANGER hides it for launch. */
 const PRESETS: { hm: string; label: string }[] = [
   { hm: '09:00', label: 'Positive Hours' },
-  { hm: '14:00', label: 'Lunch Hours' },
+  { hm: '14:00', label: FEATURES.lunchHours ? 'Lunch Hours' : 'Afternoon' },
   { hm: '22:00', label: 'Night' },
 ]
 const pad = (n: number) => String(n).padStart(2, '0')

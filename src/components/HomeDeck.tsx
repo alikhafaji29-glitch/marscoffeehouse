@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
-import { onOpenBarista, onOpenBuild } from '../bus'
+import { onOpenBarista, onOpenBuild, openCombo } from '../bus'
 import { useLang } from '../i18n'
 import type { TKey } from '../i18n'
 import { MENU } from '../menu'
 import type { MenuItem } from '../menu'
 import { useCart } from '../cart'
+import { activeEvent, positiveOffer, useStaff } from '../staff/store'
+import { FEATURES } from '../features'
 import { useCountdown, LUNCH_HOURS } from './useCountdown'
 import { clockNow } from '../clock'
 import { MoodDialog } from './MoodAsk'
@@ -27,7 +29,7 @@ const BUILD_PHOTO = '/assets/featured/build.jpg'
  * Shop (Mars products) → coffee Mars is proud of → brand + locations. Each slide: eyebrow, big
  * headline, one pill button, bottom-start.
  */
-const item = (name: string) => MENU.flatMap((c) => c.items).find((i) => i.name === name)
+const item = (name: string) => MENU.flatMap((c) => c.items).find((i) => i.name === name && !i.hidden) // not when the branch does not sell it
 
 // short descriptions for the side panel, by menu item name
 const DESC: Record<string, TKey> = {
@@ -147,18 +149,27 @@ function Track({ children }: { children: React.ReactNode }) {
 
 export function HomeDeck({ onOrder, onPick }: { onOrder: () => void; onPick: (item: MenuItem, o?: { checkout?: boolean }) => void }) {
   const { t } = useLang()
-  const { active, text } = useCountdown()
-  const lunch = useCountdown(LUNCH_HOURS) // 12:00-17:00
+  useStaff()
+  const offer = positiveOffer() // staff dashboard → Offers: its hours (useCountdown reads them), price and switch
+  const offerOn = offer?.active !== false
+  const count = useCountdown()
+  const active = count.active && offerOn
+  const text = count.text
+  const offerText = t('offerText').replace(/5,500|٥٥٠٠/, iqd(offer?.price ?? 5500))
+  const lunchClock = useCountdown(LUNCH_HOURS) // 12:00-17:00
+  const lunch = FEATURES.lunchHours ? lunchClock : { active: false, text: '' } // hidden for launch (features.ts)
   const { add } = useCart()
   const [added, setAdded] = useState('')
   const [moodOpen, setMoodOpen] = useState(false)
   const [journey, setJourney] = useState(false) // the Based On Your Mood pop-up
   const [buildAsk, setBuildAsk] = useState(false) // Build Your Drink: mood or barista?
   const [barista, setBarista] = useState<Cat | true | false>(false) // Be the barista: true = the categories, or one game (Community "Make this")
-  useEffect(() => onOpenBarista((g) => setBarista(g as Cat)), [])
-  useEffect(() => onOpenBuild(() => setBuildAsk(true)), []) // the header / sections Build Your Drink links
-  // the side panel: a season item (menu item + its card) or the Positive Hours offer
-  const [panel, setPanel] = useState<{ kind: 'item'; item: MenuItem; img: string; title: string } | { kind: 'hours' } | null>(null)
+  useEffect(() => onOpenBarista((g) => { if (FEATURES.barista) setBarista(g as Cat) }), [])
+  // Build Your Drink asks "from your mood, or be the barista?"; with the barista games hidden it is the mood game straight away
+  const startBuild = () => (FEATURES.barista ? setBuildAsk(true) : setJourney(true))
+  useEffect(() => onOpenBuild(startBuild), []) // the header / sections Build Your Drink links
+  // the side panel: a season item (menu item + its card)
+  const [panel, setPanel] = useState<{ kind: 'item'; item: MenuItem; img: string; title: string } | null>(null)
   const openItem = (it: MenuItem, img: string, title: string) => setPanel({ kind: 'item', item: it, img, title })
   const related = (except: string) => SEASON.filter((f) => f.title !== except).slice(0, 3).map((f) => ({ title: f.title, img: f.img, onClick: () => { const it = item(f.names[0]); if (it) openItem(it, f.img, f.names.length > 1 ? it.name : f.title) } }))
   const addProduct = (key: TKey, p: number) => { add({ name: t(key), price: p }, 1); setAdded(key); setTimeout(() => setAdded(''), 1600) }
@@ -170,8 +181,9 @@ export function HomeDeck({ onOrder, onPick }: { onOrder: () => void; onPick: (it
       <div className="slide-text">
         <p className="eyebrow count" dir="auto">{active ? <>{t('offerEndsIn')} <b dir="ltr">{text}</b></> : <>{t('startsAgainAt')} <b dir="ltr">{text}</b></>}</p>
         <h2 className="slide-title" id="hours-title">Positive Hours</h2>
-        <p className="slide-sub">{active ? t('offerText') : t('preOrderHint')}</p>
-        <button type="button" className="pill soft" onClick={() => setPanel({ kind: 'hours' })}>{active ? t('orderNow') : t('preOrder')}</button>
+        <p className="slide-sub">{active ? offerText : t('preOrderHint')}</p>
+        {/* straight into the combo: sandwich, drink, then name / number / address (owner, 2026-10-12) */}
+        <button type="button" className="pill soft" onClick={() => openCombo('positive')}>{active ? t('orderNow') : t('preOrder')}</button>
       </div>
     </section>
   )
@@ -208,7 +220,7 @@ export function HomeDeck({ onOrder, onPick }: { onOrder: () => void; onPick: (it
       {hero}
 
       {/* 3. New this season: full-bleed photos drifting right-to-left under a fixed title; a tap orders */}
-      <section className="slide slide-fav" id="seasonal" aria-labelledby="fav-title">
+      {activeEvent() && <section className="slide slide-fav" id="seasonal" aria-labelledby="fav-title">
         <Track>
           <div className="fav-set">
               {SEASON.map((f) => {
@@ -251,24 +263,24 @@ export function HomeDeck({ onOrder, onPick }: { onOrder: () => void; onPick: (it
           <p className="eyebrow">{t('coffeeEyebrow')}</p>
           <h2 className="slide-title" id="fav-title">{t('seasonEyebrow')}</h2>
         </div>
-      </section>
+      </section>}
 
       {/* 4. Your Mood Drink */}
       {/* 4. Build Your Drink + Based On Your Mood: two 16:9 photo cards framed by white strokes (owner, 2026-09-25) */}
       {/* 4. Build Your Drink: ONE card (owner, 2026-09-27); a tap asks: build it from your mood, or be the barista */}
       <section className="slide slide-duo slide-build-one" id="mood-home" data-period={periodOf(clockNow().getHours())}>
-        <article className="duo-card duo-build" onClick={() => setBuildAsk(true)}>
+        <article className="duo-card duo-build" onClick={startBuild}>
           {/* the Your Mood Drink photo (owner, 2026-09-28) */}
           <img src={PHOTOS.mood} alt="" draggable={false} />
           <div className="duo-text">
-            <h2>{t('cardBuild')}</h2>
-            <button type="button" className="pill soft small" onClick={(e) => { e.stopPropagation(); setBuildAsk(true) }}>{t('moodStart')}</button>
+            <h2>{t(FEATURES.barista ? 'cardBuild' : 'sectionsMood')}</h2>
+            <button type="button" className="pill soft small" onClick={(e) => { e.stopPropagation(); startBuild() }}>{t('moodStart')}</button>
           </div>
         </article>
       </section>
 
       {/* 5. Shop: the owner's product photos drifting under a fixed title; Add puts the product in the order */}
-      <section className="slide slide-fav slide-shop" id="shop" aria-labelledby="shop-title">
+      {FEATURES.shop && <section className="slide slide-fav slide-shop" id="shop" aria-labelledby="shop-title">
         <Track>
           <div className="fav-set">
               {PRODUCTS.map((p) => (
@@ -289,13 +301,13 @@ export function HomeDeck({ onOrder, onPick }: { onOrder: () => void; onPick: (it
           <p className="eyebrow">{t('shopEyebrow')}</p>
           <h2 className="slide-title" id="shop-title">{t('shopTitle')}</h2>
         </div>
-      </section>
+      </section>}
 
       {/* after 12:00 Positive Hours (pre-order) sits here: under Mars Shop, above the locations (owner, 2026-09-27) */}
-      {!active && hoursSlide}
+      {!active && offerOn && hoursSlide}
       {/* Lunch Hours pre-order (wrapped-sandwich photo) sits here whenever lunch is not running:
           during Positive Hours (owner, 2026-09-27) and after 17:00 */}
-      {!lunch.active && lunchSlide}
+      {FEATURES.lunchHours && !lunch.active && lunchSlide}
 
       {/* 6. brand + locations */}
       <section className="slide slide-brand" id="about">
@@ -327,17 +339,6 @@ export function HomeDeck({ onOrder, onPick }: { onOrder: () => void; onPick: (it
           primary={t('orderNow')}
           onPrimary={() => { const it = panel.item; setPanel(null); onPick(it, { checkout: true }) }} // New this season: after Add to order, checkout (owner, 2026-09-28)
           related={related(panel.title)}
-          onClose={() => setPanel(null)}
-        />
-      )}
-      {panel?.kind === 'hours' && (
-        <SidePanel
-          title="Positive Hours"
-          img={PHOTOS.hours}
-          desc={`${t('offerText')} ${t('preOrderHint')}`}
-          primary={active ? t('orderNow') : t('preOrder')}
-          onPrimary={() => { setPanel(null); onOrder() }}
-          related={related('')}
           onClose={() => setPanel(null)}
         />
       )}

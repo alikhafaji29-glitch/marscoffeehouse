@@ -1,0 +1,2283 @@
+{
+ "branch": "kirkuk",
+ "lang": "en",
+ "readAt": "2026-10-13T02:15:42.960Z",
+ "pageLang": "en",
+ "dir": "app-container ltr",
+ "log": [],
+ "cats": [
+  {
+   "group": 0,
+   "groupName": "Drinks",
+   "index": 0,
+   "name": "Coffee & more"
+  },
+  {
+   "group": 0,
+   "groupName": "Drinks",
+   "index": 1,
+   "name": "Coffee with Milk"
+  },
+  {
+   "group": 0,
+   "groupName": "Drinks",
+   "index": 2,
+   "name": "Cold Coffee Drinks"
+  },
+  {
+   "group": 0,
+   "groupName": "Drinks",
+   "index": 3,
+   "name": "Refreshers"
+  },
+  {
+   "group": 0,
+   "groupName": "Drinks",
+   "index": 4,
+   "name": "Milk Shake"
+  },
+  {
+   "group": 0,
+   "groupName": "Drinks",
+   "index": 5,
+   "name": "Mojito"
+  },
+  {
+   "group": 0,
+   "groupName": "Drinks",
+   "index": 6,
+   "name": "Smoothie"
+  },
+  {
+   "group": 0,
+   "groupName": "Drinks",
+   "index": 7,
+   "name": "ADD-ONS"
+  },
+  {
+   "group": 0,
+   "groupName": "Drinks",
+   "index": 8,
+   "name": "Matcha Collection"
+  },
+  {
+   "group": 0,
+   "groupName": "Drinks",
+   "index": 9,
+   "name": "Autumn Drinks"
+  },
+  {
+   "group": 1,
+   "groupName": "Food",
+   "index": 0,
+   "name": "BAKERY & DESSERTS"
+  },
+  {
+   "group": 1,
+   "groupName": "Food",
+   "index": 1,
+   "name": "SANDWICHES & SALADS"
+  }
+ ],
+ "items": [
+  {
+   "group": 0,
+   "cat": 0,
+   "index": 0,
+   "name": "Americano",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770545103453-ChatGPT_Image_Feb_8__2026__01_04_52_PM_-VaEFm0G9.png",
+   "tag": "top_seller",
+   "prices": [
+    "2,500 IQD (8oz)",
+    "3,000 IQD (12oz)"
+   ],
+   "title": "Americano",
+   "desc": "Espresso shots are topped with hot water to produce a light layer of crema",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "carbs",
+    "energy",
+    "fat",
+    "fibre",
+    "sugar",
+    "protein",
+    "caffeine"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 0,
+   "index": 1,
+   "name": "Espresso",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770546007240-ChatGPT_Image_Feb_8__2026__01_19_52_PM_ITrBU-bHF.png",
+   "tag": "premium",
+   "prices": [
+    "2,000 IQD"
+   ],
+   "title": "Espresso",
+   "desc": "A shot of espresso with a rich flavour and caramel-like sweetness.",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "caffeine",
+    "fat",
+    "protein",
+    "carbs",
+    "energy",
+    "fibre"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 0,
+   "index": 2,
+   "name": "Espresso Doppio",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770545906307-ChatGPT_Image_Feb_8__2026__01_12_10_PM_3EabD5E4p.png",
+   "tag": null,
+   "prices": [
+    "2,500 IQD"
+   ],
+   "title": "Espresso Doppio",
+   "desc": "Double shots of espresso with a rich flavour and caramel-like sweetness.",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "caffeine",
+    "fibre",
+    "protein",
+    "sugar",
+    "fat",
+    "carbs",
+    "energy"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 0,
+   "index": 3,
+   "name": "Turkish Coffee",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770484997427-05._Turkish_coffee_gpTXLh1tyd.png",
+   "tag": null,
+   "prices": [
+    "2,500 IQD"
+   ],
+   "title": "Turkish Coffee",
+   "desc": "Finely ground coffee brewed slowly for a strong flavor, rich body, and thick foam",
+   "sizes": [],
+   "flavors": [
+    {
+     "value": "Medium",
+     "text": "Medium"
+    },
+    {
+     "value": "Sweet",
+     "text": "Sweet"
+    },
+    {
+     "value": "Plain",
+     "text": "Plain"
+    }
+   ],
+   "labels": [
+    "Select Type"
+   ],
+   "nutrition": [
+    "protein",
+    "carbs",
+    "fat",
+    "sugar",
+    "caffeine",
+    "fibre",
+    "energy"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 0,
+   "index": 4,
+   "name": "Turkish Coffee Double",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770485033013-05._Turkish_coffee_tLxbBPehf.png",
+   "tag": null,
+   "prices": [
+    "3,500 IQD"
+   ],
+   "title": "Turkish Coffee Double",
+   "desc": "A stronger, richer version of Turkish coffee made with double coffee for an intense flavor and full body",
+   "sizes": [],
+   "flavors": [
+    {
+     "value": "Sweet",
+     "text": "Sweet"
+    },
+    {
+     "value": "Medium",
+     "text": "Medium"
+    },
+    {
+     "value": "Plain",
+     "text": "Plain"
+    }
+   ],
+   "labels": [
+    "Select Type"
+   ],
+   "nutrition": [
+    "protein",
+    "sugar",
+    "caffeine",
+    "fibre",
+    "fat",
+    "energy",
+    "carbs"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 0,
+   "index": 5,
+   "name": "Filter Coffee",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777199764469-drip_coffee_45_degree_6TfZDlJoF.jpg",
+   "tag": null,
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "title": "Filter Coffee",
+   "desc": "Freshly brewed to deliver a clear, balanced cup, highlighting the coffee's aroma with a soft, comforting finish",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "carbs",
+    "energy",
+    "caffeine",
+    "protein"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 0,
+   "index": 6,
+   "name": "Karak Chai",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770549249687-ChatGPT_Image_Feb_8__2026__02_13_54_PM_ZUlP0uWvj.png",
+   "tag": "signature",
+   "prices": [
+    "3,000 IQD (8oz)",
+    "4,000 IQD (12oz)"
+   ],
+   "title": "Karak Chai",
+   "desc": "Mars Signature Karak Chai — a refined blend of selected spices and milk, crafted to reveal deep warmth, classic character, and a lasting, elegant finish.",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "fat",
+    "carbs",
+    "fibre",
+    "salt",
+    "energy",
+    "sugar",
+    "sat fat",
+    "caffeine",
+    "protein"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 0,
+   "index": 7,
+   "name": "Hot Chocolate",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770547348116-ChatGPT_Image_Feb_8__2026__01_42_20_PM_W9ZQKkkI8.png",
+   "tag": "signature",
+   "prices": [
+    "4,000 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "title": "Hot Chocolate",
+   "desc": "A velvety hot chocolate crafted with rich cocoa and perfectly steamed milk, delivering a smooth and comforting chocolate experience",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "salt",
+    "protein",
+    "sugar",
+    "sat fat",
+    "fat",
+    "caffeine",
+    "carbs",
+    "energy",
+    "fibre"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 0,
+   "index": 8,
+   "name": "Hot Lotus",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770548580381-ChatGPT_Image_Feb_8__2026__02_02_43_PM_Hs7InuKN8.png",
+   "tag": null,
+   "prices": [
+    "4,000 IQD (8oz)",
+    "5,000 IQD (12oz)"
+   ],
+   "title": "Hot Lotus",
+   "desc": "Warm, silky milk blended with indulgent lotus spread, creating a caramelized, biscuit-like flavor with a smooth and satisfying finish",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "fat",
+    "sugar",
+    "salt",
+    "carbs",
+    "protein",
+    "fibre",
+    "energy",
+    "caffeine",
+    "sat fat"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 0,
+   "index": 9,
+   "name": "Hot Pistachio",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770548740541-ChatGPT_Image_Feb_8__2026__02_05_31_PM_N9UFWEKTs.png",
+   "tag": null,
+   "prices": [
+    "4,000 IQD (8oz)",
+    "5,000 IQD (12oz)"
+   ],
+   "title": "Hot Pistachio",
+   "desc": "Steamed milk combined with premium pistachio flavor, delivering a nutty, creamy taste that feels rich without being overpowering",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "carbs",
+    "salt",
+    "fibre",
+    "sat fat",
+    "fat",
+    "protein",
+    "caffeine",
+    "energy",
+    "sugar"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 0,
+   "index": 10,
+   "name": "Cold Brew",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777199823664-cold_brew_front_T3iBxPlTP.jpg",
+   "tag": "premium",
+   "prices": [
+    "3,500 IQD"
+   ],
+   "title": "Cold Brew",
+   "desc": "Slow-extracted for a naturally smooth profile, offering deep coffee notes with a clean, refreshing finish and a refined caffeine strength",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "carbs",
+    "energy",
+    "caffeine",
+    "protein"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 1,
+   "index": 0,
+   "name": "Latte Caramel",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777374155697-Hot_classic_latte__v5dXoulGc.jpg",
+   "tag": "top_seller",
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "title": "Latte Caramel",
+   "desc": "Smooth espresso blended with creamy milk and rich caramel flavor, topped with a silky layer of foam",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "fat",
+    "carbs",
+    "energy",
+    "protein",
+    "sugar",
+    "caffeine"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 1,
+   "index": 1,
+   "name": "Cappuccino Caramel",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777374169925-Cappuccino_xaN185WRjl.jpg",
+   "tag": null,
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "title": "Cappuccino Caramel",
+   "desc": "Rich espresso blended with steamed milk and sweet caramel flavor, finished with a thick, creamy foam layer",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "energy",
+    "caffeine",
+    "sugar",
+    "protein",
+    "carbs",
+    "fat"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 1,
+   "index": 2,
+   "name": "Cortado",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770543565416-ChatGPT_Image_Feb_8__2026__12_39_06_PM_FPTH_qukh.png",
+   "tag": "premium",
+   "prices": [
+    "3,500 IQD"
+   ],
+   "title": "Cortado",
+   "desc": "Two ristretto shots topped with warm, silky milk served in a 6oz cup that gives you the needed coffee kick for your day",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "fibre",
+    "carbs",
+    "salt",
+    "energy",
+    "sugar",
+    "sat fat",
+    "caffeine",
+    "protein",
+    "fat"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 1,
+   "index": 3,
+   "name": "Latte Classic",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770543820199-ChatGPT_Image_Feb_8__2026__12_43_31_PM_0w6Zf4vIK.png",
+   "tag": null,
+   "prices": [
+    "3,000 IQD (8oz)",
+    "4,000 IQD (12oz)"
+   ],
+   "title": "Latte Classic",
+   "desc": "Our dark, rich espresso is balanced with steamed milk and topped with a light layer of foam. A perfect milk-forward warm up.",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "energy",
+    "sugar",
+    "fat",
+    "fibre",
+    "caffeine",
+    "protein",
+    "carbs"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 1,
+   "index": 4,
+   "name": "cappuccino Classic",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770544806581-ChatGPT_Image_Feb_8__2026__12_59_55_PM_b0nXbAhTB.png",
+   "tag": null,
+   "prices": [
+    "3,000 IQD (8oz)",
+    "4,000 IQD (12oz)"
+   ],
+   "title": "cappuccino Classic",
+   "desc": "Dark, rich espresso combined with steamed milk, topped with a deep layer of foam",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "sugar",
+    "fat",
+    "energy",
+    "protein",
+    "fibre",
+    "sat fat",
+    "caffeine",
+    "carbs",
+    "salt"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 1,
+   "index": 5,
+   "name": "Latte with Flavour",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770543820199-ChatGPT_Image_Feb_8__2026__12_43_31_PM_0w6Zf4vIK.png",
+   "tag": "premium",
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "title": "Latte with Flavour",
+   "desc": "Smooth hot latte made with rich espresso and creamy steamed milk, available in a variety of flavors to suit every taste",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [
+    {
+     "value": "Caramel free suger",
+     "text": "Caramel free suger"
+    },
+    {
+     "value": "Hazelnut",
+     "text": "Hazelnut"
+    },
+    {
+     "value": "Vanilla",
+     "text": "Vanilla"
+    },
+    {
+     "value": "Brownie",
+     "text": "Brownie"
+    },
+    {
+     "value": "Cookies",
+     "text": "Cookies"
+    }
+   ],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "carbs",
+    "protein",
+    "sugar",
+    "caffeine",
+    "energy",
+    "fat"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 1,
+   "index": 6,
+   "name": "Cappuccino with Flavors",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770544806581-ChatGPT_Image_Feb_8__2026__12_59_55_PM_b0nXbAhTB.png",
+   "tag": null,
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "title": "Cappuccino with Flavors",
+   "desc": "Dark, rich espresso combined with steamed milk, topped with a deep layer of foam",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [
+    {
+     "value": "Hazelnut",
+     "text": "Hazelnut"
+    },
+    {
+     "value": "Caramel free suger",
+     "text": "Caramel free suger"
+    },
+    {
+     "value": "Brownie",
+     "text": "Brownie"
+    },
+    {
+     "value": "Cookies",
+     "text": "Cookies"
+    },
+    {
+     "value": "Vanilla",
+     "text": "Vanilla"
+    }
+   ],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "fat",
+    "sugar",
+    "caffeine",
+    "fibre",
+    "protein",
+    "energy",
+    "carbs"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 1,
+   "index": 7,
+   "name": "Hot Spanish latte",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770544668431-ChatGPT_Image_Feb_8__2026__12_57_32_PM_MjpjsNsB-.png",
+   "tag": null,
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "title": "Hot Spanish latte",
+   "desc": "Espresso with steamed milk and sweetened condensed milk",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "caffeine",
+    "carbs",
+    "energy",
+    "protein",
+    "fibre",
+    "fat",
+    "sugar"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 1,
+   "index": 8,
+   "name": "Mocha Dark",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770544005115-ChatGPT_Image_Feb_8__2026__12_46_19_PM_s1GlPMp1p.png",
+   "tag": null,
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "title": "Mocha Dark",
+   "desc": "Espresso with dark chocolate flavoured sauce and steamed milk, topped with whipped cream",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "caffeine",
+    "sugar",
+    "protein",
+    "fat",
+    "sat fat",
+    "fibre",
+    "carbs",
+    "energy",
+    "salt"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 1,
+   "index": 9,
+   "name": "Mocha White",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770544358842-ChatGPT_Image_Feb_8__2026__12_52_31_PM_aMV3oyAoM.png",
+   "tag": null,
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "title": "Mocha White",
+   "desc": "Espresso with white chocolate flavoured sauce and steamed milk, topped with whipped cream",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "fat",
+    "sugar",
+    "caffeine",
+    "salt",
+    "energy",
+    "carbs",
+    "protein",
+    "sat fat",
+    "fibre"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 1,
+   "index": 10,
+   "name": "Flat White",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770543410745-ChatGPT_Image_Feb_8__2026__12_36_38_PM_BUcE9o-dyu.png",
+   "tag": null,
+   "prices": [
+    "3,500 IQD"
+   ],
+   "title": "Flat White",
+   "desc": "Expertly steamed milk poured over two shots of espresso",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "sugar",
+    "protein",
+    "sat fat",
+    "caffeine",
+    "salt",
+    "fat",
+    "fibre",
+    "energy",
+    "carbs"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 2,
+   "index": 0,
+   "name": "Ice latte caramel",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777374685037-ice_classic_late_front_Hm_d7Qw9w.jpg",
+   "tag": "top_seller",
+   "prices": [
+    "3,500 IQD (12oz)",
+    "4,500 IQD (16oz)"
+   ],
+   "title": "Ice latte caramel",
+   "desc": "Chilled espresso blended with cold milk and rich caramel flavor, served over ice for a smooth and refreshing taste",
+   "sizes": [
+    "16oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "protein",
+    "caffeine",
+    "carbs",
+    "fat",
+    "energy",
+    "sugar"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 2,
+   "index": 1,
+   "name": "Iced Americano",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777199648538-ice_americano_front_view_DWZy20nsZ.jpg",
+   "tag": null,
+   "prices": [
+    "2,500 IQD (12oz)",
+    "3,000 IQD (16oz)"
+   ],
+   "title": "Iced Americano",
+   "desc": "Espresso shots are topped with water to produce a light layer of crema, then served over ice. The result is this wonderfully rich cup with depth and nuance",
+   "sizes": [
+    "12oz",
+    "16oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "protein",
+    "fibre",
+    "sugar",
+    "fat",
+    "caffeine",
+    "energy",
+    "carbs"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 2,
+   "index": 2,
+   "name": "Mars Spanish Latte Signature",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1784205474224-DSC06721_Lo4kF5FKQ.jpg",
+   "tag": "signature",
+   "prices": [
+    "3,500 IQD (12oz)",
+    "4,500 IQD (16oz)"
+   ],
+   "title": "Mars Spanish Latte Signature",
+   "desc": "A creamier and richer recipe crafted with love to be our signature.",
+   "sizes": [
+    "16oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "carbs",
+    "energy",
+    "fibre",
+    "fat",
+    "sugar",
+    "sat fat",
+    "caffeine",
+    "protein"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 2,
+   "index": 3,
+   "name": "Iced Spanish Latte",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777199658186-ice_spanish_late_front_view_fJBO3asUR.jpg",
+   "tag": null,
+   "prices": [
+    "3,500 IQD (12oz)",
+    "4,500 IQD (16oz)"
+   ],
+   "title": "Iced Spanish Latte",
+   "desc": "Cold espresso blended with chilled milk and premium sweetened condensed milk, creating a smooth, creamy body with a perfectly balanced sweetness",
+   "sizes": [
+    "12oz",
+    "16oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "salt",
+    "fat",
+    "energy",
+    "caffeine",
+    "carbs",
+    "sat fat",
+    "sugar",
+    "protein"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 2,
+   "index": 4,
+   "name": "Iced Classic Latte",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777199668331-ice_late_front_view_WGhJgrAy5n.jpg",
+   "tag": null,
+   "prices": [
+    "3,000 IQD (12oz)",
+    "4,000 IQD (16oz)"
+   ],
+   "title": "Iced Classic Latte",
+   "desc": "Our dark, rich espresso is combined with milk and served over ice. A perfect milk-forward cool down",
+   "sizes": [
+    "12oz",
+    "16oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "sugar",
+    "caffeine",
+    "energy",
+    "carbs",
+    "protein",
+    "fat"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 2,
+   "index": 5,
+   "name": "Iced Latte with Flavors",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777199638664-ice_late_front_view_XYiJA-X48.jpg",
+   "tag": "premium",
+   "prices": [
+    "3,500 IQD (12oz)",
+    "4,500 IQD (16oz)"
+   ],
+   "title": "Iced Latte with Flavors",
+   "desc": "Our dark, rich espresso is combined with milk and served over ice. A perfect milk-forward cool down",
+   "sizes": [
+    "12oz",
+    "16oz"
+   ],
+   "flavors": [
+    {
+     "value": "Hazelnut",
+     "text": "Hazelnut"
+    },
+    {
+     "value": "Vanilla",
+     "text": "Vanilla"
+    },
+    {
+     "value": "Cookies",
+     "text": "Cookies"
+    },
+    {
+     "value": "Brownie",
+     "text": "Brownie"
+    },
+    {
+     "value": "caramel free suger",
+     "text": "caramel free suger"
+    }
+   ],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "salt",
+    "protein",
+    "carbs",
+    "sat fat",
+    "fat",
+    "caffeine",
+    "sugar",
+    "energy"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 2,
+   "index": 6,
+   "name": "Iced Dark Chocolate Mocha",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777199681580-Mocha_Dark_Iced_Front_rzT2x5QWW.jpg",
+   "tag": null,
+   "prices": [
+    "3,500 IQD (12oz)",
+    "4,500 IQD (16oz)"
+   ],
+   "title": "Iced Dark Chocolate Mocha",
+   "desc": "We combine our rich, full-bodied espresso with bittersweet mocha sauce, milk and ice, then top it off with whipped cream",
+   "sizes": [
+    "12oz",
+    "16oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "caffeine",
+    "salt",
+    "carbs",
+    "fibre",
+    "fat",
+    "energy",
+    "sat fat",
+    "sugar",
+    "protein"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 2,
+   "index": 7,
+   "name": "Iced Mocha White Chocolate",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777199696490-ice_mocha_white_front_ThhckChFW.jpg",
+   "tag": null,
+   "prices": [
+    "3,500 IQD (12oz)",
+    "4,500 IQD (16oz)"
+   ],
+   "title": "Iced Mocha White Chocolate",
+   "desc": "Espresso, milk and white chocolate flavoured sauce poured over ice. Topped with whipped cream",
+   "sizes": [
+    "16oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "sugar",
+    "fat",
+    "protein",
+    "energy",
+    "carbs",
+    "salt",
+    "caffeine",
+    "sat fat"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 3,
+   "index": 0,
+   "name": "Iced Peach Tea",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777196715023-ice_peach_tea_front_view_yFLz20Tuz.jpg",
+   "tag": "top_seller",
+   "prices": [
+    "3,500 IQD (12oz)",
+    "4,500 IQD (16oz)"
+   ],
+   "title": "Iced Peach Tea",
+   "desc": "Soft peach aromas layered into chilled tea, offering a balanced sweetness with a refined, refreshing profile",
+   "sizes": [
+    "16oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "caffeine",
+    "carbs",
+    "energy",
+    "sugar"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 3,
+   "index": 1,
+   "name": "Iced Mango-peach Tea",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777196727791-ice_tea_mango___peach_front_Eci6ejZeY.jpg",
+   "tag": null,
+   "prices": [
+    "3,500 IQD (12oz)",
+    "4,500 IQD (16oz)"
+   ],
+   "title": "Iced Mango-peach Tea",
+   "desc": "A bright iced tea infused with smooth mango notes, delivering a clean tropical refreshment with a light, crisp finish",
+   "sizes": [
+    "16oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "energy",
+    "carbs",
+    "caffeine",
+    "sugar"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 3,
+   "index": 2,
+   "name": "Orange Pomegranate Fresh Juice",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777196741231-refresh_orange___pomegranate_front_view_on6NfeVuY.jpg",
+   "tag": "signature",
+   "prices": [
+    "3,500 IQD (12oz)",
+    "4,500 IQD (16oz)"
+   ],
+   "title": "Orange Pomegranate Fresh Juice",
+   "desc": "A precise composition blending the bright freshness of orange with the natural sharpness of pomegranate, creating a bold juice with a refreshing character and vibrant energy, finished with a clean sensation that lingers lightly and elegantly.",
+   "sizes": [
+    "12oz",
+    "16oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "carbs",
+    "energy",
+    "caffeine",
+    "fibre",
+    "sugar"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 3,
+   "index": 3,
+   "name": "energy +",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777196754341-Mexican_Red_bull_Front_dCrl5YZ0Q.jpg",
+   "tag": null,
+   "prices": [
+    "4,000 IQD"
+   ],
+   "title": "energy +",
+   "desc": "An energizing blend with a bold character, combining vibrant flavors for a lively and refreshing kick",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "salt",
+    "carbs",
+    "caffeine",
+    "energy",
+    "sugar"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 3,
+   "index": 4,
+   "name": "Fresh Orange Juice",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1784269618378-IMG_6891_I3zr-h65d.jpeg",
+   "tag": null,
+   "prices": [
+    "3,000 IQD"
+   ],
+   "title": "Fresh Orange Juice",
+   "desc": "Freshly squeezed orange juice, naturally refreshing with a balanced citrus flavor",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "fat",
+    "sat fat",
+    "salt",
+    "energy",
+    "carbs",
+    "protein",
+    "sugar",
+    "fibre"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 4,
+   "index": 0,
+   "name": "Lotus Milkshake",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777196561218-milk_shake_lotus_front_sHMz9Crmd.jpg",
+   "tag": "top_seller",
+   "prices": [
+    "5,000 IQD (12oz)",
+    "6,000 IQD (16oz)"
+   ],
+   "title": "Lotus Milkshake",
+   "desc": "A rich and indulgent milkshake crafted with lotus spread, featuring warm caramelized biscuit notes and a creamy, satisfying body",
+   "sizes": [
+    "16oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 4,
+   "index": 1,
+   "name": "Pistachio Milkshake",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777196573615-milk_shake_pistachio_front_1JBqLlavt.jpg",
+   "tag": null,
+   "prices": [
+    "5,000 IQD (12oz)",
+    "6,000 IQD (16oz)"
+   ],
+   "title": "Pistachio Milkshake",
+   "desc": "A refined milkshake infused with pistachio flavor, delivering a nutty richness and a soft, elegant finish",
+   "sizes": [
+    "16oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 4,
+   "index": 2,
+   "name": "Oreo Milkshake",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777196588248-milk_shake_oreo_front_JCrrL6ZEb.jpg",
+   "tag": null,
+   "prices": [
+    "5,000 IQD (12oz)",
+    "6,000 IQD (16oz)"
+   ],
+   "title": "Oreo Milkshake",
+   "desc": "A classic milkshake mixed with crushed Oreo cookies, combining creamy vanilla tones with a subtle chocolate crunch",
+   "sizes": [
+    "16oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 4,
+   "index": 3,
+   "name": "Nutella Milkshake",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777196606160-milk_shake_nutella_front_72mWTSRVA.jpg",
+   "tag": null,
+   "prices": [
+    "5,000 IQD (12oz)",
+    "6,000 IQD (16oz)"
+   ],
+   "title": "Nutella Milkshake",
+   "desc": "A decadent blend of creamy milk and Nutella, creating a deep chocolate-hazelnut flavor with a luxuriously smooth mouthfeel",
+   "sizes": [
+    "16oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 4,
+   "index": 4,
+   "name": "Strawberry Milkshake",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777196618845-Milkshake_strawberry_front_CrrjIywvx.jpg",
+   "tag": null,
+   "prices": [
+    "5,000 IQD (12oz)",
+    "6,000 IQD (16oz)"
+   ],
+   "title": "Strawberry Milkshake",
+   "desc": "A fresh and creamy milkshake blended with strawberry flavor, delivering a light sweetness and a smooth, refreshing sip",
+   "sizes": [
+    "16oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 4,
+   "index": 5,
+   "name": "Rashi Milkshake",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777196630285-milk_shake_rashi_front_M2LL6n9hP.jpg",
+   "tag": "signature",
+   "prices": [
+    "5,000 IQD (12oz)",
+    "6,000 IQD (16oz)"
+   ],
+   "title": "Rashi Milkshake",
+   "desc": "Mars Signature Rashi Milkshake — a refined composition of polished flavors and silky texture, crafted to deliver gentle sweetness and a lasting, elegant impression.",
+   "sizes": [
+    "16oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 5,
+   "index": 0,
+   "name": "Strawberry Mojito",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777197114961-Mojito_Strawberry_Front_14VM1dO75.jpg",
+   "tag": "top_seller",
+   "prices": [
+    "3,000 IQD (12oz)",
+    "4,000 IQD (16oz)"
+   ],
+   "title": "Strawberry Mojito",
+   "desc": "Smooth strawberry accents balanced with citrus notes for a clean, fruity finish",
+   "sizes": [
+    "12oz",
+    "16oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "energy",
+    "sugar",
+    "fibre",
+    "caffeine",
+    "carbs"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 5,
+   "index": 1,
+   "name": "Watermelon Mojito",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777197127805-Mojito_Watermelon_Front_9nKwdeiPr.jpg",
+   "tag": null,
+   "prices": [
+    "3,000 IQD (12oz)",
+    "4,000 IQD (16oz)"
+   ],
+   "title": "Watermelon Mojito",
+   "desc": "Juicy watermelon tones paired with lime, delivering a naturally refreshing taste",
+   "sizes": [
+    "12oz",
+    "16oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "carbs",
+    "caffeine",
+    "energy",
+    "fibre",
+    "sugar"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 5,
+   "index": 2,
+   "name": "Pomegranate Mojito",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777197139541-mojito_pomegranate_front_view_YwvU2WYkE.jpg",
+   "tag": "signature",
+   "prices": [
+    "3,500 IQD (12oz)",
+    "4,500 IQD (16oz)"
+   ],
+   "title": "Pomegranate Mojito",
+   "desc": "Bold pomegranate character layered with zesty lime, served light and refreshing",
+   "sizes": [
+    "12oz",
+    "16oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "sugar",
+    "caffeine",
+    "fibre",
+    "energy",
+    "carbs"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 6,
+   "index": 0,
+   "name": "Strawberry Smoothie",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777197519602-smoothie_strwberry_front_k0FOizy9a.jpg",
+   "tag": "top_seller",
+   "prices": [
+    "4,500 IQD"
+   ],
+   "title": "Strawberry Smoothie",
+   "desc": "A classic reimagined with ripe strawberries blended into a creamy, smooth texture. Soft sweetness, fresh aroma, and a clean, comforting finish that never feels heavy",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "energy",
+    "sugar",
+    "caffeine",
+    "carbs",
+    "salt",
+    "protein"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 6,
+   "index": 1,
+   "name": "Passion Fruit Smoothie",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777197530319-smoothie_passion_fruit_front_view_zdGZuHr4-.jpg",
+   "tag": null,
+   "prices": [
+    "4,500 IQD"
+   ],
+   "title": "Passion Fruit Smoothie",
+   "desc": "An expressive and aromatic smoothie with the distinctive tang of passion fruit. Sharp yet smooth, it delivers an intense flavor profile that lingers pleasantly with every sip",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "carbs",
+    "energy",
+    "caffeine",
+    "salt",
+    "sugar",
+    "protein"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 6,
+   "index": 2,
+   "name": "Mango with Orange Smoothie",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777197541451-smoothie_orange___mango_front_view_VRt58Rn6o.jpg",
+   "tag": "signature",
+   "prices": [
+    "4,500 IQD"
+   ],
+   "title": "Mango with Orange Smoothie",
+   "desc": "A bold fusion where rich, velvety mango meets the crisp brightness of fresh orange. Full-bodied, lively, and perfectly balanced between sweetness and citrus freshness",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "salt",
+    "carbs",
+    "energy",
+    "protein",
+    "sugar",
+    "caffeine"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 7,
+   "index": 0,
+   "name": "Espresso shot",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777281960519-ChatGPT_Image_Apr_27__2026__12_24_58_PM_pF9iOC7E6.png",
+   "tag": null,
+   "prices": [
+    "500 IQD"
+   ],
+   "title": "Espresso shot",
+   "desc": "",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 7,
+   "index": 1,
+   "name": "add Flavors",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777282656441-ChatGPT_Image_Apr_27__2026__12_37_26_PM_lTWSTxahL.png",
+   "tag": null,
+   "prices": [
+    "500 IQD"
+   ],
+   "title": "add Flavors",
+   "desc": "Enhance your drink with extra flavor: Caramel, Vanilla, Hazelnut, Brownie, Cookies, or Sugar-Free Caramel.",
+   "sizes": [
+    "pumps"
+   ],
+   "flavors": [
+    {
+     "value": "Hazelnut",
+     "text": "Hazelnut"
+    },
+    {
+     "value": "Cookies",
+     "text": "Cookies"
+    },
+    {
+     "value": "Brownie",
+     "text": "Brownie"
+    },
+    {
+     "value": "Caramel Free Sugar",
+     "text": "Caramel Free Sugar"
+    },
+    {
+     "value": "Caramel",
+     "text": "Caramel"
+    },
+    {
+     "value": "Vanilla",
+     "text": "Vanilla"
+    }
+   ],
+   "labels": [
+    "Select Size",
+    "Select Flavor"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 7,
+   "index": 2,
+   "name": "Whipped Cream",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777282028863-ChatGPT_Image_Apr_27__2026__12_26_46_PM_zXk7txpS7.png",
+   "tag": null,
+   "prices": [
+    "1,000 IQD"
+   ],
+   "title": "Whipped Cream",
+   "desc": "Lightly sweetened cream whipped to a soft, fluffy texture and as a topping",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 7,
+   "index": 3,
+   "name": "Cold Foam",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777282378496-ChatGPT_Image_Apr_27__2026__12_32_41_PM_ABRPg3fti.png",
+   "tag": null,
+   "prices": [
+    "1,000 IQD"
+   ],
+   "title": "Cold Foam",
+   "desc": "A light, creamy foam added on top of cold drinks for a smooth texture and subtle sweetness",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 7,
+   "index": 4,
+   "name": "Skimmed Milk",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777282104326-ChatGPT_Image_Apr_27__2026__12_27_52_PM_HIzjbia8y.png",
+   "tag": null,
+   "prices": [
+    "0 IQD"
+   ],
+   "title": "Skimmed Milk",
+   "desc": "Pure milk taste, with no fat",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 7,
+   "index": 5,
+   "name": "Free Lactose",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777282392198-ChatGPT_Image_Apr_27__2026__12_27_52_PM_PSaqWuMzu.png",
+   "tag": null,
+   "prices": [
+    "500 IQD"
+   ],
+   "title": "Free Lactose",
+   "desc": "",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 8,
+   "index": 0,
+   "name": "Classic Matcha",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1784211361669-ChatGPT_Image_Jul_16__2026__04_05_10_PM_jC6_Ppxuw.png",
+   "tag": null,
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "noModal": true
+  },
+  {
+   "group": 0,
+   "cat": 8,
+   "index": 1,
+   "name": "Berry Matcha",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1784215077168-ChatGPT_Image_Jul_16__2026__04_06_23_PM__GXuAOtsq.png",
+   "tag": null,
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "noModal": true
+  },
+  {
+   "group": 0,
+   "cat": 8,
+   "index": 2,
+   "name": "Mid Night matcha",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1784218415335-ChatGPT_Image_Jul_16__2026__04_08_23_PM_aNBt2lW-w.png",
+   "tag": null,
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "noModal": true
+  },
+  {
+   "group": 0,
+   "cat": 9,
+   "index": 0,
+   "name": "Kakaw Crunch",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1791235588982-IMG_8898_d2udq0XJV.PNG",
+   "tag": "signature",
+   "prices": [
+    "4,000 IQD"
+   ],
+   "title": "Kakaw Crunch",
+   "desc": "Belgian iced chocolate, smooth whipped cream, and a crisp hazelnut caramel candy",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 0,
+   "name": "Banana Bread",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1770457771004-Banana_bread___KBNiB22i.png",
+   "tag": null,
+   "prices": [
+    "2,000 IQD"
+   ],
+   "title": "Banana Bread",
+   "desc": "Ultra-soft banana bread, rich in natural banana flavor and inspired by Mars' signature recipe",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "energy",
+    "sugar",
+    "fat",
+    "protein",
+    "carbs"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 1,
+   "name": "Cheesecake pistachio",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1790507015220-IMG_8186_pWwgCsTyV.PNG",
+   "tag": null,
+   "prices": [
+    "4,000 IQD"
+   ],
+   "title": "Cheesecake pistachio",
+   "desc": "Freshly made Silky cheesecake topped with sweet pistachio sauce for a , fruity balance",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "carbs",
+    "fat",
+    "energy",
+    "protein",
+    "sugar"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 2,
+   "name": "Cheesecake Nutella",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1790507321824-IMG_8188_Xd_TfY2P-.PNG",
+   "tag": null,
+   "prices": [
+    "4,000 IQD"
+   ],
+   "title": "Cheesecake Nutella",
+   "desc": "Cheesecake Nutella Name (EN) * Freshly made Velvety cheesecake swirled with rich Nutella chocolate spread",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "protein",
+    "sugar",
+    "fat",
+    "energy",
+    "carbs"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 3,
+   "name": "Cheesecake Lotus",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1790507173958-IMG_8187_YyNb3BvyR.PNG",
+   "tag": null,
+   "prices": [
+    "4,000 IQD"
+   ],
+   "title": "Cheesecake Lotus",
+   "desc": "Freshly made cheesecake infused with Lotus biscuit flavor and a smooth lotus cream finish",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "carbs",
+    "sugar",
+    "fat",
+    "energy",
+    "protein"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 4,
+   "name": "San Sebastian",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1790507854288-IMG_8189_7g7Tv3C-P.PNG",
+   "tag": null,
+   "prices": [
+    "5,500 IQD"
+   ],
+   "title": "San Sebastian",
+   "desc": "Silky cream cheese, fresh eggs, and a touch of vanilla—perfectly baked with a golden top and creamy heart",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "energy",
+    "protein",
+    "sugar",
+    "fat",
+    "carbs"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 5,
+   "name": "Chocolate Lava Cookie",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1780771461568-6add3790-1503-4195-9479-39d610521558_l3T7HkI3lH.png",
+   "tag": null,
+   "prices": [
+    "2,500 IQD"
+   ],
+   "title": "Chocolate Lava Cookie",
+   "desc": "Rich chocolate cookie finished with white chocolate drizzle and toasted almond flakes for a decadent, satisfying treat",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "carbs",
+    "protein",
+    "energy",
+    "sugar",
+    "fat"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 6,
+   "name": "Lotus Lava Cookie",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1780771340563-0c4ea723-079b-4fde-871c-bbba1fd74ae8_jBVAFRFXs.png",
+   "tag": null,
+   "prices": [
+    "2,500 IQD"
+   ],
+   "title": "Lotus Lava Cookie",
+   "desc": "Soft, buttery cookie topped with smooth Lotus cream and crunchy Biscoff crumbs for the ultimate Lotus lover's bite",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "fat",
+    "sugar",
+    "protein",
+    "energy",
+    "carbs"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 7,
+   "name": "Cookies Dark",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1770457984752-Dark_cookies__QuTyl4rp1.png",
+   "tag": null,
+   "prices": [
+    "2,000 IQD"
+   ],
+   "title": "Cookies Dark",
+   "desc": "Soft-baked dark chocolate cookies with a rich, bold cocoa flavor",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "energy",
+    "protein",
+    "sugar",
+    "carbs",
+    "fat"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 8,
+   "name": "Cookies Brown",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1770458034590-Brownies_cookies__gjUfA9ULk.png",
+   "tag": "top_seller",
+   "prices": [
+    "2,000 IQD"
+   ],
+   "title": "Cookies Brown",
+   "desc": "Soft and melt-in-the-mouth, filled with a rich Nutella center for a warm, indulgent finish",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "carbs",
+    "protein",
+    "energy",
+    "sugar",
+    "fat"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 9,
+   "name": "Cookies Red Velvet",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1770458055658-Red_valvet_cookies__xiMRfezFz.png",
+   "tag": null,
+   "prices": [
+    "2,000 IQD"
+   ],
+   "title": "Cookies Red Velvet",
+   "desc": "Soft red velvet cookies with a mild cocoa taste and smooth texture",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "energy",
+    "sugar",
+    "protein",
+    "fat",
+    "carbs"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 10,
+   "name": "Cookies New York",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1770458103957-New_york_cookies__DrQJysUXq.png",
+   "tag": null,
+   "prices": [
+    "2,000 IQD"
+   ],
+   "title": "Cookies New York",
+   "desc": "Thick, soft New York–style cookies packed with a rich, indulgent chocolate flavor",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "carbs",
+    "sugar",
+    "protein",
+    "fat",
+    "energy"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 11,
+   "name": "Croissant Nutella",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1770458292277-Nutella_croissant__0dgzq6Ln6.jpg",
+   "tag": null,
+   "prices": [
+    "3,000 IQD"
+   ],
+   "title": "Croissant Nutella",
+   "desc": "Flaky, buttery croissant filled with rich, creamy Nutella and baked to golden perfection",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "protein",
+    "carbs",
+    "fat",
+    "sugar",
+    "energy"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 12,
+   "name": "Croissant Cheese",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1770458407605-Cheese_croissant__aKrdeDwkC.jpg",
+   "tag": null,
+   "prices": [
+    "3,000 IQD"
+   ],
+   "title": "Croissant Cheese",
+   "desc": "Classic buttery croissant filled with melted cheese and baked until perfectly golden and savory",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "sugar",
+    "energy",
+    "fat",
+    "protein",
+    "carbs"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 13,
+   "name": "Molten cake",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1782039549197-WhatsApp_Image_2026-06-21_at_1.50.56_PM_pNi5Z6D0X.jpeg",
+   "tag": null,
+   "prices": [
+    "3,500 IQD"
+   ],
+   "title": "Molten cake",
+   "desc": "",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 14,
+   "name": "Brownies Cup",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1770457814068-Brownie_cup__f9vhdSx1R3.png",
+   "tag": null,
+   "prices": [
+    "3,500 IQD"
+   ],
+   "title": "Brownies Cup",
+   "desc": "Fudgy chocolate brownie, rich and moist with an intense cocoa taste",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "carbs",
+    "fat",
+    "sugar",
+    "energy",
+    "protein"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 1,
+   "index": 0,
+   "name": "Turkey Sandwich (Lightly Spiced)",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1784238582597-IMG_3054.JPG_XuO5DQHXY.jpeg",
+   "tag": null,
+   "prices": [
+    "3,500 IQD"
+   ],
+   "title": "Turkey Sandwich (Lightly Spiced)",
+   "desc": "Protein-packed smoked turkey slices with lettuce and tomatoes for a fiber boost, topped with sriracha sauce, pickles, and a slice of cheddar cheese inside ciabatta bread for instant energy Order it now",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "fibre",
+    "energy",
+    "sugar",
+    "carbs",
+    "salt",
+    "protein",
+    "sat fat",
+    "fat"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 1,
+   "index": 1,
+   "name": "Halloumi Sandwich",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1784238604874-IMG_3056.JPG_otmkASI0u.jpeg",
+   "tag": null,
+   "prices": [
+    "3,500 IQD"
+   ],
+   "title": "Halloumi Sandwich",
+   "desc": "Halloumi cheese, crispy lettuce, fresh arugula and a drizzle of pomegranate molasses in a toasted ciabatta",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "fat",
+    "salt",
+    "carbs",
+    "energy",
+    "protein",
+    "sugar",
+    "sat fat",
+    "fibre"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 1,
+   "index": 2,
+   "name": "Caesar Sandwich",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1784238627516-IMG_3055.JPG_8M6YJFg_O.jpeg",
+   "tag": null,
+   "prices": [
+    "3,500 IQD"
+   ],
+   "title": "Caesar Sandwich",
+   "desc": "Sous vide chicken, crispy lettuce, fresh arugula, cheddar & parmesan and a rich Caesar dressing in a toasted ciabatta",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "protein",
+    "salt",
+    "fat",
+    "carbs",
+    "sat fat",
+    "sugar",
+    "energy",
+    "fibre"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 1,
+   "index": 3,
+   "name": "Honey Mustard Chicken Sandwich",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1790095792822-IMG_7290_Qib0-Pc-xa.png",
+   "tag": "premium",
+   "prices": [
+    "3,500 IQD"
+   ],
+   "title": "Honey Mustard Chicken Sandwich",
+   "desc": "Enjoy the ultimate balance of flavors with our new Honey Mustard Chicken sandwich, featuring tender sous vide chicken nestled inside a toasted ciabatta bread. Enhanced by our signature tangy-sweet honey mustard sauce.",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "fat",
+    "carbs",
+    "energy",
+    "sugar",
+    "fibre",
+    "sat fat",
+    "protein"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 1,
+   "index": 4,
+   "name": "Caesar Salad",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1770473581529-Caesar_Salar_Am6ENl_Eq.JPG",
+   "tag": "premium",
+   "prices": [
+    "5,500 IQD"
+   ],
+   "title": "Caesar Salad",
+   "desc": "Fresh, filling, and perfectly balanced Experience our tender sous-vide chicken breast paired with crisp lettuce, crunchy croutons, and a rich Caesar dressing finished with a sprinkle of Parmesan Fuel your focus. Order now",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "Select Flavor"
+   ],
+   "nutrition": [
+    "sat fat",
+    "carbs",
+    "protein",
+    "fat",
+    "sugar",
+    "fibre",
+    "energy",
+    "salt"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 1,
+   "index": 5,
+   "name": "Strawberry Granola Yogurt",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1783958249616-DSC04936_1.jpg_k2M30jLZS.jpeg",
+   "tag": null,
+   "prices": [
+    "3,500 IQD"
+   ],
+   "noModal": true
+  }
+ ]
+}

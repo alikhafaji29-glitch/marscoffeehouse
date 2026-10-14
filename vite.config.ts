@@ -1,6 +1,7 @@
 import { defineConfig, loadEnv } from 'vite'
 import type { Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
+import basicSsl from '@vitejs/plugin-basic-ssl'
 
 // dev-only: "Your Mood Drink" asks Claude through the Anthropic API when ANTHROPIC_API_KEY is set
 // (the real site gets a backend function for this; without a key the browser falls back on its own)
@@ -42,8 +43,13 @@ function moodApi(): Plugin {
   }
 }
 
-export default defineConfig({
-  plugins: [react(), moodApi()],
-  server: { port: 1440, host: true },
-})
+// `npm run dev` is plain http on 1440. `npm run dev:https` (mode "https") serves the same site on 1441 with a
+// self-signed certificate, for trying on a phone the things browsers only allow on a secure page ("Share my
+// location", the share sheet, the clipboard); the phone shows a certificate warning once, which is expected.
+// `npm run dev:demo` (mode "demo", port 1442) and `npm run build:demo` leave the shared backend out (.env.demo):
+// the on-device demo, for the artifact snapshot and the headless tests.
+export default defineConfig(({ mode }) => ({
+  plugins: [react(), moodApi(), ...(mode === 'https' ? [basicSsl()] : [])],
+  server: { port: mode === 'https' ? 1441 : mode === 'demo' ? 1442 : 1440, host: true },
+}))
 

@@ -1,0 +1,2317 @@
+{
+ "branch": "erbil",
+ "lang": "ku",
+ "readAt": "2026-10-13T02:16:09.013Z",
+ "pageLang": "ku",
+ "dir": "",
+ "log": [],
+ "cats": [
+  {
+   "group": 0,
+   "groupName": "خواردنەوەکان",
+   "index": 0,
+   "name": "قاوەی و شتی زیاتر"
+  },
+  {
+   "group": 0,
+   "groupName": "خواردنەوەکان",
+   "index": 1,
+   "name": "قاوە و شیر"
+  },
+  {
+   "group": 0,
+   "groupName": "خواردنەوەکان",
+   "index": 2,
+   "name": "قاوە و شیری سارد"
+  },
+  {
+   "group": 0,
+   "groupName": "خواردنەوەکان",
+   "index": 3,
+   "name": "ریفرێشەر"
+  },
+  {
+   "group": 0,
+   "groupName": "خواردنەوەکان",
+   "index": 4,
+   "name": "مێڵک شەیک"
+  },
+  {
+   "group": 0,
+   "groupName": "خواردنەوەکان",
+   "index": 5,
+   "name": "موهیتۆ"
+  },
+  {
+   "group": 0,
+   "groupName": "خواردنەوەکان",
+   "index": 6,
+   "name": "سمووزی"
+  },
+  {
+   "group": 0,
+   "groupName": "خواردنەوەکان",
+   "index": 7,
+   "name": "ئێکسترا"
+  },
+  {
+   "group": 0,
+   "groupName": "خواردنەوەکان",
+   "index": 8,
+   "name": "Matcha Collection"
+  },
+  {
+   "group": 0,
+   "groupName": "خواردنەوەکان",
+   "index": 9,
+   "name": "خواردنەوەکانی پاییز"
+  },
+  {
+   "group": 1,
+   "groupName": "خواردن",
+   "index": 0,
+   "name": "هەویرکاری"
+  },
+  {
+   "group": 1,
+   "groupName": "خواردن",
+   "index": 1,
+   "name": "ساندویچ و زەڵاتە"
+  }
+ ],
+ "items": [
+  {
+   "group": 0,
+   "cat": 0,
+   "index": 0,
+   "name": "ئەمێریکانۆ",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770545103453-ChatGPT_Image_Feb_8__2026__01_04_52_PM_-VaEFm0G9.png",
+   "tag": "top_seller",
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "title": "ئەمێریکانۆ",
+   "desc": "شۆتەکانی ئەسپریسۆ لەگەڵ ئاوی گەرم پێکەوە چینێکی سووکی کرێماوی لەسەریان دروست دەبێت",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "fat",
+    "sugar",
+    "caffeine",
+    "protein",
+    "fibre",
+    "carbs",
+    "energy"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 0,
+   "index": 1,
+   "name": "ئێسپرێسۆ",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770546007240-ChatGPT_Image_Feb_8__2026__01_19_52_PM_ITrBU-bHF.png",
+   "tag": "premium",
+   "prices": [
+    "3,000 IQD"
+   ],
+   "title": "ئێسپرێسۆ",
+   "desc": "شۆتێکی ئەسپریسۆی تێر، بە تامێکی دەوڵەمەند و چێژاوی",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "fibre",
+    "caffeine",
+    "carbs",
+    "protein",
+    "energy",
+    "fat"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 0,
+   "index": 2,
+   "name": "ئێسپرێسۆ دۆپیۆ",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770545906307-ChatGPT_Image_Feb_8__2026__01_12_10_PM_3EabD5E4p.png",
+   "tag": null,
+   "prices": [
+    "4,000 IQD"
+   ],
+   "title": "ئێسپرێسۆ دۆپیۆ",
+   "desc": "شۆتێکی ئەسپریسۆی تێر، بە تامێکی دەوڵەمەند و چێژاوی",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "caffeine",
+    "carbs",
+    "fibre",
+    "energy",
+    "fat",
+    "sugar",
+    "protein"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 0,
+   "index": 3,
+   "name": "قاوەی تەرکی",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770484997427-05._Turkish_coffee_gpTXLh1tyd.png",
+   "tag": null,
+   "prices": [
+    "3,500 IQD"
+   ],
+   "title": "قاوەی تەرکی",
+   "desc": "قاوەی ورد بە هێواشی دەکوڵێت بۆ تامێکی قوڵی قاوەی تێر، و کەفی ئەستوور",
+   "sizes": [],
+   "flavors": [
+    {
+     "value": "Medium",
+     "text": "Medium"
+    },
+    {
+     "value": "Sweet",
+     "text": "Sweet"
+    },
+    {
+     "value": "Plain",
+     "text": "Plain"
+    }
+   ],
+   "labels": [
+    "جۆر هەڵبژێرە"
+   ],
+   "nutrition": [
+    "caffeine",
+    "carbs",
+    "protein",
+    "fibre",
+    "energy",
+    "sugar",
+    "fat"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 0,
+   "index": 4,
+   "name": "قاوەی تەرکی دەبڵ",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770485033013-05._Turkish_coffee_tLxbBPehf.png",
+   "tag": null,
+   "prices": [
+    "5,000 IQD"
+   ],
+   "title": "قاوەی تەرکی دەبڵ",
+   "desc": "جۆرێکی بەهێزتر و دەوڵەمەندتر لە قاوەی تورکی کە بە قاوەی دەبڵ دروست دەکرێت بۆ تامێکی چڕوپڕتر.",
+   "sizes": [],
+   "flavors": [
+    {
+     "value": "Sweet",
+     "text": "Sweet"
+    },
+    {
+     "value": "Medium",
+     "text": "Medium"
+    },
+    {
+     "value": "Plain",
+     "text": "Plain"
+    }
+   ],
+   "labels": [
+    "جۆر هەڵبژێرە"
+   ],
+   "nutrition": [
+    "fat",
+    "sugar",
+    "protein",
+    "fibre",
+    "carbs",
+    "caffeine",
+    "energy"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 0,
+   "index": 5,
+   "name": "قاوەی فلتەرکراو",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777195044130-drip_coffee_45_degree_XMSFDoS-g.jpg",
+   "tag": null,
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "noModal": true
+  },
+  {
+   "group": 0,
+   "cat": 0,
+   "index": 6,
+   "name": "چای کەره ک",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770549249687-ChatGPT_Image_Feb_8__2026__02_13_54_PM_ZUlP0uWvj.png",
+   "tag": "top_seller",
+   "prices": [
+    "5,000 IQD (8oz)",
+    "6,000 IQD (12oz)"
+   ],
+   "title": "چای کەره ک",
+   "desc": "چای تايبەتی Marsکە بۆنی بةهاراتە ڕەسەنەکان لێی بڵاودەبێتەوە، لەگەڵ شیر تێکەڵ دەکرێت بۆ پێشکەشکردنی تایبەتمەندییەکی جیاواز لە چینە گەرمەکان وەرگرتراوە لە ڕەچەتەی کەرەکە کلاسیکییەکەوە ، لە پەرداغێکدا کە کەسایەتیەکی ڕەسەنی ڕوون و بیرنەچوو هەڵدەگرێت.",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "sugar",
+    "sat fat",
+    "energy",
+    "caffeine",
+    "salt",
+    "fat",
+    "fibre",
+    "carbs",
+    "protein"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 0,
+   "index": 7,
+   "name": "لوتسى گەرم",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770548580381-ChatGPT_Image_Feb_8__2026__02_02_43_PM_Hs7InuKN8.png",
+   "tag": null,
+   "prices": [
+    "5,000 IQD (8oz)",
+    "6,000 IQD (12oz)"
+   ],
+   "title": "لوتسى گەرم",
+   "desc": "شیری گەرم بە شێوازێکی مخملی لەگەڵ کرێمی لۆتسی دەوڵەمەند تێکەڵ دەبێت بۆ دروستکردنی تایبەتمەندییەکی بسکویتیی برژاو، کە بە هەستێکی ناوازە و دڵنیاکەرەوە کۆتایی پێدەهێنرێت",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "fibre",
+    "sat fat",
+    "fat",
+    "carbs",
+    "caffeine",
+    "protein",
+    "sugar",
+    "energy",
+    "salt"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 0,
+   "index": 8,
+   "name": "فستقى گەرم",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770548740541-ChatGPT_Image_Feb_8__2026__02_05_31_PM_N9UFWEKTs.png",
+   "tag": null,
+   "prices": [
+    "5,000 IQD (8oz)",
+    "6,000 IQD (12oz)"
+   ],
+   "title": "فستقى گەرم",
+   "desc": "شیری ھەڵمێشراو لەگەڵ چێژی فستقێکی تایبەت یەکدەگرێت بۆ پێشکەشکردنی تایبەتمەندییەکی لەبیرنەکراو ، بێ ئەوەی چێژەکان تیکەڵ ببێت یان هەستەکان ماندوو بکات.",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "caffeine",
+    "fat",
+    "protein",
+    "salt",
+    "sugar",
+    "carbs",
+    "sat fat",
+    "energy",
+    "fibre"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 0,
+   "index": 9,
+   "name": "چۆکۆلاتی گەرم",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770547348116-ChatGPT_Image_Feb_8__2026__01_42_20_PM_W9ZQKkkI8.png",
+   "tag": null,
+   "prices": [
+    "5,000 IQD (8oz)",
+    "6,000 IQD (12oz)"
+   ],
+   "title": "چۆکۆلاتی گەرم",
+   "desc": "شۆکۆلاتەی گەرم بە چێژێکی ناوازه، کە لە کاکاوی هەڵبژێردراو بە وردی ئامادە دەکرێت، بە کرێمییک كه چینێکی تايبەت زیاد دەکات، به شێوەیەکی لەسەرخۆ دەتوێتەوە و هەر تامێک دەگۆڕێت بۆ چێژێکی دەوڵەمەند و بە تایبەتمەندییەکی بیرنەچوو.",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "energy",
+    "carbs",
+    "salt",
+    "protein",
+    "fibre",
+    "caffeine",
+    "sugar",
+    "fat",
+    "sat fat"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 0,
+   "index": 10,
+   "name": "کۆڵد برو",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777195451279-cold_brew_front_HHRBa77HmT.jpg",
+   "tag": null,
+   "prices": [
+    "5,500 IQD"
+   ],
+   "noModal": true
+  },
+  {
+   "group": 0,
+   "cat": 1,
+   "index": 0,
+   "name": "لاتێی کارامێل",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777378595133-Hot_classic_latte__zRdgBuPZY.jpg",
+   "tag": null,
+   "prices": [
+    "5,000 IQD (8oz)",
+    "6,000 IQD (12oz)"
+   ],
+   "title": "لاتێی کارامێل",
+   "desc": "قاوەی ئێسپڕێسۆی نەرم و هەڵتێکەڵکراو لەگەڵ شیری کرێمی و تامی کارامێلی دەوڵەمەند، سەرووپۆشکراو بە فۆمی نەرم",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "energy",
+    "caffeine",
+    "carbs",
+    "protein",
+    "fat",
+    "sugar"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 1,
+   "index": 1,
+   "name": "کاپوچینو کارامێل",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777378808221-Cappuccino_QTXDVv4IG.jpg",
+   "tag": null,
+   "prices": [
+    "5,000 IQD (8oz)",
+    "6,000 IQD (12oz)"
+   ],
+   "title": "کاپوچینو کارامێل",
+   "desc": "ئێسپریسۆی دەوڵەمەند تێکەڵکراو لەگەڵ شیری بەهەڵمکراو و تامی کارامێلی شیرین، کۆتایی دێت بە چینێکی کرێمی لە فۆم",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "fat",
+    "sugar",
+    "energy",
+    "carbs",
+    "protein",
+    "caffeine"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 1,
+   "index": 2,
+   "name": "کۆرتادۆ",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770543565416-ChatGPT_Image_Feb_8__2026__12_39_06_PM_FPTH_qukh.png",
+   "tag": null,
+   "prices": [
+    "5,000 IQD"
+   ],
+   "title": "کۆرتادۆ",
+   "desc": "تێکەڵەیەکی ورد لە دوو شۆتی ڕیستڕێتۆ و شیری حەریری گەرم، بە قەبارەیەکی نموونەیی پێشکەش دەکرێت بۆ ئەوەی قووڵی و هێز و نەرمی لە یەک پەرداغێکدا کۆبکاتەوە",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "sat fat",
+    "sugar",
+    "fat",
+    "fibre",
+    "protein",
+    "caffeine",
+    "salt",
+    "carbs",
+    "energy"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 1,
+   "index": 3,
+   "name": "لاتێی کلاسیک",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770543820199-ChatGPT_Image_Feb_8__2026__12_43_31_PM_0w6Zf4vIK.png",
+   "tag": null,
+   "prices": [
+    "4,000 IQD (8oz)",
+    "5,000 IQD (12oz)"
+   ],
+   "title": "لاتێی کلاسیک",
+   "desc": "هاوسەنگیەکی خوشڕەنگ لەنێوان ئیسپرێسۆ و شیری ھەڵمێشراو، کە بە فوميكى سووک بۆ ئەوەی پەرداغێکی گەرم بە تایبەتمەندییەکی شیری مخمەلی و تامیكى ناياب پێ ببەخشێت",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "fat",
+    "sugar",
+    "protein",
+    "fibre",
+    "carbs",
+    "caffeine",
+    "energy"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 1,
+   "index": 4,
+   "name": "کاپوچینو",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770544806581-ChatGPT_Image_Feb_8__2026__12_59_55_PM_b0nXbAhTB.png",
+   "tag": null,
+   "prices": [
+    "4,000 IQD (8oz)",
+    "5,000 IQD (12oz)"
+   ],
+   "title": "کاپوچینو",
+   "desc": "تێکەڵەیەکی هاوسەنگ لە ئیسپرێسۆ و شیری ھەڵمێشراو، بە چینێک لە فومى چڕ و پڕ نەرمییەکی مخمەلی دەبەخشێت",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "salt",
+    "protein",
+    "sugar",
+    "caffeine",
+    "carbs",
+    "sat fat",
+    "energy",
+    "fat",
+    "fibre"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 1,
+   "index": 5,
+   "name": "لاتێی گەرم بە تام",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770543820199-ChatGPT_Image_Feb_8__2026__12_43_31_PM_0w6Zf4vIK.png",
+   "tag": null,
+   "prices": [
+    "5,000 IQD (8oz)",
+    "6,000 IQD (12oz)"
+   ],
+   "title": "لاتێی گەرم بە تام",
+   "desc": "هاوسەنگیەکی خوشڕەنگ لەنێوان ئیسپرێسۆ و شیری ھەڵمێشراو، کە بە فوميكى سووک بۆ ئەوەی پەرداغێکی گەرم بە تایبەتمەندییەکی شیری مخمەلی و تامیكى ناياب پێ ببەخشێت",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [
+    {
+     "value": "caramel free sugar",
+     "text": "caramel free sugar"
+    },
+    {
+     "value": "Cookies",
+     "text": "Cookies"
+    },
+    {
+     "value": "Brownie",
+     "text": "Brownie"
+    },
+    {
+     "value": "Hazelnut",
+     "text": "Hazelnut"
+    },
+    {
+     "value": "Vanilla",
+     "text": "Vanilla"
+    }
+   ],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "carbs",
+    "protein",
+    "caffeine",
+    "energy",
+    "sugar",
+    "fat"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 1,
+   "index": 6,
+   "name": "کاپوچینو",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777302210689-cappuccino_45_degree_ykXHVDNfA.jpg",
+   "tag": null,
+   "prices": [
+    "5,500 IQD (8oz)",
+    "6,500 IQD (12oz)"
+   ],
+   "title": "کاپوچینو",
+   "desc": "تێکەڵەیەکی هاوسەنگ لە ئیسپرێسۆ و شیری ھەڵمێشراو، بە چینێک لە فومى چڕ و پڕ نەرمییەکی مخمەلی دەبەخشێت",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [
+    {
+     "value": "Cookies",
+     "text": "Cookies"
+    },
+    {
+     "value": "Caramel free sugar",
+     "text": "Caramel free sugar"
+    },
+    {
+     "value": "Brownie",
+     "text": "Brownie"
+    },
+    {
+     "value": "Vanilla",
+     "text": "Vanilla"
+    },
+    {
+     "value": "Hazlenut",
+     "text": "Hazlenut"
+    }
+   ],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "fat",
+    "energy",
+    "carbs",
+    "caffeine",
+    "fibre",
+    "protein",
+    "sugar"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 1,
+   "index": 7,
+   "name": "لاتێی ئیسپانی گەرم",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770544668431-ChatGPT_Image_Feb_8__2026__12_57_32_PM_MjpjsNsB-.png",
+   "tag": null,
+   "prices": [
+    "5,000 IQD (8oz)",
+    "6,000 IQD (12oz)"
+   ],
+   "title": "لاتێی ئیسپانی گەرم",
+   "desc": "تێکەڵەیەک لە ئسپرێسۆ وشیری گەرم و شيرى خەست ، بۆ ئەوەی پەرداغێکی دەوڵەمەند بە تایبەتمەندییەکی شیرین و هاوسەنگ پێشکەش بکات، تاميكي لةبير نەکراو بۆ ماوەیەکی درێژ .",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "caffeine",
+    "protein",
+    "energy",
+    "carbs",
+    "fat",
+    "fibre",
+    "sugar"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 1,
+   "index": 8,
+   "name": "مۆکا چۆکۆلاتە توخ",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770544005115-ChatGPT_Image_Feb_8__2026__12_46_19_PM_s1GlPMp1p.png",
+   "tag": null,
+   "prices": [
+    "5,000 IQD (8oz)",
+    "6,000 IQD (12oz)"
+   ],
+   "title": "مۆکا چۆکۆلاتە توخ",
+   "desc": "تێکەڵەیەکی دەوڵەمەند لە ئیسپرێسۆ، و سۆسی شۆکۆلاتە و شیری ھەڵمێشراو،بە چینێکی کرێمی بۆ ئەزموونێکی گەرم و جياواز",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "caffeine",
+    "sugar",
+    "protein",
+    "energy",
+    "salt",
+    "fibre",
+    "carbs",
+    "fat",
+    "sat fat"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 1,
+   "index": 9,
+   "name": "مۆکا چۆکۆلاتە سپی",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770544358842-ChatGPT_Image_Feb_8__2026__12_52_31_PM_aMV3oyAoM.png",
+   "tag": null,
+   "prices": [
+    "5,000 IQD (8oz)",
+    "6,000 IQD (12oz)"
+   ],
+   "title": "مۆکا چۆکۆلاتە سپی",
+   "desc": "تاقيكردنوەيەكي ناوازه بە تایبەتمەندییەکی کرێمی دەوڵەمەند، کە لەوەدا قاوەیەكى چڕ بە شۆکۆلاتەی سپیی مخمەلی تێکەڵ دەبێت، کە هاوسەنگیەکی گەرم لە یەکەم تامەوە هەستیپێدەكرى",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "fat",
+    "salt",
+    "energy",
+    "sugar",
+    "protein",
+    "carbs",
+    "fibre",
+    "sat fat",
+    "caffeine"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 1,
+   "index": 10,
+   "name": "فلات وایت",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770543410745-ChatGPT_Image_Feb_8__2026__12_36_38_PM_BUcE9o-dyu.png",
+   "tag": null,
+   "prices": [
+    "5,500 IQD"
+   ],
+   "title": "فلات وایت",
+   "desc": "تێکەڵەیەکی خۆشڕەنگ لە دوو شۆتی ئیسپرێسۆ و شیری ھەڵمێشراو بە تاميكى مخمەلی، هێزی قاوەی دەسەلمێنێ بێ ئەوەی تامى شیریەکە زاڵ بێت",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "protein",
+    "fat",
+    "fibre",
+    "carbs",
+    "sat fat",
+    "sugar",
+    "energy",
+    "caffeine",
+    "salt"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 2,
+   "index": 0,
+   "name": "لاتێی کارامێل سارد",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777379278505-ice_classic_late_front_l771tmdhu.jpg",
+   "tag": null,
+   "prices": [
+    "5,000 IQD (8oz)",
+    "6,000 IQD (12oz)"
+   ],
+   "title": "لاتێی کارامێل سارد",
+   "desc": "ئێسپریسۆی سارد تێکەڵکراو لەگەڵ شیری سارد و تامی کارامێلی دەوڵەمەند، لەگەڵ سەهۆڵ پێشکەش دەکرێت بۆ ئەوەی تامێکی تازەکەرەوە بدات.",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "caffeine",
+    "fat",
+    "sugar",
+    "energy",
+    "carbs",
+    "protein"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 2,
+   "index": 1,
+   "name": "ئەمێریکانۆی سارد",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777199575559-ice_americano_front_view_zgRiIa5Xj.jpg",
+   "tag": null,
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "title": "ئەمێریکانۆی سارد",
+   "desc": "شوتی ئێسپرێسۆ لە ئاودا چینێک کرێم دروست دەکەن، پاشان لەسەر سەهۆڵ پێشکەش دەکرێت. ئەنجامەکە ئەم کوپە پڕ بە تامێکی تێرەیە.",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "caffeine",
+    "protein",
+    "carbs",
+    "fibre",
+    "energy",
+    "sugar",
+    "fat"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 2,
+   "index": 2,
+   "name": "سپانش لاتێ مارس",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1784205104129-DSC06721_BGoxUkp7k.jpg",
+   "tag": "signature",
+   "prices": [
+    "5,000 IQD (8oz)",
+    "6,000 IQD (12oz)"
+   ],
+   "title": "سپانش لاتێ مارس",
+   "desc": "رەچەتەیەکی کریمی و دەوڵەمەند، بە تایبەتی دروستکراوە بۆ ئەوەی ببێتە واژۆی تایبەتی مارس",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "sugar",
+    "fat",
+    "caffeine",
+    "fibre",
+    "carbs",
+    "protein",
+    "energy",
+    "sat fat"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 2,
+   "index": 3,
+   "name": "سپانش لاتێ سارد",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777199564382-ice_spanish_late_front_view_k2WFfRziU.jpg",
+   "tag": null,
+   "prices": [
+    "5,000 IQD (8oz)",
+    "6,000 IQD (12oz)"
+   ],
+   "title": "سپانش لاتێ سارد",
+   "desc": "تێکەڵەیەکی ساردى مخمەلیه له ئێسپرسۆ و شیر ،تامێکی نەرم و کرێمی دروست دەكات لەگەڵ شيرینيەكي هاوسةنگ",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "fat",
+    "sugar",
+    "salt",
+    "energy",
+    "carbs",
+    "sat fat",
+    "protein",
+    "caffeine"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 2,
+   "index": 4,
+   "name": "لاتێی کلاسیک سارد",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777199586175-ice_late_front_view_gMFEreniS.jpg",
+   "tag": null,
+   "prices": [
+    "4,000 IQD (8oz)",
+    "5,000 IQD (12oz)"
+   ],
+   "title": "لاتێی کلاسیک سارد",
+   "desc": "تێکەڵەيەكی سارد کە هێزی ئیسپرێسۆ و شیرێکی مەخمەلی تێکەڵ دەبێ ، لە پەرداغێکی فرێش بە تایبەتمەندییەکی ناياب بۆ هەموو ساتێک",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "caffeine",
+    "energy",
+    "fat",
+    "carbs",
+    "fibre",
+    "sugar",
+    "protein"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 2,
+   "index": 5,
+   "name": "لاتێی کلاسیک سارد",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777199548673-ice_late_front_view_ngq0gib83.jpg",
+   "tag": null,
+   "prices": [
+    "5,000 IQD (8oz)",
+    "6,000 IQD (12oz)"
+   ],
+   "title": "لاتێی کلاسیک سارد",
+   "desc": "تێکەڵەيەكی سارد کە هێزی ئیسپرێسۆ و شیرێکی مەخمەلی تێکەڵ دەبێ ، لە پەرداغێکی فرێش بە تایبەتمەندییەکی ناياب بۆ هەموو ساتێک",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [
+    {
+     "value": "caramel free sugar",
+     "text": "caramel free sugar"
+    },
+    {
+     "value": "Vanilla",
+     "text": "Vanilla"
+    },
+    {
+     "value": "Brownie",
+     "text": "Brownie"
+    },
+    {
+     "value": "Hazelnut",
+     "text": "Hazelnut"
+    },
+    {
+     "value": "Cookies",
+     "text": "Cookies"
+    }
+   ],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "carbs",
+    "energy",
+    "sugar",
+    "caffeine",
+    "protein",
+    "fat"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 2,
+   "index": 6,
+   "name": "مۆکا به چۆکۆلاتى توخ سارد",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777199599193-Mocha_Dark_Iced_Front_p0K7CovrZ.jpg",
+   "tag": null,
+   "prices": [
+    "5,000 IQD (8oz)",
+    "6,000 IQD (12oz)"
+   ],
+   "title": "مۆکا به چۆکۆلاتى توخ سارد",
+   "desc": "خواردنەوەیەکی سارد بە واژویەکی ناياب، کە هێزی قاوە بە شۆکۆلاتەیەکی تێری تایبەت تێکەڵ دەبێت بۆ تاقیکردنەوەيەکی تایبەت و هاوسەنگ",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "salt",
+    "energy",
+    "sugar",
+    "protein",
+    "caffeine",
+    "carbs",
+    "fat",
+    "fibre",
+    "sat fat"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 2,
+   "index": 7,
+   "name": "مۆکا به چۆکۆلاتى سپی سارد",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777199618102-ice_mocha_white_front_MGy7kR4lH.jpg",
+   "tag": null,
+   "prices": [
+    "5,000 IQD (8oz)",
+    "6,000 IQD (12oz)"
+   ],
+   "title": "مۆکا به چۆکۆلاتى سپی سارد",
+   "desc": "تێکەڵەیەکی سارد له ئیسپرێسۆ و شۆکۆلاتەی سپیی و شیری سەهۆڵکراوى تایبەت ، له چینى سەرەوەدا بە کرێمیکی مخمەلي ڕوپۆش کراوە کۆتاییەکی ناوازه بە خواردنەکە دەبەخشێت",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "caffeine",
+    "carbs",
+    "protein",
+    "sat fat",
+    "fat",
+    "energy",
+    "sugar",
+    "salt"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 3,
+   "index": 0,
+   "name": "چای سارد خۆخ",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777196043103-ice_peach_tea_front_view_znI0nG5Bq.jpg",
+   "tag": null,
+   "prices": [
+    "5,000 IQD (8oz)",
+    "6,000 IQD (12oz)"
+   ],
+   "title": "چای سارد خۆخ",
+   "desc": "خۆخ لە ناو چایەکی سارددا تێکەڵکراون، کە شیرینییەکی هاوسەنگ و هەستی تازەبوونەوە دەدات.",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "carbs",
+    "sugar",
+    "caffeine",
+    "energy"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 3,
+   "index": 1,
+   "name": "چای سارد مانگۆ",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777196057340-ice_tea_mango___peach_front_5t2Kq-3Mm.jpg",
+   "tag": null,
+   "prices": [
+    "5,000 IQD (8oz)",
+    "6,000 IQD (12oz)"
+   ],
+   "title": "چای سارد مانگۆ",
+   "desc": "چایەکی روونی ساردە بە تامی مانگۆ، هەستێکی فێنکەرەی زۆر بەتام و سووکە",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "sugar",
+    "energy",
+    "carbs",
+    "caffeine"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 3,
+   "index": 2,
+   "name": "شەربەتی پرتەقاڵی فرێش",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777196070622-refresh_orange___pomegranate_front_view_frY3OLw0e.jpg",
+   "tag": null,
+   "prices": [
+    "5,500 IQD (8oz)",
+    "6,500 IQD (12oz)"
+   ],
+   "title": "شەربەتی پرتەقاڵی فرێش",
+   "desc": "تێکەڵەیەکی وردی پرتەقاڵ لەگەڵ هەنار، شەربەتێکی بەتام و تازەبوونەوەیە.",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "fibre",
+    "caffeine",
+    "sugar",
+    "energy",
+    "carbs"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 3,
+   "index": 3,
+   "name": "ئێنەرجی+",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777196081216-Mexican_Red_bull_Front_DT2uA7cAe.jpg",
+   "tag": null,
+   "prices": [
+    "6,500 IQD"
+   ],
+   "title": "ئێنەرجی+",
+   "desc": "تێکەڵەیەکی وزەبەخشی توند، کە هەستی تازەبوونەوە و بەهێزی دەدات.",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "caffeine",
+    "energy",
+    "carbs",
+    "salt",
+    "sugar"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 3,
+   "index": 4,
+   "name": "شەربەتی پڕتەقاڵی فرێش",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1784200155746-IMG_3061.JPG_aBgBLjFL1.jpeg",
+   "tag": null,
+   "prices": [
+    "5,000 IQD"
+   ],
+   "title": "شەربەتی پڕتەقاڵی فرێش",
+   "desc": "پڕتەقاڵی فرێش لە پڕتەقاڵی تازە ئامادە کراو، بە تامێکی تایبەت و خۆش و گونجاو",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "fibre",
+    "sat fat",
+    "protein",
+    "sugar",
+    "energy",
+    "fat",
+    "carbs"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 4,
+   "index": 0,
+   "name": "لۆتس مێڵک شەیک",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777196379821-milk_shake_lotus_front_FSW28dt7X_.jpg",
+   "tag": null,
+   "prices": [
+    "5,500 IQD (8oz)",
+    "6,500 IQD (12oz)"
+   ],
+   "title": "لۆتس مێڵک شەیک",
+   "desc": "مێڵک شەیک کە لە سۆسی لۆتس ئامادە دەکرێت، بۆ ئەوەی تایبەتمەندی بسکویتێکی برژاو به شێوەیەکی ڕوون پێشکەش بکات، لەگەڵ تام و چێژێکی هاوسەنگ کە هەستێکی جياواز و لةبير نەکراو دروست دەکات و تا دوا سات بەردەوام دەبێت",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 4,
+   "index": 1,
+   "name": "فستق مێڵک شەیک",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777196393196-milk_shake_pistachio_front_3x25QNt6h.jpg",
+   "tag": null,
+   "prices": [
+    "5,500 IQD (8oz)",
+    "6,500 IQD (12oz)"
+   ],
+   "title": "فستق مێڵک شەیک",
+   "desc": "مێڵک شەیکێکی ناياب و پڕ لە تامی فستق، لە ئەنجامدا تامێکی فستقی زاڵ هەستی پێ دەکرێ، لەگەڵ کۆتاییەکی هاوسەنگ کە کاریگەرییەکی ئارام بەجێ دەهێڵێت",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 4,
+   "index": 2,
+   "name": "ئۆریۆ مێڵک شەیک",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777196403733-milk_shake_oreo_front_voxK0FLVj.jpg",
+   "tag": null,
+   "prices": [
+    "5,500 IQD (8oz)",
+    "6,500 IQD (12oz)"
+   ],
+   "title": "ئۆریۆ مێڵک شەیک",
+   "desc": "مێڵک شەیکێکی کلاسیک کە پارچە ئۆریۆی وورد بە وریایی تێیدا تێکەڵ دەکرێت، له ئەنجامدا تێکەڵەیەکی هاوسەنگ لە تامی ڤانیلیا و شوکولاتەى ناياب پێشکەش دەکرێت کە جیاوازییەکی خۆش لە تام و چێژ دروست دەکەن",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 4,
+   "index": 3,
+   "name": "نۆتێلا مێڵک شەیک",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777196420696-milk_shake_nutella_front_OlzAm4Nfb.jpg",
+   "tag": null,
+   "prices": [
+    "5,500 IQD (8oz)",
+    "6,500 IQD (12oz)"
+   ],
+   "title": "نۆتێلا مێڵک شەیک",
+   "desc": "تێکەڵەیەکی جياواز کە شیر و نوتێلا کۆ دەکاتەوە، بۆ ئەوەی چینەکانی شوکوڵاتە و تامێکی ڕوون لە بوندق ئاشکرا بکات، لە پێکهاتەیەکی تايبەت و دەوڵەمەند کە هەستێکی مەخمەلی درێژخایەن بەجێ دەهێڵێت",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 4,
+   "index": 4,
+   "name": "شیلیک مێڵک شەیک",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777196432916-Milkshake_strawberry_front_G0QI1iLix.jpg",
+   "tag": null,
+   "prices": [
+    "5,500 IQD (8oz)",
+    "6,500 IQD (12oz)"
+   ],
+   "title": "شیلیک مێڵک شەیک",
+   "desc": "مێڵکشەیکێک بە تامێکی کریمی، تێکەڵکراو بە تامی فڕاوڵە،به شیرینییەکی هاوسەنگ پێشکەش دەکرێت،",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 4,
+   "index": 5,
+   "name": "تەحین مێڵک شەیک",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777196445909-milk_shake_rashi_front_RejrpYA9o.jpg",
+   "tag": null,
+   "prices": [
+    "5,500 IQD (8oz)",
+    "6,500 IQD (12oz)"
+   ],
+   "title": "تەحین مێڵک شەیک",
+   "desc": "،Mars مێڵکشیکێکی تایبەت بە ، تێکەڵەیەکی جیاواز له شیرینییەکی هاوسەنگ بە هەستێکی مەخمەلی تامێکی یەکگرتوو بۆ دواین سات",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 5,
+   "index": 0,
+   "name": "مۆهیتۆی شیلیک",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777197186852-Mojito_Strawberry_Front_q-_lLCjDG.jpg",
+   "tag": null,
+   "prices": [
+    "4,500 IQD (8oz)",
+    "5,500 IQD (12oz)"
+   ],
+   "title": "مۆهیتۆی شیلیک",
+   "desc": "هاوسەنگییەکی ورد لە تامی فڕاوڵە و چێژی ترشەکان، بە واژویەکی میوەیی کۆتایی پێدەهێنرێت ، لە ئەنجامدا تامیکی تایبەتی لەبیرنەکراو پەیدادەبێت",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "energy",
+    "caffeine",
+    "carbs",
+    "fibre",
+    "sugar"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 5,
+   "index": 1,
+   "name": "مۆهیتۆی شووتی",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777197196565-Mojito_Watermelon_Front_KJeb-nQ5l.jpg",
+   "tag": null,
+   "prices": [
+    "4,500 IQD (8oz)",
+    "5,500 IQD (12oz)"
+   ],
+   "title": "مۆهیتۆی شووتی",
+   "desc": "تامێکی شوتی زاڵ کە تێکەڵ دەبێت بە برێک لە لەیمونی فرێش تاقیکردنەوەیەک شایەنی دوبارەکردنەوەیە",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "carbs",
+    "energy",
+    "sugar",
+    "caffeine",
+    "fibre"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 5,
+   "index": 2,
+   "name": "مۆهیتۆی هەنار",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777197207089-mojito_pomegranate_front_view_d1FuK7ZOR.jpg",
+   "tag": null,
+   "prices": [
+    "5,000 IQD (8oz)",
+    "6,000 IQD (12oz)"
+   ],
+   "title": "مۆهیتۆی هەنار",
+   "desc": "چینەکانی تامی هەناری چڕ لەگەڵ لیمون تێکەڵ دەبن لە خواردنەوەیەکی تايبەت و فرێش کە کاریگەرییەکی هاوسەنگ بەجێ دەهێڵێت",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "sugar",
+    "energy",
+    "caffeine",
+    "fibre",
+    "carbs"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 5,
+   "index": 3,
+   "name": "مۆهیتۆی لیمۆ و پونە",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1787836197341-ChatGPT_Image_Aug_27__2026__03_50_49_PM_gvDBzHST5.png",
+   "tag": null,
+   "prices": [
+    "4,500 IQD (8oz)",
+    "5,500 IQD (12oz)"
+   ],
+   "noModal": true
+  },
+  {
+   "group": 0,
+   "cat": 6,
+   "index": 0,
+   "name": "سمووزی شیلیک",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777197452736-smoothie_strwberry_front_jpFL15JsV.jpg",
+   "tag": null,
+   "prices": [
+    "6,000 IQD"
+   ],
+   "title": "سمووزی شیلیک",
+   "desc": "تێکەڵەیەکی نایاب کە بە هەستێکی کلاسیکی نوێ دووبارە دەبێتەوە، ئەبێتە هۆی هەستکردن بەتامی ڕوونی فڕاولە لە خواردنەوەیەکی سارد",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "energy",
+    "carbs",
+    "caffeine",
+    "sugar",
+    "protein",
+    "salt"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 6,
+   "index": 1,
+   "name": "پاشنفرووت سمووزی",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777197467163-smoothie_passion_fruit_front_view_C0jlXf6zp.jpg",
+   "tag": null,
+   "prices": [
+    "6,500 IQD"
+   ],
+   "title": "پاشنفرووت سمووزی",
+   "desc": "پێکهاتەیەک کە لە میوەی گەرمەسێری تایبەت دروست دەکرێت جوانی و هاوسەنگی لە پەرداغێکدا کۆدەکاتەوە",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "protein",
+    "caffeine",
+    "sugar",
+    "energy",
+    "salt",
+    "carbs"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 6,
+   "index": 2,
+   "name": "مانگۆ و پڕتەقاڵ سمووزی",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777197479999-smoothie_orange___mango_front_view_I4tU4o_aG.jpg",
+   "tag": null,
+   "prices": [
+    "6,500 IQD"
+   ],
+   "title": "مانگۆ و پڕتەقاڵ سمووزی",
+   "desc": "تێکەڵەیەکی میوەیی درەوشاو کە تامی چڕی مانگۆ لەگەڵ ڕوونی پرتەقال کۆ دەکاتەوە، لە خواردنەوەیەکی بە تامی لەبیرنەکراو پێشکەش دەکرێت",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "energy",
+    "caffeine",
+    "carbs",
+    "protein",
+    "sugar",
+    "salt"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 7,
+   "index": 0,
+   "name": "زیادکراوی ئێسپرێسۆ شووت",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777281984702-ChatGPT_Image_Apr_27__2026__12_24_58_PM_FXSNixDiCG.png",
+   "tag": null,
+   "prices": [
+    "1,000 IQD"
+   ],
+   "title": "زیادکراوی ئێسپرێسۆ شووت",
+   "desc": "",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 7,
+   "index": 1,
+   "name": "ئێکسترا فلیڤر",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777282727942-ChatGPT_Image_Apr_27__2026__12_37_26_PM_I1RHFMIfr.png",
+   "tag": null,
+   "prices": [
+    "1,000 IQD"
+   ],
+   "title": "ئێکسترا فلیڤر",
+   "desc": "تامی خواردنەوەکەت باشتر بکە بە زیادکردنی تام: کارامێل، فانێلا، فندق، براونی، کوکیز، یان کارامێلی بێ شەکر",
+   "sizes": [
+    "Pumps"
+   ],
+   "flavors": [
+    {
+     "value": "Cookies",
+     "text": "Cookies"
+    },
+    {
+     "value": "Caramel",
+     "text": "Caramel"
+    },
+    {
+     "value": "Hazelnut",
+     "text": "Hazelnut"
+    },
+    {
+     "value": "Caramel free sugar",
+     "text": "Caramel free sugar"
+    },
+    {
+     "value": "Vanilla",
+     "text": "Vanilla"
+    },
+    {
+     "value": "Brownie",
+     "text": "Brownie"
+    }
+   ],
+   "labels": [
+    "قەبارە هەڵبژێرە",
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 7,
+   "index": 2,
+   "name": "کرێمی وایپد",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777282050908-ChatGPT_Image_Apr_27__2026__12_26_46_PM_XcAybY7w2.png",
+   "tag": null,
+   "prices": [
+    "2,000 IQD"
+   ],
+   "title": "کرێمی وایپد",
+   "desc": "قەیماغێکی سووک کە بە کەمێک شەکر هەڵدەدرێت تا ببێتە شێوەیەکی نەرم ، وەک سەرپۆش بۆ خواردنەوە یان شیرینی",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 7,
+   "index": 3,
+   "name": "شیری بێ چەوری",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777282082320-ChatGPT_Image_Apr_27__2026__12_27_52_PM_yJN0hSy0C.png",
+   "tag": null,
+   "prices": [
+    "0 IQD"
+   ],
+   "title": "شیری بێ چەوری",
+   "desc": "تامی شیری خاو، بەبێ چەوری",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 7,
+   "index": 4,
+   "name": "شيرى فرى لاكتوز",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777282282552-ChatGPT_Image_Apr_27__2026__12_27_52_PM_e6jTsBjiy.png",
+   "tag": null,
+   "prices": [
+    "1,000 IQD"
+   ],
+   "title": "شيرى فرى لاكتوز",
+   "desc": "",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 7,
+   "index": 5,
+   "name": "کۆڵد فووم",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777282768821-ChatGPT_Image_Apr_27__2026__12_32_41_PM_DLvZBs6xa.png",
+   "tag": null,
+   "prices": [
+    "1,000 IQD"
+   ],
+   "title": "کۆڵد فووم",
+   "desc": "کەفێکی سووک و کریمی کە لەسەر خواردنەوە ساردەکان دادەنرێت بۆ دەستکەوتنی تامێکی نەرم و شیرینییەکی سووک",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 8,
+   "index": 0,
+   "name": "ماچای کلاسیک",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1784207825649-ChatGPT_Image_Jul_16__2026__04_05_10_PM_E3soqTgfh.png",
+   "tag": null,
+   "prices": [
+    "5,000 IQD (8oz)",
+    "6,000 IQD (12oz)"
+   ],
+   "noModal": true
+  },
+  {
+   "group": 0,
+   "cat": 8,
+   "index": 1,
+   "name": "مدنایت ماچا",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1784208009517-ChatGPT_Image_Jul_16__2026__04_08_23_PM_Pws5g_o6E.png",
+   "tag": null,
+   "prices": [
+    "5,000 IQD (8oz)",
+    "6,000 IQD (12oz)"
+   ],
+   "noModal": true
+  },
+  {
+   "group": 0,
+   "cat": 8,
+   "index": 2,
+   "name": "بيري ماچا",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1784208046104-ChatGPT_Image_Jul_16__2026__04_06_23_PM_7bGpF7nEP.png",
+   "tag": null,
+   "prices": [
+    "5,000 IQD (8oz)",
+    "6,000 IQD (12oz)"
+   ],
+   "noModal": true
+  },
+  {
+   "group": 0,
+   "cat": 9,
+   "index": 0,
+   "name": "كاكاو كرانش",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1791235820040-IMG_8898_PYhi96eLI.PNG",
+   "tag": "signature",
+   "prices": [
+    "5,000 IQD"
+   ],
+   "title": "كاكاو كرانش",
+   "desc": "شۆکۆلاتەی بەڵجیکی ساردكراو، کرێمەی تايبەت و شیرینی شەکری کارامێڵکراوی بە تامی بوندق",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 0,
+   "name": "بەنانا برێد",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1770457771004-Banana_bread___KBNiB22i.png",
+   "tag": null,
+   "prices": [
+    "3,500 IQD"
+   ],
+   "title": "بەنانا برێد",
+   "desc": "بە تامێکی دەوڵەمەند لە مۆزی سروشتی، بە پێی ڕێسەپی تایبەتی Mars ئامادەکراوە، بۆ پێشکەشکردنی ئەزموونێکی بەتام وچێژبەخش.",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "carbs",
+    "protein",
+    "sugar",
+    "energy",
+    "fat"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 1,
+   "name": "لۆتس چیزکەیک",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1790506372382-IMG_8187_xgnuy0p1G.PNG",
+   "tag": null,
+   "prices": [
+    "5,500 IQD"
+   ],
+   "title": "لۆتس چیزکەیک",
+   "desc": "چیزکێیکی کرێمی نەرم، تێکەڵ بە تامی بسکێتی لۆتوس، بە کۆتایییەکی تام کارامێل.",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "protein",
+    "fat",
+    "sugar",
+    "carbs",
+    "energy"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 2,
+   "name": "چیزکەیکی شیلیک",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1790506630525-IMG_8186_2JNjPvl3-.PNG",
+   "tag": null,
+   "prices": [
+    "5,500 IQD"
+   ],
+   "title": "چیزکەیکی شیلیک",
+   "desc": "چیزکێیکی زۆر نەرم و شەفاف، لەسەری ساوسی شێرینی فسته ق دانراوە بۆ هاوسەنگییەکی تازە و میوەیی.",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "fat",
+    "energy",
+    "sugar",
+    "carbs",
+    "protein"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 3,
+   "name": "نۆتێلا چیزکەیک",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1790506427212-IMG_8188_BOtuzMtwko.PNG",
+   "tag": null,
+   "prices": [
+    "5,500 IQD"
+   ],
+   "title": "نۆتێلا چیزکەیک",
+   "desc": "چیزکێیکی تێکەڵ و هەڵچراو بە شوکۆلاتی نوتێلا بۆ تامێکی تایبەت و خۆش.",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "sugar",
+    "energy",
+    "protein",
+    "carbs",
+    "fat"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 4,
+   "name": "سان سێباستیان",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1790507861045-IMG_8189_2h8cSki8J.PNG",
+   "tag": null,
+   "prices": [
+    "6,000 IQD"
+   ],
+   "title": "سان سێباستیان",
+   "desc": "چیزکێکی فرنی کراو بە پەنیرى کرێمی تایبەت، لەگەڵ تامی ڤانیلا، بە ڕووخسارێکی زێڕینی تایبەت و ناوەڕۆکێکی کرێمی دەوڵەمەند.",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "carbs",
+    "protein",
+    "fat",
+    "energy",
+    "sugar"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 5,
+   "name": "کوکیزی مەحشی بە جوكلت",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1780772060160-6add3790-1503-4195-9479-39d610521558_WDNCQZP6X.png",
+   "tag": null,
+   "prices": [
+    "3,500 IQD"
+   ],
+   "noModal": true
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 6,
+   "name": "كوكيزی مەحشی بە لۆتس",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1780772183408-0c4ea723-079b-4fde-871c-bbba1fd74ae8_AWiNmepBc.png",
+   "tag": null,
+   "prices": [
+    "3,500 IQD"
+   ],
+   "title": "كوكيزی مەحشی بە لۆتس",
+   "desc": "Soft, buttery cookie topped with smooth Lotus cream and crunchy Biscoff crumbs for the ultimate Lotus lover's bite.",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "fat",
+    "sugar",
+    "carbs",
+    "protein",
+    "energy"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 7,
+   "name": "کووکیز دارک",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1770457984752-Dark_cookies__QuTyl4rp1.png",
+   "tag": null,
+   "prices": [
+    "3,500 IQD"
+   ],
+   "title": "کووکیز دارک",
+   "desc": "کوکیزی نەرم بە تامی کاکاۆی قوڵ و بەهێز.",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "protein",
+    "sugar",
+    "fat",
+    "energy",
+    "carbs"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 8,
+   "name": "کووکیز قاوەیی",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1770458034590-Brownies_cookies__gjUfA9ULk.png",
+   "tag": null,
+   "prices": [
+    "3,500 IQD"
+   ],
+   "title": "کووکیز قاوەیی",
+   "desc": "نەرم و لە دەم توانەوە، پڕکراوە لە ناوەڕاستێکی دەوڵەمەندی نوتێلا بە تامێکی خۆشی تایبەت​​​​​​​​​​​​​​​​.",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "protein",
+    "carbs",
+    "energy",
+    "sugar",
+    "fat"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 9,
+   "name": "کووکیز رێد ڤێڵڤێت",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1770458055658-Red_valvet_cookies__xiMRfezFz.png",
+   "tag": null,
+   "prices": [
+    "3,500 IQD"
+   ],
+   "title": "کووکیز رێد ڤێڵڤێت",
+   "desc": "کوکیزی ڕید ڤێڵڤێتی نەرم بە تامی کاکاوێکی تایبەت",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "carbs",
+    "fat",
+    "protein",
+    "energy",
+    "sugar"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 10,
+   "name": "کووکیز نیو یۆرک",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1770458103957-New_york_cookies__DrQJysUXq.png",
+   "tag": null,
+   "prices": [
+    "3,500 IQD"
+   ],
+   "title": "کووکیز نیو یۆرک",
+   "desc": "کوکیزی ئەستوور و نەرمی پڕ لە تامی شۆکڵاتێکی دەوڵەمەند و خۆش",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "protein",
+    "sugar",
+    "energy",
+    "fat",
+    "carbs"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 11,
+   "name": "کرواسۆن بە نۆتێلا",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1770458292277-Nutella_croissant__0dgzq6Ln6.jpg",
+   "tag": null,
+   "prices": [
+    "5,500 IQD"
+   ],
+   "title": "کرواسۆن بە نۆتێلا",
+   "desc": "کڕواسانی کەرەیی پڕکراوە لە نوتێلای کرێمی و دەوڵەمەند و برژاوە تا بووە بە ئاڵتونی تەواو",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "carbs",
+    "fat",
+    "energy",
+    "protein",
+    "sugar"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 12,
+   "name": "کرواسۆن بە فستق",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1770474136252-Pistachio_croissant__5JExPfgst.png",
+   "tag": null,
+   "prices": [
+    "5,500 IQD"
+   ],
+   "title": "کرواسۆن بە فستق",
+   "desc": "چینە کەرەییە ناسکەکان پڕکراون لە کرێمی فستقی لووس بۆ تامێکی دەوڵەمەند و فستقی",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "carbs",
+    "sugar",
+    "energy",
+    "fat",
+    "protein"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 13,
+   "name": "کرواسۆن بە پەنیر",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1770458407605-Cheese_croissant__aKrdeDwkC.jpg",
+   "tag": null,
+   "prices": [
+    "5,500 IQD"
+   ],
+   "title": "کرواسۆن بە پەنیر",
+   "desc": "کڕواسانی کەرەیی کلاسیک پڕکراوە لە پەنیری توانەوە و برژاوە تا بووە بە ئاڵتونی تەواو و تامداری",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "carbs",
+    "fat",
+    "energy",
+    "sugar",
+    "protein"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 14,
+   "name": "کێکی قاوە",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1770459057693-Coffee_cake__4mCgJm2D6.PNG",
+   "tag": null,
+   "prices": [
+    "6,000 IQD"
+   ],
+   "noModal": true
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 15,
+   "name": "کێکی مانگۆ",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1770459157729-Mango_cake__QkUDBGJtB.PNG",
+   "tag": null,
+   "prices": [
+    "6,500 IQD"
+   ],
+   "noModal": true
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 16,
+   "name": "کیکی پڕتەقاڵ",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1770459609623-Orange_cake__YWo8_Yhec.PNG",
+   "tag": null,
+   "prices": [
+    "7,500 IQD"
+   ],
+   "noModal": true
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 17,
+   "name": "ڕێد ڤاڵڤێت",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1770459826801-Red_valvet_cake__pfAzNGIdpS.PNG",
+   "tag": null,
+   "prices": [
+    "6,500 IQD"
+   ],
+   "title": "ڕێد ڤاڵڤێت",
+   "desc": "چینە چینە لە کێکی ڕێد ڤێلفێت، لەگەڵ کرێمی پەنیرێکی دەوڵەمەند و تامێکی سووک و تازەی ترش",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 18,
+   "name": "دانیشی چۆکلێت",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1771407113286-ChatGPT_Image_Feb_18__2026__10_39_42_AM_lTG7_jhAp.png",
+   "tag": null,
+   "prices": [
+    "6,500 IQD"
+   ],
+   "title": "دانیشی چۆکلێت",
+   "desc": "هەویری دانیشی پووک و زێڕینی فرنی کراو، تەواوکراو بە چینێک لە چۆکلێتی دەوڵەمەند",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 19,
+   "name": "کوپ بڕاونی",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1770457814068-Brownie_cup__f9vhdSx1R3.png",
+   "tag": null,
+   "prices": [
+    "5,500 IQD"
+   ],
+   "title": "کوپ بڕاونی",
+   "desc": "براونی چۆکۆلاتییەکی تێر و چڕ، پڕ لە تامی توندی کاکاو و شیرین .",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "energy",
+    "carbs",
+    "fat",
+    "protein",
+    "sugar"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 1,
+   "index": 0,
+   "name": "تورکی ساندویچ (بە توندی سووک)",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1784200224524-IMG_3054.JPG_HTrMFm5XK.jpeg",
+   "tag": null,
+   "prices": [
+    "3,500 IQD"
+   ],
+   "title": "تورکی ساندویچ (بە توندی سووک)",
+   "desc": "پارچەکانی مارتەدێلا لەگەڵ خاس و تەماتەی فرێش بە سۆسی کرێمیی لە ناو نانێکی تایبەت کە ڕۆژانە ئامادە دەکرێت، بۆ تاقیکردنەوەیەکی هاوسەنگ و تامێکی تایبەت و ڕوون",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "fat",
+    "energy",
+    "sat fat",
+    "protein",
+    "carbs",
+    "salt",
+    "fibre",
+    "sugar"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 1,
+   "index": 1,
+   "name": "ساندویچی پەنیری حەلووم",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1784200253232-IMG_3056.JPG_XKFS_66lK.jpeg",
+   "tag": null,
+   "prices": [
+    "3,500 IQD"
+   ],
+   "title": "ساندویچی پەنیری حەلووم",
+   "desc": "سندويچ حلوم سەندەویچێک لە پارچەکانی حەلوومی برژاو لەگەڵ خەسێکی تازە و تەماتەیەکی فرێش پێشکەش دەکرێت،بە سۆسی کرێمی ناو نانی تایبەت کۆتایی پێ دێت، بۆتاقیکردنەوەیەکی ناوازە و لەبیرنەکراو",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "salt",
+    "sugar",
+    "energy",
+    "fat",
+    "fibre",
+    "carbs",
+    "sat fat",
+    "protein"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 1,
+   "index": 2,
+   "name": "سیزەر ساندویچ",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1784200292142-IMG_3055.JPG_5XJ1mwCWY.jpeg",
+   "tag": null,
+   "prices": [
+    "3,500 IQD"
+   ],
+   "title": "سیزەر ساندویچ",
+   "desc": "سندويج سيزر پارچەکانی مریشکی برژاو لەگەڵ خەسێکی تایبەت و پەنیرى پارمێزان رەندراو پێشکەش دەکرێت، کە بە سۆسی سیزەری دەوڵەمەند لە ناو نانی تایبەت کۆتایی پێدێت، بۆ تاقیکردنەوەیەکی هاوسەنگ بە شێوەیەکی کلاسیکی ڕەسەن",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "carbs",
+    "salt",
+    "fat",
+    "protein",
+    "sat fat",
+    "energy",
+    "sugar",
+    "fibre"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 1,
+   "index": 3,
+   "name": "ساندويجى مريشك به سوّسى هانى مه سته رد",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1790095455754-IMG_7290_t8ExMG67v.png",
+   "tag": "premium",
+   "prices": [
+    "3,500 IQD"
+   ],
+   "title": "ساندويجى مريشك به سوّسى هانى مه سته رد",
+   "desc": "پارجه مريشكى نهرم و خوّشركه به ته كنيكى سوڤيد (Sous Vide) لينراوه، ناو نانى جياباتاى برزاو و كرسپى دانراون وبه سوّسى هانى مه سته رد (ههنكوين وخهرده ل) جوانكراون؛ سوسيكى تايبهت كه تامى شيرين وترش به يهكه وه كوده كاته وه.",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "تام هەڵبژێرە"
+   ],
+   "nutrition": [
+    "sat fat",
+    "protein",
+    "carbs",
+    "fibre",
+    "energy",
+    "sugar",
+    "fat"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 1,
+   "index": 4,
+   "name": "زەڵاتەی سیزەر",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1770473581529-Caesar_Salar_Am6ENl_Eq.JPG",
+   "tag": null,
+   "prices": [
+    "7,000 IQD"
+   ],
+   "noModal": true
+  },
+  {
+   "group": 1,
+   "cat": 1,
+   "index": 5,
+   "name": "ماست شووتی گرانۆلا",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1783957081406-DSC04936_1.jpg_y_0-dkMWd-.jpeg",
+   "tag": null,
+   "prices": [
+    "3,500 IQD"
+   ],
+   "noModal": true
+  }
+ ]
+}

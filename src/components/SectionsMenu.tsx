@@ -3,6 +3,7 @@ import type { MouseEvent } from 'react'
 import { LANGS, useLang } from '../i18n'
 import type { Lang } from '../i18n'
 import { openBuild } from '../bus'
+import { FEATURES } from '../features'
 import { useAccount } from '../account'
 import { Notifications } from './Notifications'
 
@@ -19,11 +20,12 @@ export function SectionsMenu({ onClose }: { onClose: () => void }) {
   const links: { href: string; label: string; onClick?: (e: MouseEvent) => void }[] = [
     { href: '#top', label: t('tabHome') },
     { href: '#menu', label: t('cardMenu') },
-    { href: '#gift', label: t('sectionsGift') }, // Title Case labels in the sections (owner 2026-09-14)
-    { href: '#mood-home', label: t('cardBuild'), onClick: (e) => { e.preventDefault(); onClose(); openBuild() } },
-    { href: '#mood-home', label: t('sectionsMood') }, // "Based On Your Mood" (owner 2026-09-14)
-    { href: '#shop', label: t('shopTitle') },
-    { href: '#community', label: t('cardCommunity') },
+    ...(FEATURES.gifts ? [{ href: '#gift', label: t('sectionsGift') }] : []), // Title Case labels in the sections (owner 2026-09-14)
+    ...(FEATURES.barista ? [{ href: '#mood-home', label: t('cardBuild'), onClick: (e: MouseEvent) => { e.preventDefault(); onClose(); openBuild() } }] : []),
+    // "Based On Your Mood" (owner 2026-09-14); with the barista games hidden it opens the mood game itself
+    { href: '#mood-home', label: t('sectionsMood'), onClick: FEATURES.barista ? undefined : (e: MouseEvent) => { e.preventDefault(); onClose(); openBuild() } },
+    ...(FEATURES.shop ? [{ href: '#shop', label: t('shopTitle') }] : []),
+    ...(FEATURES.community ? [{ href: '#community', label: t('cardCommunity') }] : []),
     { href: '#hours', label: t('cardHours') },
   ]
   return (
@@ -39,7 +41,7 @@ export function SectionsMenu({ onClose }: { onClose: () => void }) {
               <small dir="ltr">{a.phone}</small>
             </span>
           </a>
-          <Notifications bell />
+          {(FEATURES.gifts || FEATURES.community) && <Notifications bell />}
         </div>
       ) : (
         <div className="sections-auth">

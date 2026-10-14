@@ -915,6 +915,8 @@ body[data-view='home'] .deck > .slide:first-child::before { content: ''; positio
 .ocard-name { font: 700 1.05rem/1.2 var(--font-display); }
 .ocard-price { font: 700 1rem var(--font-display); white-space: nowrap; }
 .ocard-price small { font-size: 0.7em; font-weight: 600; }
+.ocard-price.two { display: flex; flex-direction: column; align-items: flex-end; gap: 0.1rem; font-size: 0.95rem; line-height: 1.2; }
+.ocard-head:has(.ocard-price.two) { align-items: flex-start; }
 .ocard-line { font-size: 0.88rem; line-height: 1.35; color: rgba(0, 36, 76, 0.85); }
 .ocard-badge { align-self: flex-start; font: 700 0.6rem var(--font-display); letter-spacing: 0.1em; padding: 0.2rem 0.5rem; border-radius: 999px; background: var(--pale); color: var(--navy); margin-top: 0.15rem; }
 .ocard-badge.signature { background: var(--navy); color: #fff; }
@@ -977,11 +979,6 @@ body[data-view='home'] .deck > .slide:first-child::before { content: ''; positio
 }
 
 /* ---- Staff dashboard (#staff): its own page, no customer chrome ---- */
-.staff { min-height: 100dvh; background: #f4f9ff; color: var(--navy); padding: 0 1rem 2rem; max-width: 64rem; margin-inline: auto; }
-.staff-top { display: flex; align-items: center; gap: 0.8rem; padding: 0.8rem 0; border-bottom: 1px solid rgba(0, 47, 109, 0.12); position: sticky; top: 0; background: #f4f9ff; z-index: 5; }
-.staff-top h1 { margin: 0; flex: 1; font-size: 1.05rem; font-weight: 700; }
-.staff-logo .logo-img { height: 30px; width: auto; display: block; }
-.staff-top .lang-select { font: inherit; font-size: 0.8rem; padding: 0.3rem 0.5rem; border-radius: 999px; border: 1.5px solid rgba(0, 47, 109, 0.25); background: #fff; color: var(--navy); }
 .staff-gate { display: flex; flex-direction: column; gap: 0.6rem; max-width: 18rem; margin: 3rem auto; text-align: center; }
 .staff-gate label { font-weight: 600; }
 .staff-gate input { font: inherit; font-size: 1.4rem; letter-spacing: 0.3em; text-align: center; padding: 0.6rem; border-radius: 0.8rem; border: 1.5px solid rgba(0, 47, 109, 0.25); background: #fff; color: var(--navy); }
@@ -1021,7 +1018,137 @@ body[data-view='home'] .deck > .slide:first-child::before { content: ''; positio
 .staff-next { font: inherit; font-weight: 700; font-size: 0.95rem; margin-top: 0.3rem; padding: 0.7rem 1rem; border-radius: 999px; border: none; background: var(--sky-deep); color: #fff; cursor: pointer; }
 .staff-next:hover { filter: brightness(1.05); }
 .staff-empty { text-align: center; color: rgba(0, 47, 109, 0.6); padding: 3rem 1rem; }
-.staff .demo-note { margin-top: 1.5rem; }
+/* Prices & stock */
+.staff-menu { margin-top: 1rem; }
+.sm-tools { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; padding: 0.5rem 0; }
+.sm-tools input[type='search'] { flex: 1 1 14rem; min-width: 0; font: inherit; padding: 0.6rem 0.9rem; border-radius: 999px; border: 1.5px solid rgba(0, 47, 109, 0.25); background: #fff; color: var(--navy); }
+.sm-tools .chip.warn { background: #b3261e; border-color: #b3261e; color: #fff; }
+.sm-cat h2 { font-family: var(--font-serif); font-size: 1.3rem; margin: 1.2rem 0 0.4rem; }
+.sm-cat ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; }
+.sm-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 0.5rem 1rem; align-items: center; background: #fff; border-radius: 0.8rem; padding: 0.55rem 0.8rem; border-inline-start: 4px solid transparent; }
+.sm-row.out { border-inline-start-color: #b3261e; background: #fff7f6; }
+.sm-row.out .sm-name b { color: rgba(0, 47, 109, 0.55); text-decoration: line-through; }
+.sm-name { min-width: 0; display: flex; flex-direction: column; }
+.sm-name b { font-size: 0.92rem; }
+.sm-name small { font-size: 0.72rem; color: #a3561a; }
+.sm-reset { font: inherit; color: var(--navy); background: none; border: none; padding: 0; text-decoration: underline; cursor: pointer; min-height: 0; }
+.sm-prices { display: flex; align-items: center; gap: 0.4rem; }
+.sm-prices > small { font-size: 0.7rem; color: rgba(0, 47, 109, 0.55); }
+.sm-price { display: flex; flex-direction: column; align-items: center; gap: 0.1rem; }
+.sm-price span { font-size: 0.62rem; color: rgba(0, 47, 109, 0.6); }
+.sm-price input { width: 5.2rem; font: 600 0.9rem var(--font-body); text-align: center; padding: 0.45rem 0.3rem; border-radius: 0.6rem; border: 1.5px solid rgba(0, 47, 109, 0.2); color: var(--navy); background: #fff; font-variant-numeric: tabular-nums; }
+.sm-price input:focus { border-color: var(--sky-deep); outline: none; box-shadow: 0 0 0 3px rgba(57, 125, 201, 0.25); }
+.sm-prices.changed input { border-color: var(--caramel); background: #fff8ef; }
+.sm-stock { display: flex; align-items: center; gap: 0.5rem; }
+.sm-stock > span { font-size: 0.72rem; color: rgba(0, 47, 109, 0.65); min-width: 5.5em; text-align: end; }
+.sm-row.out .sm-stock > span { color: #b3261e; font-weight: 600; }
+@media (max-width: 600px) {
+  .sm-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .sm-name { grid-column: 1 / -1; }
+  .sm-stock > span { min-width: 0; }
+}
+/* ---- combo order (ComboFlow.tsx): an offer's steps, then the details, then the tracker ---- */
+.combo-overlay { padding: 0; place-items: end center; }
+.combo { background: var(--cream); color: var(--ink); width: min(100%, 44rem); max-height: 94dvh; height: 94dvh; border-radius: 1.6rem 1.6rem 0 0; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 -18px 60px rgba(3, 30, 70, 0.35); animation: combo-in 0.28s cubic-bezier(0.2, 0.9, 0.3, 1); }
+@keyframes combo-in { from { transform: translateY(8%); opacity: 0; } }
+.combo-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; padding: 1.2rem 1.3rem 0.6rem; }
+.combo-eyebrow { margin: 0; font-family: var(--font-script); font-size: 1.25rem; color: var(--caramel-deep); display: flex; align-items: center; gap: 0.6rem; }
+.combo-eyebrow em { font: 700 0.66rem/1 var(--font-sans); font-style: normal; text-transform: uppercase; letter-spacing: 0.06em; background: var(--navy); color: #fff; border-radius: 999px; padding: 0.3rem 0.6rem; }
+.combo-head h2 { margin: 0.1rem 0 0; font-family: var(--font-serif); font-size: clamp(1.6rem, 5vw, 2.1rem); line-height: 1.1; color: var(--navy); }
+.combo-close { display: grid; place-items: center; width: 2.75rem; height: 2.75rem; flex: none; border: none; border-radius: 50%; background: rgba(0, 47, 109, 0.08); color: var(--navy); cursor: pointer; }
+.combo-steps { list-style: none; margin: 0; padding: 0 1.3rem 0.8rem; display: flex; gap: 0.4rem; overflow-x: auto; border-bottom: 1px solid rgba(0, 36, 76, 0.1); }
+.combo-steps button { font: 600 0.82rem/1 inherit; font-family: inherit; display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.3rem 0.85rem 0.3rem 0.3rem; min-height: 40px; border-radius: 999px; border: 1.5px solid rgba(0, 47, 109, 0.18); background: #fff; color: rgba(0, 47, 109, 0.6); cursor: pointer; white-space: nowrap; }
+[dir='rtl'] .combo-steps button { padding: 0.3rem 0.3rem 0.3rem 0.85rem; }
+.combo-steps button:disabled { cursor: default; }
+.combo-steps button > span { display: grid; place-items: center; width: 1.7rem; height: 1.7rem; border-radius: 50%; background: rgba(0, 47, 109, 0.1); font-size: 0.78rem; }
+.combo-steps button svg { width: 13px; height: 13px; }
+.combo-steps .past button { color: var(--navy); }
+.combo-steps .past button > span { background: var(--sky-deep); color: #fff; }
+.combo-steps .now button { background: var(--navy); border-color: var(--navy); color: #fff; }
+.combo-steps .now button > span { background: #fff; color: var(--navy); }
+.combo-body { flex: 1; overflow-y: auto; padding: 1rem 1.3rem 1.2rem; display: flex; flex-direction: column; gap: 0.9rem; }
+.combo-body h3 { margin: 0.2rem 0 0.5rem; font-family: var(--font-serif); font-size: 1.25rem; color: var(--navy); }
+.combo-hint { margin: 0; font-size: 0.85rem; color: rgba(0, 47, 109, 0.7); }
+.combo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr)); gap: 0.5rem; }
+.combo-item { background: #fff; border: 1.5px solid rgba(0, 36, 76, 0.14); border-radius: 1rem; overflow: hidden; }
+.combo-item.on { border: 2.5px solid var(--sky-deep); background: #f7fbff; }
+.combo-item > button { font: inherit; color: inherit; width: 100%; display: flex; align-items: center; gap: 0.7rem; padding: 0.5rem 0.7rem 0.5rem 0.5rem; border: none; background: transparent; text-align: start; cursor: pointer; min-height: 4.2rem; }
+[dir='rtl'] .combo-item > button { padding: 0.5rem 0.5rem 0.5rem 0.7rem; }
+.combo-tile { display: grid; place-items: center; width: 3.6rem; height: 3.6rem; flex: none; border-radius: 0.8rem; background: #f3ece1; overflow: hidden; }
+.combo-tile img { width: 100%; height: 100%; object-fit: cover; }
+.combo-name { flex: 1; min-width: 0; font-weight: 600; font-size: 0.95rem; color: var(--navy); display: flex; flex-direction: column; }
+.combo-name small { font-weight: 500; font-size: 0.74rem; color: rgba(0, 47, 109, 0.6); align-self: flex-start; }
+.combo-check { display: grid; place-items: center; width: 1.6rem; height: 1.6rem; flex: none; border-radius: 50%; border: 1.5px solid rgba(0, 47, 109, 0.3); color: #fff; }
+.combo-item.on .combo-check { background: var(--sky-deep); border-color: var(--sky-deep); }
+.combo-check svg { width: 13px; height: 13px; }
+.combo-sizes { display: flex; gap: 0.4rem; padding: 0 0.7rem 0.6rem; }
+.combo-sizes button { font: 600 0.82rem inherit; font-family: inherit; flex: 1; min-height: 38px; border-radius: 999px; border: 1.5px solid rgba(0, 47, 109, 0.25); background: #fff; color: var(--navy); cursor: pointer; }
+.combo-sizes button.on { background: var(--navy); border-color: var(--navy); color: #fff; }
+.combo-summary { list-style: none; margin: 0; padding: 0; background: #fff; border-radius: 1rem; border: 1px solid rgba(0, 36, 76, 0.1); }
+.combo-summary li { display: flex; align-items: center; gap: 0.7rem; padding: 0.7rem 0.9rem; border-top: 1px solid rgba(0, 36, 76, 0.08); }
+.combo-summary li:first-child { border-top: none; }
+.combo-summary span { font-size: 0.78rem; color: rgba(0, 47, 109, 0.65); min-width: 4.5rem; }
+.combo-summary b { flex: 1; min-width: 0; color: var(--navy); }
+.combo-summary .link-btn { color: var(--sky-deep); min-height: 0; }
+.combo-form { display: grid; gap: 0.7rem; }
+.combo-form label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.8rem; font-weight: 600; color: var(--navy); }
+.combo-form input, .combo-form textarea { font: inherit; font-size: 1rem; padding: 0.75rem 0.9rem; border-radius: 0.8rem; border: 1.5px solid rgba(0, 47, 109, 0.25); background: #fff; color: var(--navy); resize: vertical; }
+.combo-form input:focus, .combo-form textarea:focus { outline: none; border-color: var(--sky-deep); box-shadow: 0 0 0 3px rgba(57, 125, 201, 0.25); }
+.combo-form ::placeholder { color: rgba(0, 47, 109, 0.4); }
+.combo-bill { margin: 0; display: grid; gap: 0.35rem; }
+.combo-bill div { display: flex; justify-content: space-between; gap: 1rem; font-size: 0.92rem; color: rgba(0, 36, 76, 0.85); }
+.combo-bill dd { margin: 0; font-variant-numeric: tabular-nums; }
+.combo-bill .sum { border-top: 1px solid rgba(0, 36, 76, 0.15); padding-top: 0.45rem; font-weight: 700; font-size: 1.05rem; color: var(--navy); }
+.combo-note { margin: 0; padding: 0.6rem 0.9rem; border-radius: 0.8rem; background: #fde8e6; color: #8a1c14; font-size: 0.88rem; font-weight: 600; }
+.combo-wa { display: flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 999px; border: 1.5px solid var(--navy); color: var(--navy); font-weight: 700; text-decoration: none; }
+.combo-foot { display: flex; gap: 0.6rem; padding: 0.8rem 1.3rem calc(0.8rem + env(safe-area-inset-bottom, 0px)); border-top: 1px solid rgba(0, 36, 76, 0.1); background: var(--cream); }
+.combo-back, .combo-next { font: 700 0.95rem inherit; font-family: inherit; min-height: 52px; border-radius: 999px; cursor: pointer; padding: 0 1.4rem; }
+.combo-back { border: 1.5px solid rgba(0, 47, 109, 0.3); background: transparent; color: var(--navy); }
+.combo-next { flex: 1; border: none; background: var(--navy); color: #fff; text-transform: uppercase; letter-spacing: 0.04em; }
+.combo-next:disabled { background: rgba(0, 36, 76, 0.3); cursor: default; }
+.combo .track { margin: 0; }
+@media (min-width: 761px) {
+  .combo-overlay { place-items: center; padding: 1rem; }
+  .combo { height: min(46rem, 92dvh); border-radius: 1.6rem; }
+}
+@media (prefers-reduced-motion: reduce) { .combo { animation: none; } }
+/* "Share my location" under a delivery address (combo order and checkout), and the staff card's Maps link */
+.share-loc { display: flex; flex-direction: column; gap: 0.4rem; margin: 0; text-align: start; }
+.share-loc-btn { font: 600 0.9rem inherit; font-family: inherit; display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; min-height: 46px; padding: 0 1.1rem; border-radius: 999px; border: 1.5px solid var(--navy); background: #fff; color: var(--navy); cursor: pointer; }
+.share-loc-btn:disabled { opacity: 0.6; cursor: default; }
+.share-loc-btn svg { width: 20px; height: 20px; }
+.share-loc-msg { margin: 0; font-size: 0.8rem; opacity: 0.8; }
+/* location is off: where to switch it on, and Try again (a caramel note, not an error) */
+.share-loc.help { gap: 0.55rem; padding: 0.9rem 1rem; border-radius: 1rem; background: #fff6ea; border: 1.5px solid rgba(219, 134, 58, 0.55); color: #4d2f0f; }
+.share-loc.help p { margin: 0; font-size: 0.86rem; line-height: 1.45; }
+.share-loc.help .share-loc-title { display: flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.95rem; color: var(--navy); }
+.share-loc.help .share-loc-title svg { width: 20px; height: 20px; flex: none; color: var(--caramel-deep); }
+.share-loc.help .share-loc-btn { background: var(--navy); color: #fff; align-self: flex-start; }
+.share-loc.help .share-loc-or { font-size: 0.8rem; opacity: 0.85; }
+.share-loc.got { flex-direction: row; align-items: center; gap: 0.6rem; padding: 0.6rem 0.9rem; border-radius: 0.9rem; background: #e3f4e8; color: #17592b; font-size: 0.88rem; font-weight: 600; }
+.share-loc.got > span:nth-child(2) { flex: 1; min-width: 0; }
+.share-loc.got small { font-weight: 500; }
+.share-loc-tick { display: grid; place-items: center; width: 1.5rem; height: 1.5rem; flex: none; border-radius: 50%; background: #1f7a3a; color: #fff; }
+.share-loc-tick svg { width: 12px; height: 12px; }
+.share-loc.got .link-btn { color: #17592b; border-color: #17592b; font-size: 0.85rem; min-height: 0; }
+.staff-map { display: inline-flex; align-items: center; gap: 0.25rem; margin-inline-start: 0.6rem; font-weight: 700; color: #4b3bb5; white-space: nowrap; }
+.staff-map svg { width: 16px; height: 16px; }
+/* staff order card: the offer and pre-order badges */
+.staff-how.offer { background: var(--caramel); color: #fff; }
+.staff-how.pre { background: var(--navy); color: #fff; }
+
+.toggle-label small { font-weight: 500; color: rgba(0, 47, 109, 0.6); margin-inline-start: 0.4rem; }
+/* from the staff dashboard: an event's promo strip on top of the menu, and an item's nutrition on its page */
+.promo-strip { margin: 0 0 0.6rem; padding: 0.7rem 1rem; border-radius: 0.9rem; background: var(--caramel); color: #fff; font-weight: 600; font-size: 0.92rem; text-align: center; }
+.nutri { display: grid; grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr)); gap: 0.4rem; margin: 0 0 0.9rem; }
+.nutri div { background: rgba(0, 47, 109, 0.05); border-radius: 0.7rem; padding: 0.45rem 0.6rem; }
+.nutri dt { font-size: 0.7rem; color: rgba(0, 47, 109, 0.65); }
+.nutri dd { margin: 0; font-weight: 700; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+.item-label em { font-style: normal; font-weight: 500; color: rgba(0, 47, 109, 0.6); }
+/* sold out (staff): the item page and the barista result cannot be added */
+.cta-btn:disabled { background: rgba(0, 36, 76, 0.35); cursor: default; }
+.sold-note { margin: 0.2rem 0 0; font-size: 0.8rem; font-weight: 600; color: #b3261e; }
+.pill:disabled { opacity: 0.45; cursor: default; }
 
 /* order window: pickup / delivery toggle and the delivery fields */
 .get-toggle { display: flex; background: rgba(255, 255, 255, 0.22); border-radius: 999px; padding: 3px; }
@@ -1037,7 +1164,6 @@ body[data-view='home'] .deck > .slide:first-child::before { content: ''; positio
 .staff-customer a { color: inherit; }
 .staff-address { margin: 0; font-size: 0.85rem; padding: 0.4rem 0.6rem; border-radius: 0.6rem; background: #f4f0ff; border-inline-start: 3px solid #7b61ff; }
 
-.staff-top .chip { min-height: 32px; padding: 0.3rem 0.7rem; font-size: 0.75rem; }
 
 /* "Send a drink to a friend": banner over the menu in gift mode, and the send form inside the item sheet */
 .gift-banner { position: sticky; top: var(--header-h); z-index: 6; display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; margin: 0 0 0.4rem; padding: 0.7rem 1rem; background: var(--navy); color: #fff; font-size: 0.85rem; font-weight: 600; }

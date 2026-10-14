@@ -29,7 +29,7 @@ const findItem = (name: string) => {
 const LANG_NAME: Record<Lang, string> = { en: 'English', ar: 'formal Modern Standard Arabic', ku: 'Sorani Kurdish' }
 
 export function moodPrompt(text: string, lang: Lang, hour: number): string {
-  const menu = drinkItems().map((i) => `${i.name} [${i.cat}] ${Array.isArray(i.price) ? i.price.join('/') : i.price} IQD`).join('\n')
+  const menu = drinkItems().filter((i) => !i.soldOut).map((i) => `${i.name} [${i.cat}] ${Array.isArray(i.price) ? i.price.join('/') : i.price} IQD`).join('\n')
   return [
     'You are the friendly barista of Mars CoffeeHouse (Erbil, Iraq). A customer tells you how they feel; pick ONE drink for them.',
     `Local time: ${hour}:00. Reply in ${LANG_NAME[lang]}.`,
@@ -118,7 +118,7 @@ const SWEET_1 = new Set([
 export const sweetnessOf = (name: string): Sweet => (SWEET_2.has(name) ? 2 : SWEET_1.has(name) ? 1 : 0)
 /** the sweet offered with a drink that is less sweet than asked: [a little, sweet], by drink family (owner, 2026-09-29) */
 const SWEET_SIDE: Record<'coffee' | 'matcha' | 'fresh', [string, string]> = {
-  coffee: ['Banana Bread', 'San Sebastian'], matcha: ['Croissant Pistachio', 'Cheesecake Strawberry'], fresh: ['Cookies New York', 'Mango Mousse Cake'],
+  coffee: ['Banana Bread', 'San Sebastian'], matcha: ['Croissant Pistachio', 'Cheesecake Pistachio'], fresh: ['Cookies New York', 'Mango Mousse Cake'],
 }
 const familyOf = (cat: string) => (['coffeeMore', 'coffeeMilk', 'coldCoffee'].includes(cat) ? 'coffee' : cat === 'matcha' ? 'matcha' : 'fresh')
 /** what the asked sweetness does to one drink: made less sweet / no sugar, or made as usual with a bakery sweet offered */
@@ -170,7 +170,10 @@ export function gameOptions(a: Set<GameAnswer>, lang: Lang, hour: number): { ite
   const milk = a.has('milknone') ? 'none' : 'with'
   const sweet: Sweet = a.has('sweetnone') ? 0 : a.has('sweetyes') ? 2 : 1
   const names = POOLS[set][going]![`${hot ? 'hot' : 'cold'}${milk === 'none' ? 'No' : 'Milk'}` as Group4]
-  const pool = names.map((n) => drinkItems().find((i) => i.name === n)).filter((i): i is NonNullable<typeof i> => !!i)
+  const path = names.map((n) => drinkItems().find((i) => i.name === n)).filter((i): i is NonNullable<typeof i> => !!i)
+  // drinks the staff marked out of stock are left out (all of them out: the path as it is, the item page says sold out)
+  const inStock = path.filter((i) => !i.soldOut)
+  const pool = inStock.length ? inStock : path
   if (!pool.length) return null
   const d = (i: MenuItem) => Math.abs(sweetnessOf(i.name) - sweet)
   const sorted = [...pool].sort((x, y) => d(x) - d(y))

@@ -1,0 +1,2267 @@
+{
+ "branch": "kirkuk",
+ "lang": "ar",
+ "readAt": "2026-10-13T02:16:15.604Z",
+ "pageLang": "ar",
+ "dir": "",
+ "log": [],
+ "cats": [
+  {
+   "group": 0,
+   "groupName": "المشروبات",
+   "index": 0,
+   "name": "القهوة و أكثر"
+  },
+  {
+   "group": 0,
+   "groupName": "المشروبات",
+   "index": 1,
+   "name": "قهوة مع الحليب"
+  },
+  {
+   "group": 0,
+   "groupName": "المشروبات",
+   "index": 2,
+   "name": "القهوة المثلجة"
+  },
+  {
+   "group": 0,
+   "groupName": "المشروبات",
+   "index": 3,
+   "name": "خيارات الانتعاش"
+  },
+  {
+   "group": 0,
+   "groupName": "المشروبات",
+   "index": 4,
+   "name": "ميلك شيك"
+  },
+  {
+   "group": 0,
+   "groupName": "المشروبات",
+   "index": 5,
+   "name": "الموهيتو"
+  },
+  {
+   "group": 0,
+   "groupName": "المشروبات",
+   "index": 6,
+   "name": "السموذي"
+  },
+  {
+   "group": 0,
+   "groupName": "المشروبات",
+   "index": 7,
+   "name": "الاضافات"
+  },
+  {
+   "group": 0,
+   "groupName": "المشروبات",
+   "index": 8,
+   "name": "ماتشا مارس"
+  },
+  {
+   "group": 0,
+   "groupName": "المشروبات",
+   "index": 9,
+   "name": "مشروبات الخريف"
+  },
+  {
+   "group": 1,
+   "groupName": "الطعام",
+   "index": 0,
+   "name": "المخبوزات"
+  },
+  {
+   "group": 1,
+   "groupName": "الطعام",
+   "index": 1,
+   "name": "السلطة & الساندويش"
+  }
+ ],
+ "items": [
+  {
+   "group": 0,
+   "cat": 0,
+   "index": 0,
+   "name": "أمريكانو",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770545103453-ChatGPT_Image_Feb_8__2026__01_04_52_PM_-VaEFm0G9.png",
+   "tag": "top_seller",
+   "prices": [
+    "2,500 IQD (8oz)",
+    "3,000 IQD (12oz)"
+   ],
+   "noModal": true
+  },
+  {
+   "group": 0,
+   "cat": 0,
+   "index": 1,
+   "name": "اسبريسو",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770546007240-ChatGPT_Image_Feb_8__2026__01_19_52_PM_ITrBU-bHF.png",
+   "tag": "premium",
+   "prices": [
+    "2,000 IQD"
+   ],
+   "title": "اسبريسو",
+   "desc": "جرعة إسبريسو مركّزة بطعم غني وقوام ناعم.",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "energy",
+    "caffeine",
+    "fibre",
+    "fat",
+    "carbs",
+    "protein"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 0,
+   "index": 2,
+   "name": "اسبريسو دوبيو",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770545906307-ChatGPT_Image_Feb_8__2026__01_12_10_PM_3EabD5E4p.png",
+   "tag": null,
+   "prices": [
+    "2,500 IQD"
+   ],
+   "title": "اسبريسو دوبيو",
+   "desc": "استخلاص مزدوج يمنح عمقًا مكثفًا وتجربة قهوة مباشرة ونكهة مركزة",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "energy",
+    "sugar",
+    "carbs",
+    "protein",
+    "fibre",
+    "caffeine",
+    "fat"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 0,
+   "index": 3,
+   "name": "القهوة التركية",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770484997427-05._Turkish_coffee_gpTXLh1tyd.png",
+   "tag": null,
+   "prices": [
+    "2,500 IQD"
+   ],
+   "title": "القهوة التركية",
+   "desc": "قهوة مطحونة بدرجة ناعمة جداً تُخمّر ببطء لتقديم تجربة غنية بطعم عميق وقوام كثيف ورغوة مخملية",
+   "sizes": [],
+   "flavors": [
+    {
+     "value": "Sweet",
+     "text": "Sweet"
+    },
+    {
+     "value": "Medium",
+     "text": "Medium"
+    },
+    {
+     "value": "Plain",
+     "text": "Plain"
+    }
+   ],
+   "labels": [
+    "اختر النوع"
+   ],
+   "nutrition": [
+    "sugar",
+    "energy",
+    "carbs",
+    "fibre",
+    "protein",
+    "caffeine",
+    "fat"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 0,
+   "index": 4,
+   "name": "قهوة تركية دبل",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770485033013-05._Turkish_coffee_tLxbBPehf.png",
+   "tag": null,
+   "prices": [
+    "3,500 IQD"
+   ],
+   "title": "قهوة تركية دبل",
+   "desc": "قهوة تركية مُحضّرة بجرعة مضاعفة لعشّاق الطعم القوي، بقوام كثيف ونكهة عميقة تدوم",
+   "sizes": [],
+   "flavors": [
+    {
+     "value": "Plain",
+     "text": "Plain"
+    },
+    {
+     "value": "Medium",
+     "text": "Medium"
+    },
+    {
+     "value": "Sweet",
+     "text": "Sweet"
+    }
+   ],
+   "labels": [
+    "اختر النوع"
+   ],
+   "nutrition": [
+    "energy",
+    "caffeine",
+    "fibre",
+    "fat",
+    "carbs",
+    "protein"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 0,
+   "index": 5,
+   "name": "القهوة المقطرة",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777199764469-drip_coffee_45_degree_6TfZDlJoF.jpg",
+   "tag": null,
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "title": "القهوة المقطرة",
+   "desc": "تحضير طازج بعناية ليكشف نقاء الطعم وتوازن النكهة، مع لمسة ختامية لطيفة تترك إحساساً دافئاً ومريحاً",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "caffeine",
+    "protein",
+    "carbs",
+    "energy"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 0,
+   "index": 6,
+   "name": "شاي كرك",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770549249687-ChatGPT_Image_Feb_8__2026__02_13_54_PM_ZUlP0uWvj.png",
+   "tag": "signature",
+   "prices": [
+    "3,000 IQD (8oz)",
+    "4,000 IQD (12oz)"
+   ],
+   "title": "شاي كرك",
+   "desc": "شاي مارس المميّز يُحضَّر من توليفة توابل مختارة بعناية فائقة، تتداخل مع الحليب في بناء متقن يكشف عمق النكهة ودفء طبقاتها المستوحاة من روح الكرك الكلاسيكية. تجربة راقية تحمل بصمة شرقية أصيلة، وتترك حضورًا هادئًا ومترفًا يمتد أثره بعد آخر ارتشاف.",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "caffeine",
+    "sat fat",
+    "fat",
+    "protein",
+    "carbs",
+    "energy",
+    "sugar",
+    "salt",
+    "fibre"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 0,
+   "index": 7,
+   "name": "شوكولاتة داكنة ساخنة",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770547348116-ChatGPT_Image_Feb_8__2026__01_42_20_PM_W9ZQKkkI8.png",
+   "tag": "signature",
+   "prices": [
+    "4,000 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "title": "شوكولاتة داكنة ساخنة",
+   "desc": "شوكولاتة ساخنة بقوام ممتلئ تُحضَّر من كاكاو مختار بعناية، تُتوَّج بكريمة فاخرة تضيف طبقة ناعمة تذوب ببطء وتحوّل كل رشفة إلى متعة غنية ومدلّلة بطابع لا يُنسى",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "fat",
+    "caffeine",
+    "protein",
+    "sugar",
+    "sat fat",
+    "fibre",
+    "energy",
+    "carbs",
+    "salt"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 0,
+   "index": 8,
+   "name": "لوتس ساخن",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770548580381-ChatGPT_Image_Feb_8__2026__02_02_43_PM_Hs7InuKN8.png",
+   "tag": null,
+   "prices": [
+    "4,000 IQD (8oz)",
+    "5,000 IQD (12oz)"
+   ],
+   "title": "لوتس ساخن",
+   "desc": "حليب دافئ بقوام حريري يندمج مع كريمة لوتس الغنية ليصنع طابعًا بسكويتيًا محمّصًا بطعم فاخر، ينتهي بإحساس ناعم ومُرضٍ يثبت حضوره بهدوء.",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "sat fat",
+    "fat",
+    "carbs",
+    "protein",
+    "energy",
+    "caffeine",
+    "salt",
+    "sugar",
+    "fibre"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 0,
+   "index": 9,
+   "name": "فستق ساخن",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770548740541-ChatGPT_Image_Feb_8__2026__02_05_31_PM_N9UFWEKTs.png",
+   "tag": null,
+   "prices": [
+    "4,000 IQD (8oz)",
+    "5,000 IQD (12oz)"
+   ],
+   "title": "فستق ساخن",
+   "desc": "حليب مبخّر يلتقي بنكهة فستق فاخرة ليقدّم طابعاً جوزياً ناعماً بقوام مريح، بطعم ممتلئ يحضر بثقة من دون ما يطغى أو يرهق الحواس",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "sat fat",
+    "fat",
+    "caffeine",
+    "energy",
+    "sugar",
+    "fibre",
+    "protein",
+    "carbs",
+    "salt"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 0,
+   "index": 10,
+   "name": "كولد برو",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777199823664-cold_brew_front_T3iBxPlTP.jpg",
+   "tag": "premium",
+   "prices": [
+    "3,500 IQD"
+   ],
+   "title": "كولد برو",
+   "desc": "قهوة مُحضّرة بالاستخلاص البارد البطيء لتقديم تجربة ناعمة بطبقات غنية من النكهة، ولمسة انتعاش نظيفة مع قوة الكافيين",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "carbs",
+    "caffeine",
+    "energy",
+    "protein"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 1,
+   "index": 0,
+   "name": "لاتيه كراميل",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777374155697-Hot_classic_latte__v5dXoulGc.jpg",
+   "tag": "top_seller",
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "title": "لاتيه كراميل",
+   "desc": "إسبريسو ناعم ممزوج مع حليب كريمي ونكهة كراميل غنية، يعلوه طبقة حريرية من الرغوة",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "caffeine",
+    "energy",
+    "carbs",
+    "fat",
+    "sugar",
+    "protein"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 1,
+   "index": 1,
+   "name": "كابتشينو كراميل",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777374169925-Cappuccino_xaN185WRjl.jpg",
+   "tag": null,
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "title": "كابتشينو كراميل",
+   "desc": "إسبريسو غني ممزوج مع حليب مبخر ونكهة كراميل حلوة، يكتمل بطبقة كثيفة وكريمية من الرغوة",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "protein",
+    "sugar",
+    "carbs",
+    "fat",
+    "energy",
+    "caffeine"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 1,
+   "index": 2,
+   "name": "كورتادو",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770543565416-ChatGPT_Image_Feb_8__2026__12_39_06_PM_FPTH_qukh.png",
+   "tag": "premium",
+   "prices": [
+    "3,500 IQD"
+   ],
+   "title": "كورتادو",
+   "desc": "مزيج دقيق من شوتي ريستريتو وحليب حريري دافئ، يُقدَّم بحجم مثالي ليجمع بين العمق والقوة والنعومة في كوب واحد",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "energy",
+    "sat fat",
+    "sugar",
+    "fibre",
+    "salt",
+    "caffeine",
+    "protein",
+    "fat",
+    "carbs"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 1,
+   "index": 3,
+   "name": "لاتية كلاسك",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770543820199-ChatGPT_Image_Feb_8__2026__12_43_31_PM_0w6Zf4vIK.png",
+   "tag": null,
+   "prices": [
+    "3,000 IQD (8oz)",
+    "4,000 IQD (12oz)"
+   ],
+   "title": "لاتية كلاسك",
+   "desc": "توازن أنيق بين الإسبريسو الداكن والحليب المبخّر، تتوّجه رغوة خفيفة لتمنح كوباً دافئاً بطابع حليبي مخملي ومذاق مريح",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "energy",
+    "carbs",
+    "sugar",
+    "protein",
+    "caffeine",
+    "fibre",
+    "fat"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 1,
+   "index": 4,
+   "name": "كلاسك كابتشينو",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770544806581-ChatGPT_Image_Feb_8__2026__12_59_55_PM_b0nXbAhTB.png",
+   "tag": null,
+   "prices": [
+    "3,000 IQD (8oz)",
+    "4,000 IQD (12oz)"
+   ],
+   "title": "كلاسك كابتشينو",
+   "desc": "مزيج متوازن من الإسبريسو الداكن والحليب المبخّر، تتوّجه طبقة رغوة عميقة تضيف نعومة مخملية لكل رشفة.",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "salt",
+    "fibre",
+    "protein",
+    "sugar",
+    "sat fat",
+    "energy",
+    "carbs",
+    "fat",
+    "caffeine"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 1,
+   "index": 5,
+   "name": "لاتية مع نكهة",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770543820199-ChatGPT_Image_Feb_8__2026__12_43_31_PM_0w6Zf4vIK.png",
+   "tag": "premium",
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "title": "لاتية مع نكهة",
+   "desc": "لاتيه ساخن ناعم محضر من إسبريسو غني وحليب مبخر كريمي، متوفر بعدة نكهات تناسب جميع الأذواق.",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [
+    {
+     "value": "Vanilla",
+     "text": "Vanilla"
+    },
+    {
+     "value": "Cookies",
+     "text": "Cookies"
+    },
+    {
+     "value": "Brownie",
+     "text": "Brownie"
+    },
+    {
+     "value": "Caramel free suger",
+     "text": "Caramel free suger"
+    },
+    {
+     "value": "Hazelnut",
+     "text": "Hazelnut"
+    }
+   ],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "energy",
+    "sat fat",
+    "sugar",
+    "fibre",
+    "salt",
+    "protein",
+    "fat",
+    "caffeine",
+    "carbs"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 1,
+   "index": 6,
+   "name": "كابتشينو مع نكهة",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770544806581-ChatGPT_Image_Feb_8__2026__12_59_55_PM_b0nXbAhTB.png",
+   "tag": null,
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "title": "كابتشينو مع نكهة",
+   "desc": "مزيج متوازن من الإسبريسو الداكن والحليب المبخّر، تتوّجه طبقة رغوة عميقة تضيف نعومة مخملية لكل رشفة.",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [
+    {
+     "value": "Brownie",
+     "text": "Brownie"
+    },
+    {
+     "value": "Vanilla",
+     "text": "Vanilla"
+    },
+    {
+     "value": "Caramel free suger",
+     "text": "Caramel free suger"
+    },
+    {
+     "value": "Cookies",
+     "text": "Cookies"
+    },
+    {
+     "value": "Hazelnut",
+     "text": "Hazelnut"
+    }
+   ],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "fat",
+    "energy",
+    "caffeine",
+    "fibre",
+    "sugar",
+    "carbs",
+    "protein"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 1,
+   "index": 7,
+   "name": "سبانش لاتية ساخن",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770544668431-ChatGPT_Image_Feb_8__2026__12_57_32_PM_MjpjsNsB-.png",
+   "tag": null,
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "title": "سبانش لاتية ساخن",
+   "desc": "قهوة مركّزة تمتزج بحليب دافئ ولمسة حليب مكثّف ناعمة، لتقدّم كوباً غنيّ القوام بطابع حلو متوازن ولمذاق يترك أثره بهدوء ولوقت طويل",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "energy",
+    "fat",
+    "protein",
+    "sugar",
+    "carbs",
+    "fibre",
+    "caffeine"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 1,
+   "index": 8,
+   "name": "موكا بلشوكولاتة الداكنة",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770544005115-ChatGPT_Image_Feb_8__2026__12_46_19_PM_s1GlPMp1p.png",
+   "tag": null,
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "title": "موكا بلشوكولاتة الداكنة",
+   "desc": "مزيج غني من الإسبريسو وصلصة الشوكولاتة الداكنة والحليب المبخّر، تتوّجه كريمة مخفوقة ناعمة لتجربة دافئة مترفة",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "carbs",
+    "energy",
+    "fat",
+    "sat fat",
+    "salt",
+    "caffeine",
+    "protein",
+    "sugar",
+    "fibre"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 1,
+   "index": 9,
+   "name": "موكا بلشكولاتة البيضاء",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770544358842-ChatGPT_Image_Feb_8__2026__12_52_31_PM_aMV3oyAoM.png",
+   "tag": null,
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "title": "موكا بلشكولاتة البيضاء",
+   "desc": "تجربة ناعمة بطابع كريمي غني، تمتزج فيها القهوة المركّزة مع شوكولاتة بيضاء مخملية، تضيف توازناً دافئاً ومذاقاً مترفاً من أول رشفة",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "energy",
+    "fat",
+    "sugar",
+    "fibre",
+    "caffeine",
+    "salt",
+    "sat fat",
+    "carbs",
+    "protein"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 1,
+   "index": 10,
+   "name": "فلات وايت",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1770543410745-ChatGPT_Image_Feb_8__2026__12_36_38_PM_BUcE9o-dyu.png",
+   "tag": null,
+   "prices": [
+    "3,500 IQD"
+   ],
+   "title": "فلات وايت",
+   "desc": "مزيج أنيق من شوتي إسبريسو وحليب مبخّر بقوام مخملي، يبرز قوة القهوة دون أن يطغى عليها الحليب",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "carbs",
+    "salt",
+    "energy",
+    "fat",
+    "caffeine",
+    "sugar",
+    "fibre",
+    "sat fat",
+    "protein"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 2,
+   "index": 0,
+   "name": "لاتية كراميل مثلج",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777374685037-ice_classic_late_front_Hm_d7Qw9w.jpg",
+   "tag": "top_seller",
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "title": "لاتية كراميل مثلج",
+   "desc": "إسبريسو بارد ممزوج مع حليب بارد ونكهة كراميل غنية، يُقدم مع الثلج ليمنحك طعماً منعشاً وسلساً",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "carbs",
+    "sugar",
+    "protein",
+    "caffeine",
+    "energy",
+    "fat"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 2,
+   "index": 1,
+   "name": "آيس امريكانو",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777199648538-ice_americano_front_view_DWZy20nsZ.jpg",
+   "tag": null,
+   "prices": [
+    "2,500 IQD (8oz)",
+    "3,000 IQD (12oz)"
+   ],
+   "title": "آيس امريكانو",
+   "desc": "شوتات إسبريسو تُستكمل بالماء لتشكّل طبقة خفيفة من الكريمة، ثم تُقدَّم فوق الثلج لتمنحك كوباً غنياً بطبقات عميقة من النكهة وتفاصيل دقيقة ومتوازنة",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "energy",
+    "sugar",
+    "fat",
+    "carbs",
+    "fibre",
+    "caffeine",
+    "protein"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 2,
+   "index": 2,
+   "name": "سبانش لاتية مارس",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1784205474224-DSC06721_Lo4kF5FKQ.jpg",
+   "tag": "signature",
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "title": "سبانش لاتية مارس",
+   "desc": "وصفة أكثر كريمية وغنى، ابتكرناها بعناية لتكون توقيع مارس المميز",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "sat fat",
+    "energy",
+    "fat",
+    "fibre",
+    "protein",
+    "carbs",
+    "caffeine",
+    "sugar"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 2,
+   "index": 3,
+   "name": "سبانش لاتية مثلج",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777199658186-ice_spanish_late_front_view_fJBO3asUR.jpg",
+   "tag": null,
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "title": "سبانش لاتية مثلج",
+   "desc": "تركيبة باردة مخملية تجمع عمق القهوة مع نعومة الحليب وحلاوة مدروسة في تجربة فاخرة تستحق التكرار.",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "sat fat",
+    "salt",
+    "energy",
+    "fat",
+    "caffeine",
+    "sugar",
+    "protein",
+    "carbs"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 2,
+   "index": 4,
+   "name": "لاتية مثلج",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777199668331-ice_late_front_view_WGhJgrAy5n.jpg",
+   "tag": null,
+   "prices": [
+    "3,000 IQD (8oz)",
+    "4,000 IQD (12oz)"
+   ],
+   "title": "لاتية مثلج",
+   "desc": "توليفة باردة تجمع عمق الإسبريسو مع نعومة الحليب في كوب منعش بطابع مخملي يليق بكل وقت",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "energy",
+    "sugar",
+    "protein",
+    "caffeine",
+    "carbs",
+    "fat"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 2,
+   "index": 5,
+   "name": "لاتية مثلج مع نكهة",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777199638664-ice_late_front_view_XYiJA-X48.jpg",
+   "tag": "premium",
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "title": "لاتية مثلج مع نكهة",
+   "desc": "توليفة باردة تجمع عمق الإسبريسو مع نعومة الحليب في كوب منعش بطابع مخملي يليق بكل وقت",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [
+    {
+     "value": "Brownie",
+     "text": "Brownie"
+    },
+    {
+     "value": "caramel free suger",
+     "text": "caramel free suger"
+    },
+    {
+     "value": "Hazelnut",
+     "text": "Hazelnut"
+    },
+    {
+     "value": "Vanilla",
+     "text": "Vanilla"
+    },
+    {
+     "value": "Cookies",
+     "text": "Cookies"
+    }
+   ],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "fibre",
+    "salt",
+    "sugar",
+    "caffeine",
+    "energy",
+    "protein",
+    "carbs",
+    "sat fat",
+    "fat"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 2,
+   "index": 6,
+   "name": "موكا بلشوكولاتة الداكنة",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777199681580-Mocha_Dark_Iced_Front_rzT2x5QWW.jpg",
+   "tag": null,
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "title": "موكا بلشوكولاتة الداكنة",
+   "desc": "مشروب بارد بتوقيع فاخر، تتقاطع فيه قوة القهوة مع أناقة الشوكولاتة الداكنة في تجربة ناعمة ومتوازنة",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "sat fat",
+    "protein",
+    "energy",
+    "carbs",
+    "caffeine",
+    "fat",
+    "salt",
+    "fibre",
+    "sugar"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 2,
+   "index": 7,
+   "name": "موكا بلشوكولاتة البيضاء",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777199696490-ice_mocha_white_front_ThhckChFW.jpg",
+   "tag": null,
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "title": "موكا بلشوكولاتة البيضاء",
+   "desc": "مزيج بارد ينساب فيه الإسبريسو مع شوكولاتة بيضاء فاخرة وحليب مُثلَّج في قوام انسيابي خفيف، وتعلوه طبقة كريمية رقيقة تمنح المشروب لمسة مترفة ونهاية أنيقة",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "protein",
+    "carbs",
+    "salt",
+    "fat",
+    "sat fat",
+    "sugar",
+    "caffeine",
+    "energy"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 3,
+   "index": 0,
+   "name": "شاي الخوخ المثلج",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777196715023-ice_peach_tea_front_view_yFLz20Tuz.jpg",
+   "tag": "top_seller",
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "title": "شاي الخوخ المثلج",
+   "desc": "شاي مُبرّد تتداخل فيه روائح الخوخ الناعمة بطبقات هادئة، ليقدّم حلاوة متزنة وطابعًا منعشًا مصقولًا يُشرب بسلاسة ويترك إحساسًا أنيقاً",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "energy",
+    "caffeine",
+    "carbs",
+    "sugar"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 3,
+   "index": 1,
+   "name": "شاي المانجو مع الخوخ المثلج",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777196727791-ice_tea_mango___peach_front_Eci6ejZeY.jpg",
+   "tag": null,
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "title": "شاي المانجو مع الخوخ المثلج",
+   "desc": "شاي مثلّج بنبرة مشرقة يتداخل مع نفحات مانگو ناعمة، ليقدّم إحساسًا استوائيًا واضح المعالم وانتعاشًا صافيًا ينتهي بلمسة خفيفة ومنعشة تشرب على مهل",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "caffeine",
+    "energy",
+    "sugar",
+    "carbs"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 3,
+   "index": 2,
+   "name": "عصير برتقال ورمان الطازج",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777196741231-refresh_orange___pomegranate_front_view_on6NfeVuY.jpg",
+   "tag": "signature",
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "title": "عصير برتقال ورمان الطازج",
+   "desc": "توليفة دقيقة تجمع إشراقة البرتقال مع حدّة الرمان الطبيعية، لتقدّم عصيراً جريئاً بطابع منعش وحيوية واضحة، يُختَم بإحساس صافٍ يترك أثره بخفة وأناقة",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "energy",
+    "fibre",
+    "caffeine",
+    "carbs",
+    "sugar"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 3,
+   "index": 3,
+   "name": "طاقة +",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777196754341-Mexican_Red_bull_Front_dCrl5YZ0Q.jpg",
+   "tag": null,
+   "prices": [
+    "4,000 IQD"
+   ],
+   "title": "طاقة +",
+   "desc": "طاقة قوية بنكهة واضحة وانتعاش فوري",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "salt",
+    "energy",
+    "sugar",
+    "caffeine",
+    "carbs"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 3,
+   "index": 4,
+   "name": "عصير البرتقال الطازج",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1784269618378-IMG_6891_I3zr-h65d.jpeg",
+   "tag": null,
+   "prices": [
+    "3,000 IQD"
+   ],
+   "title": "عصير البرتقال الطازج",
+   "desc": "عصير برتقال طبيعي يُحضَّر من برتقال طازج، بنكهة منعشة وطعم متوازن",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "fat",
+    "protein",
+    "salt",
+    "energy",
+    "fibre",
+    "sat fat",
+    "sugar",
+    "carbs"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 4,
+   "index": 0,
+   "name": "ميلك شيك لوتس",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777196561218-milk_shake_lotus_front_sHMz9Crmd.jpg",
+   "tag": "top_seller",
+   "prices": [
+    "5,000 IQD (8oz)",
+    "6,000 IQD (12oz)"
+   ],
+   "title": "ميلك شيك لوتس",
+   "desc": "ميلك شيك يُحضَّر من صوص اللوتس ليقدّم طابعًا بسكويتيًا محمّصًا بعمق واضح، مع قوام كثيف وانسياب ناعم يمنح إحساسًا مترفًا يدوم حتى آخر رشفة",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 4,
+   "index": 1,
+   "name": "ميلك شيك فستق",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777196573615-milk_shake_pistachio_front_1JBqLlavt.jpg",
+   "tag": null,
+   "prices": [
+    "5,000 IQD (8oz)",
+    "6,000 IQD (12oz)"
+   ],
+   "title": "ميلك شيك فستق",
+   "desc": "ميلك شيك أنيق مُشبَع بنكهة الفستق، يقدّم عمقًا جوزيًا واضح المعالم مع ختام لطيف ومتزن يترك أثرًا هادئًا ومترفًا.",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 4,
+   "index": 2,
+   "name": "ميلك شيك اوريو",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777196588248-milk_shake_oreo_front_JCrrL6ZEb.jpg",
+   "tag": null,
+   "prices": [
+    "5,000 IQD (8oz)",
+    "6,000 IQD (12oz)"
+   ],
+   "title": "ميلك شيك اوريو",
+   "desc": "ميلك شيك كلاسيكي تُدمج فيه قطع أوريو المطحونة بعناية، ليقدّم مزيجًا متناغمًا من نكهة الفانيليا الناعمة ولمسات شوكولاتة خفيفة تضيف تباينًا لطيفًا في القوام والطعم.",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 4,
+   "index": 3,
+   "name": "ميلك شيك نوتيلا",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777196606160-milk_shake_nutella_front_72mWTSRVA.jpg",
+   "tag": null,
+   "prices": [
+    "5,000 IQD (8oz)",
+    "6,000 IQD (12oz)"
+   ],
+   "title": "ميلك شيك نوتيلا",
+   "desc": "مزيج مترف يجمع الحليب مع نوتيلا ليكشف طبقات شوكولاتة داكنة ولمسة بندق واضحة، في تركيبة غنية تنساب بسلاسة وتترك إحساسًا مخمليًا طويل الأثر",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 4,
+   "index": 4,
+   "name": "ميلك شيك فراولة",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777196618845-Milkshake_strawberry_front_CrrjIywvx.jpg",
+   "tag": null,
+   "prices": [
+    "5,000 IQD (8oz)",
+    "6,000 IQD (12oz)"
+   ],
+   "title": "ميلك شيك فراولة",
+   "desc": "ميلك شيك بطابع كريمي ممزوج بنكهة الفراولة، يقدّم حلاوة خفيفة متزنة ورشفة باردة سلسة تمنح إحساسًا منعشًا وواضح المعالم",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 4,
+   "index": 5,
+   "name": "ميلك شيك راشي",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777196630285-milk_shake_rashi_front_M2LL6n9hP.jpg",
+   "tag": "signature",
+   "prices": [
+    "5,000 IQD (8oz)",
+    "6,000 IQD (12oz)"
+   ],
+   "title": "ميلك شيك راشي",
+   "desc": "ابتكار حصري من مارس، يُقدَّم كتجربة راقية تُجسّد دقّة الاختيار وأناقة التحضير، بتوليفة نكهات مصقولة وقوام حريري متوازن وحلاوة تُبنى برفق، ليمنح مشروبًا خفيف الإحساس وعميق الأثر يمتد حضوره حتى آخر ارتشاف",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 5,
+   "index": 0,
+   "name": "فراولة موهيتو",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777197114961-Mojito_Strawberry_Front_14VM1dO75.jpg",
+   "tag": "top_seller",
+   "prices": [
+    "3,000 IQD (8oz)",
+    "4,000 IQD (12oz)"
+   ],
+   "title": "فراولة موهيتو",
+   "desc": "توازن دقيق بين رقة الفراولة وإشراقة الحمضيات، يُختَم بطابع فاكهي مصقول وانيق المذاق",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "fibre",
+    "caffeine",
+    "sugar",
+    "carbs",
+    "energy"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 5,
+   "index": 1,
+   "name": "ركي موهيتو",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777197127805-Mojito_Watermelon_Front_9nKwdeiPr.jpg",
+   "tag": null,
+   "prices": [
+    "3,000 IQD (8oz)",
+    "4,000 IQD (12oz)"
+   ],
+   "title": "ركي موهيتو",
+   "desc": "نكهة الركَي الطري ينسجم مع وخزة لايم خفيفة ليمنح المشروب روحًا صيفية صافية وطعمًا باردًا ينعش الحواس بهدوء",
+   "sizes": [
+    "12oz",
+    "8oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "energy",
+    "caffeine",
+    "fibre",
+    "carbs",
+    "sugar"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 5,
+   "index": 2,
+   "name": "رمان موهيتو",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777197139541-mojito_pomegranate_front_view_YwvU2WYkE.jpg",
+   "tag": "signature",
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "title": "رمان موهيتو",
+   "desc": "طبقات من نكهة الرمان العميقة تتقاطع مع حيوية اللايم في مشروب خفيف وأنيق يترك أثره بنقاء منعش",
+   "sizes": [
+    "8oz",
+    "12oz"
+   ],
+   "flavors": [],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "energy",
+    "caffeine",
+    "carbs",
+    "sugar",
+    "fibre"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 6,
+   "index": 0,
+   "name": "فراولة سموذي",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777197519602-smoothie_strwberry_front_k0FOizy9a.jpg",
+   "tag": "top_seller",
+   "prices": [
+    "4,500 IQD"
+   ],
+   "title": "فراولة سموذي",
+   "desc": "توليفة أنيقة تعيد الكلاسيك بروح جديدة، تجمع نعومة القوام مع صفاء الفراولة في تجربة خفيفة ومطمئنة تدوم بهدوء.",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "energy",
+    "salt",
+    "sugar",
+    "carbs",
+    "caffeine",
+    "protein"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 6,
+   "index": 1,
+   "name": "باشن فروت سموذي",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777197530319-smoothie_passion_fruit_front_view_zdGZuHr4-.jpg",
+   "tag": null,
+   "prices": [
+    "4,500 IQD"
+   ],
+   "title": "باشن فروت سموذي",
+   "desc": "تركيبة تنقل شخصية الفاكهه الاستوائية بنقاء لافت، في مشروب يجمع الجمال والرقي بأثر طويل وممتع على الحواس.",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "salt",
+    "protein",
+    "caffeine",
+    "sugar",
+    "energy",
+    "carbs"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 6,
+   "index": 2,
+   "name": "مانجو وبرتقال سموذي",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777197541451-smoothie_orange___mango_front_view_VRt58Rn6o.jpg",
+   "tag": "signature",
+   "prices": [
+    "4,500 IQD"
+   ],
+   "title": "مانجو وبرتقال سموذي",
+   "desc": "توليفة فاكهية متألقة تجمع كثافة المانجو مع صفاء البرتقال في مشروب نابض بالحياة ومصقول المذاق",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "carbs",
+    "protein",
+    "sugar",
+    "energy",
+    "salt",
+    "caffeine"
+   ]
+  },
+  {
+   "group": 0,
+   "cat": 7,
+   "index": 0,
+   "name": "شوت أسبريسو",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777281960519-ChatGPT_Image_Apr_27__2026__12_24_58_PM_pF9iOC7E6.png",
+   "tag": null,
+   "prices": [
+    "500 IQD"
+   ],
+   "title": "شوت أسبريسو",
+   "desc": "",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 7,
+   "index": 1,
+   "name": "أضافة نكهة",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777282656441-ChatGPT_Image_Apr_27__2026__12_37_26_PM_lTWSTxahL.png",
+   "tag": null,
+   "prices": [
+    "500 IQD"
+   ],
+   "title": "أضافة نكهة",
+   "desc": "عزّز نكهة مشروبك بإضافة نكهة إضافية: كراميل، فانيلا، بندق، براوني، كوكيز، أو كراميل خالي من السكر",
+   "sizes": [
+    "pumps"
+   ],
+   "flavors": [
+    {
+     "value": "Caramel",
+     "text": "Caramel"
+    },
+    {
+     "value": "Cookies",
+     "text": "Cookies"
+    },
+    {
+     "value": "Hazelnut",
+     "text": "Hazelnut"
+    },
+    {
+     "value": "Vanilla",
+     "text": "Vanilla"
+    },
+    {
+     "value": "Caramel Free Sugar",
+     "text": "Caramel Free Sugar"
+    },
+    {
+     "value": "Brownie",
+     "text": "Brownie"
+    }
+   ],
+   "labels": [
+    "اختر الحجم",
+    "اختر النكهة"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 7,
+   "index": 2,
+   "name": "كريمة مخفوقة",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777282028863-ChatGPT_Image_Apr_27__2026__12_26_46_PM_zXk7txpS7.png",
+   "tag": null,
+   "prices": [
+    "1,000 IQD"
+   ],
+   "title": "كريمة مخفوقة",
+   "desc": "كريمة مخفوقة بحلاوة خفيفة وقوام ناعم وهوائي، تُضاف كطبقة فاخرة فوق المشروب.",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 7,
+   "index": 3,
+   "name": "كولد فوم",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777282378496-ChatGPT_Image_Apr_27__2026__12_32_41_PM_ABRPg3fti.png",
+   "tag": null,
+   "prices": [
+    "1,000 IQD"
+   ],
+   "title": "كولد فوم",
+   "desc": "رغوة كريمية خفيفة تضيف نعومة ولمسة حلاوة للمشروب",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 7,
+   "index": 4,
+   "name": "حليب خالي من الدسم",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777282104326-ChatGPT_Image_Apr_27__2026__12_27_52_PM_HIzjbia8y.png",
+   "tag": null,
+   "prices": [
+    "0 IQD"
+   ],
+   "title": "حليب خالي من الدسم",
+   "desc": "طعم حليب نقي بدون دهون، بقوام خفيف ونكهة صافية.",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 7,
+   "index": 5,
+   "name": "حليب خالي اللاكتوز",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1777282392198-ChatGPT_Image_Apr_27__2026__12_27_52_PM_PSaqWuMzu.png",
+   "tag": null,
+   "prices": [
+    "500 IQD"
+   ],
+   "title": "حليب خالي اللاكتوز",
+   "desc": "",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 0,
+   "cat": 8,
+   "index": 0,
+   "name": "كلاسك ماتشا",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1784211361669-ChatGPT_Image_Jul_16__2026__04_05_10_PM_jC6_Ppxuw.png",
+   "tag": null,
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "noModal": true
+  },
+  {
+   "group": 0,
+   "cat": 8,
+   "index": 1,
+   "name": "بيري ماتشا",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1784215077168-ChatGPT_Image_Jul_16__2026__04_06_23_PM__GXuAOtsq.png",
+   "tag": null,
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "noModal": true
+  },
+  {
+   "group": 0,
+   "cat": 8,
+   "index": 2,
+   "name": "مد نايت بلوم ماتشا",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1784218415335-ChatGPT_Image_Jul_16__2026__04_08_23_PM_aNBt2lW-w.png",
+   "tag": null,
+   "prices": [
+    "3,500 IQD (8oz)",
+    "4,500 IQD (12oz)"
+   ],
+   "noModal": true
+  },
+  {
+   "group": 0,
+   "cat": 9,
+   "index": 0,
+   "name": "كاكاو كرانش",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/drinks/1791235588982-IMG_8898_d2udq0XJV.PNG",
+   "tag": "signature",
+   "prices": [
+    "4,000 IQD"
+   ],
+   "title": "كاكاو كرانش",
+   "desc": "شوكولاتة بلجيكية مثلجه ، كريمة ناعمة و حلوى السكر المكرمل المقرمشة بنكهه البندق",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 0,
+   "name": "كعكة الموز",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1770457771004-Banana_bread___KBNiB22i.png",
+   "tag": null,
+   "prices": [
+    "2,000 IQD"
+   ],
+   "title": "كعكة الموز",
+   "desc": "خبز موز فائق الطراوة بطابع غني من نكهة الموز الطبيعية، مُحضَّر وفق وصفة مارس المميّزة ليقدّم تجربة دافئة ومتوازنة بلمسة خاصة لا تُنسى",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "energy",
+    "protein",
+    "fat",
+    "carbs",
+    "sugar"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 1,
+   "name": "Cheesecake pistachio",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1790507015220-IMG_8186_pWwgCsTyV.PNG",
+   "tag": null,
+   "prices": [
+    "4,000 IQD"
+   ],
+   "title": "Cheesecake pistachio",
+   "desc": "طبقات ناعمة من التشيزكيك الكريمي تتكامل مع صوص الفستق لتقدّم تجربة حلوى متوازنة بين الغنى والانتعاش بذوق رفيع",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "protein",
+    "energy",
+    "carbs",
+    "sugar",
+    "fat"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 2,
+   "name": "تشيز كيك نوتيلا",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1790507321824-IMG_8188_Xd_TfY2P-.PNG",
+   "tag": null,
+   "prices": [
+    "4,000 IQD"
+   ],
+   "title": "تشيز كيك نوتيلا",
+   "desc": "تشيزكيك بقوام مخملي ناعم تتخلله دوّامات من نوتيلا الغنية، ليقدّم تجربة متوازنة تجمع نعومة الجبن مع عمق الشوكولاتة والبندق بطابع فاخر وجذاب",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "protein",
+    "carbs",
+    "sugar",
+    "energy",
+    "fat"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 3,
+   "name": "تشيز كيك لوتس",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1790507173958-IMG_8187_YyNb3BvyR.PNG",
+   "tag": null,
+   "prices": [
+    "4,000 IQD"
+   ],
+   "title": "تشيز كيك لوتس",
+   "desc": "تشيزكيك كريمي مُعزَّز بنكهة بسكويت لوتس، يكتمل بلمسة صوص اللوتس الناعمه تمنح المذاق عمقًا متوازنًا ونهاية سلسة ومترفة",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "protein",
+    "carbs",
+    "sugar",
+    "energy",
+    "fat"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 4,
+   "name": "سان سباستيان",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1790507854288-IMG_8189_7g7Tv3C-P.PNG",
+   "tag": null,
+   "prices": [
+    "5,500 IQD"
+   ],
+   "title": "سان سباستيان",
+   "desc": "تشيزكيك مخبوز بجبن كريمي فاخر مع لمسة فانيلا، بسطح ذهبي مميز وقلب كريمي غني",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "fat",
+    "energy",
+    "sugar",
+    "carbs",
+    "protein"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 5,
+   "name": "كوكيز نوتيلا محشي",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1780771461568-6add3790-1503-4195-9479-39d610521558_l3T7HkI3lH.png",
+   "tag": null,
+   "prices": [
+    "2,500 IQD"
+   ],
+   "title": "كوكيز نوتيلا محشي",
+   "desc": "كوكيز شوكولاتة غني بقوام طري، مزين بخطوط الشوكولاتة البيضاء ورقائق اللوز المحمصة لمذاق متوازن وفاخر.",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "protein",
+    "fat",
+    "carbs",
+    "energy",
+    "sugar"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 6,
+   "name": "كوكيز لوتس محشي",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1780771340563-0c4ea723-079b-4fde-871c-bbba1fd74ae8_jBVAFRFXs.png",
+   "tag": null,
+   "prices": [
+    "2,500 IQD"
+   ],
+   "title": "كوكيز لوتس محشي",
+   "desc": "كوكيز طري وغني مغطى بكريمة اللوتس الناعمة ومزين بقطع البسكويت المقرمشة، مزيج مثالي لعشاق اللوتس",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "protein",
+    "fat",
+    "sugar",
+    "carbs",
+    "energy"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 7,
+   "name": "دارك كوكيز",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1770457984752-Dark_cookies__QuTyl4rp1.png",
+   "tag": null,
+   "prices": [
+    "2,000 IQD"
+   ],
+   "title": "دارك كوكيز",
+   "desc": "كوكيز مخبوزة بقوام طري من الداخل، محضّرة بشوكولاتة داكنة لتقدّم نكهة كاكاو قوية وواضحة بطابع غني وجريء",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "energy",
+    "fat",
+    "sugar",
+    "carbs",
+    "protein"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 8,
+   "name": "براون كوكيز",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1770458034590-Brownies_cookies__gjUfA9ULk.png",
+   "tag": "top_seller",
+   "prices": [
+    "2,000 IQD"
+   ],
+   "title": "براون كوكيز",
+   "desc": "قوام طري يذوب بسهولة، يحتضن قلبًا غنيًا من نوتيلا ليقدّم تجربة حلوى مترفة بطابع دافئ ومريح",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "energy",
+    "fat",
+    "carbs",
+    "sugar",
+    "protein"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 9,
+   "name": "رِد فِلفِت كوكيز",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1770458055658-Red_valvet_cookies__xiMRfezFz.png",
+   "tag": null,
+   "prices": [
+    "2,000 IQD"
+   ],
+   "title": "رِد فِلفِت كوكيز",
+   "desc": "قوام مخملي وطابع كاكاو رقيق يلتقيان في كوكيز أنيقة المذاق ومريحة التجربة",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "fat",
+    "protein",
+    "sugar",
+    "energy",
+    "carbs"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 10,
+   "name": "كوكيز نيويورك",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1770458103957-New_york_cookies__DrQJysUXq.png",
+   "tag": null,
+   "prices": [
+    "2,000 IQD"
+   ],
+   "title": "كوكيز نيويورك",
+   "desc": "كوكيز نيويورك سميكة وفائقة الطراوة، محمّلة بنكهة شوكولاتة غنية ومترفة تقدّم تجربة ممتلئة وقوية في كل قضمة.",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "fat",
+    "energy",
+    "protein",
+    "sugar",
+    "carbs"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 11,
+   "name": "كرواسون بالنوتيلا",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1770458292277-Nutella_croissant__0dgzq6Ln6.jpg",
+   "tag": null,
+   "prices": [
+    "3,000 IQD"
+   ],
+   "title": "كرواسون بالنوتيلا",
+   "desc": "طبقات رقيقة متقشرة تحتضن قلبًا مخمليًا من نوتيلا، في قطعة مخبوزة بعناية تجمع الخفة مع الثراء في تجربة فرنسية أنيقة.",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "protein",
+    "carbs",
+    "fat",
+    "sugar",
+    "energy"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 12,
+   "name": "كرواسون بالجبن",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1770458407605-Cheese_croissant__aKrdeDwkC.jpg",
+   "tag": null,
+   "prices": [
+    "3,000 IQD"
+   ],
+   "title": "كرواسون بالجبن",
+   "desc": "كرواسون كلاسيكي بطبقات زبدية هشّة، محشوّ بجبن ذائب بقوام غني، ومخبوز حتى يبلغ درجة مثالية من اللون والنكهة المالحة المتوازنة",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "protein",
+    "carbs",
+    "sugar",
+    "energy",
+    "fat"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 13,
+   "name": "مولتن كيك",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1782039549197-WhatsApp_Image_2026-06-21_at_1.50.56_PM_pNi5Z6D0X.jpeg",
+   "tag": null,
+   "prices": [
+    "3,500 IQD"
+   ],
+   "title": "مولتن كيك",
+   "desc": "",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": []
+  },
+  {
+   "group": 1,
+   "cat": 0,
+   "index": 14,
+   "name": "براونيز",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1770457814068-Brownie_cup__f9vhdSx1R3.png",
+   "tag": null,
+   "prices": [
+    "3,500 IQD"
+   ],
+   "title": "براونيز",
+   "desc": "تحلية غنية بقوام متماسك وطراوة داخلية واضحة، تتصدرها نكهة كاكاو قوية تمنح تجربة شوكولاتة خالصة وفاخرة",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "carbs",
+    "sugar",
+    "protein",
+    "energy",
+    "fat"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 1,
+   "index": 0,
+   "name": "ساندويش الديك الرومي المدخّن (لمسة حارة)",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1784238582597-IMG_3054.JPG_XuO5DQHXY.jpeg",
+   "tag": null,
+   "prices": [
+    "3,500 IQD"
+   ],
+   "title": "ساندويش الديك الرومي المدخّن (لمسة حارة)",
+   "desc": "شرائح الحبش المدخن غنية بلبروتين مع خس وطماطم لدفعه من الالياف يكملها صوص السيراشا والمخلل وشريحه من جبن الشيدر داخل خبز الشباتا لطافة فورية وجبة متكاملة تمنحك القوة والتركيز اطلبها الان",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "salt",
+    "sat fat",
+    "energy",
+    "fat",
+    "protein",
+    "fibre",
+    "carbs",
+    "sugar"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 1,
+   "index": 1,
+   "name": "ساندويش حلّوم مشوي",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1784238604874-IMG_3056.JPG_otmkASI0u.jpeg",
+   "tag": null,
+   "prices": [
+    "3,500 IQD"
+   ],
+   "title": "ساندويش حلّوم مشوي",
+   "desc": "جبنة حلوم، خس مقرمش، جرجير طازج، مع رشة من دبس الرمان داخل خبز تشاباتا محمص",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "fat",
+    "energy",
+    "protein",
+    "sugar",
+    "sat fat",
+    "carbs",
+    "fibre",
+    "salt"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 1,
+   "index": 2,
+   "name": "ساندويش دجاج سيزر",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1784238627516-IMG_3055.JPG_8M6YJFg_O.jpeg",
+   "tag": null,
+   "prices": [
+    "3,500 IQD"
+   ],
+   "title": "ساندويش دجاج سيزر",
+   "desc": "دجاج سو فيد، خس مقرمش، جرجير طازج، جبن شيدر وبارميزان، مع صوص سيزر غني داخل خبز تشاباتا محمص",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "protein",
+    "fat",
+    "sat fat",
+    "carbs",
+    "sugar",
+    "salt",
+    "energy",
+    "fibre"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 1,
+   "index": 3,
+   "name": "ساندويتش دجاج بالهاني ماسترد",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1790095792822-IMG_7290_Qib0-Pc-xa.png",
+   "tag": "premium",
+   "prices": [
+    "3,500 IQD"
+   ],
+   "title": "ساندويتش دجاج بالهاني ماسترد",
+   "desc": "قطع دجاج طرية ومطهوة ببطء بتقنية السو فيد (Sous vide) داخل خبز شاباتا محمص ومقرمش ومزينة بصوص العسل والخردل (هاني مسترد) الحامض والحلو الفريد",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "sugar",
+    "protein",
+    "carbs",
+    "fibre",
+    "fat",
+    "energy",
+    "sat fat"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 1,
+   "index": 4,
+   "name": "سلطة سيزر بالدجاج المشوي",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1770473581529-Caesar_Salar_Am6ENl_Eq.JPG",
+   "tag": "premium",
+   "prices": [
+    "5,500 IQD"
+   ],
+   "title": "سلطة سيزر بالدجاج المشوي",
+   "desc": "استمتع بلانتعاش والشبع صدور دجاج غنية بلبروتين , خس فريش غني بالاياف مع خبز محمص بقرمشة خفيفة مغلفه بصوص السيزر ورشة من البارميزان اطلبها الان",
+   "sizes": [],
+   "flavors": [],
+   "labels": [
+    "اختر النكهة"
+   ],
+   "nutrition": [
+    "protein",
+    "salt",
+    "fat",
+    "fibre",
+    "sat fat",
+    "sugar",
+    "carbs",
+    "energy"
+   ]
+  },
+  {
+   "group": 1,
+   "cat": 1,
+   "index": 5,
+   "name": "زبادي بالجرانولا والفراولة",
+   "image": "https://ik.imagekit.io/marsassests/mars-menu/food/1783958249616-DSC04936_1.jpg_k2M30jLZS.jpeg",
+   "tag": null,
+   "prices": [
+    "3,500 IQD"
+   ],
+   "noModal": true
+  }
+ ]
+}

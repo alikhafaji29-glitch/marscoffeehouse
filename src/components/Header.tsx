@@ -4,6 +4,7 @@ import type { MouseEvent } from 'react'
 import { LANGS, useLang } from '../i18n'
 import type { Lang } from '../i18n'
 import { openBuild } from '../bus'
+import { FEATURES } from '../features'
 import { useAccount } from '../account'
 import { SectionsMenu } from './SectionsMenu'
 import { useNotices } from '../notify'
@@ -61,17 +62,18 @@ export function Header() {
   const hero = useOverHero()
   const over = hero.over && !open // over the open menu the bar is solid cream with navy text
   useEffect(() => { document.body.classList.toggle('sections-open', open); return () => document.body.classList.remove('sections-open') }, [open])
-  const unread = useNotices(a?.phone ?? null).filter((n) => !n.read).length
+  const notices = useNotices(a?.phone ?? null).filter((n) => !n.read).length
+  const unread = FEATURES.gifts || FEATURES.community ? notices : 0 // notices are about gifts, likes and comments only
   return (
     <header className={'header' + (over ? ' over' : '')}>
       <a className="logo-link" href="#top" aria-label="Mars CoffeeHouse"><Logo white={over} /></a>
       <div className="header-right">
         <nav className="nav" aria-label={t('sections')}>
           <a href="#menu">{t('menu')}</a>
-          <a href="#mood-home" onClick={(e: MouseEvent) => { e.preventDefault(); openBuild() }}>{t('navBuild')}</a>
-          <a href="#mood-home">{t('navMood')}</a>
-          <a href="#shop">{t('navShop')}</a>
-          <a href="#community">{t('navCommunity')}</a>
+          {FEATURES.barista && <a href="#mood-home" onClick={(e: MouseEvent) => { e.preventDefault(); openBuild() }}>{t('navBuild')}</a>}
+          <a href="#mood-home" onClick={FEATURES.barista ? undefined : (e: MouseEvent) => { e.preventDefault(); openBuild() }}>{t('navMood')}</a>
+          {FEATURES.shop && <a href="#shop">{t('navShop')}</a>}
+          {FEATURES.community && <a href="#community">{t('navCommunity')}</a>}
           <a href="#hours">{t('navHours')}</a>
           <a href="#account">{t('navAccount')}</a>
         </nav>

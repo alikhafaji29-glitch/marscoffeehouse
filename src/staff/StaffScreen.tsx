@@ -1,0 +1,245 @@
+import { useEffect, useRef, useState } from 'react'
+import type { FormEvent, ReactNode } from 'react'
+import { LANGS, useLang } from '../i18n'
+import type { Lang } from '../i18n'
+import { useAllOrders } from '../account'
+import { isActive } from '../orders'
+import { Logo } from '../components/Header'
+import { catLabel } from '../components/MenuSection'
+import { chime, unlockAudio } from '../chime'
+import { categoryOf } from '../menuMeta'
+import { branchCats, nameOf, useMenuVersion } from '../menuAdmin'
+import { Analytics } from './Analytics'
+import { Category, ItemEditor, NewCategory, NewItem } from './Catalog'
+import { Branches } from './Branches'
+import { Events } from './Events'
+import { Offers } from './Offers'
+import { Orders } from './Orders'
+import { Overview } from './Overview'
+import { Tools } from './Tools'
+import { Warehouse } from './Warehouse'
+import { backendOn } from '../backend'
+import { staffSignIn, staffSignOut, useRemote, wakeRemote } from './remote'
+import { BRANCHES, branchName, update, useStaff } from './store'
+import type { BranchId } from './store'
+import { useS } from './strings'
+import type { SKey } from './strings'
+import { I } from './ui'
+import './staff.css'
+
+/*
+ * Staff dashboard (#staff), rebuilt on 2026-10-12 after the live Mars admin panel (owner's screenshots): a side menu
+ * with the branch on top, then Dashboard, Orders, Analytics, Events, Offers, Warehouse, the menu by category
+ * (Drinks, Food) and Tools. Orders keeps the order tracking: the buttons that move each order through the stages the
+ * customer sees. DEMO: a PIN gate (1234) and everything stored in this browser.
+ */
+const PIN = '1234'
+const MAIN: { id: string; key: SKey; icon: () => ReactNode }[] = [
+  { id: 'dashboard', key: 'navDashboard', icon: I.dashboard },
+  { id: 'orders', key: 'navOrders', icon: I.orders },
+  { id: 'analytics', key: 'navAnalytics', icon: I.analytics },
+  { id: 'events', key: 'navEvents', icon: I.events },
+  { id: 'offers', key: 'navOffers', icon: I.offers },
+  { id: 'warehouse', key: 'navWarehouse', icon: I.warehouse },
+]
+const read = (k: string, fallback: string) => { try { return sessionStorage.getItem(k) ?? fallback } catch { return fallback } }
+
+export function StaffScreen() {
+  const { t, lang, setLang } = useLang()
+  const s = useS()
+  const data = useStaff()
+  useMenuVersion() // staff may add a category
+  // with the shared backend on, staff sign in with an email and password and the orders are the database's;
+  // without it, the demo PIN and this browser's own orders
+  const remote = useRemote()
+  const [pinOk, setOk] = useState(() => read('mars-staff', '') === '1')
+  const ok = backendOn ? !!remote.staff : pinOk
+  const [pin, setPin] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [signErr, setSignErr] = useState<'' | 'bad' | 'notstaff' | 'error'>('')
+  const [err, setErr] = useState(false)
+  useEffect(() => wakeRemote(), [])
+  // a cashier belongs to one branch: the dashboard shows that branch
+  const fixedBranch = backendOn ? remote.staff?.branch ?? null : null
+  // the owner's sign-in is for every branch: it may switch between them and add one (the demo's PIN counts as the owner)
+  const owner = backendOn ? !!remote.staff && remote.staff.branch === null : true
+  useEffect(() => { if (fixedBranch && fixedBranch !== data.branch) update(() => ({ branch: fixedBranch as BranchId })) }, [fixedBranch, data.branch])
+  const [page, setPage] = useState(() => read('mars-staff-page', 'dashboard'))
+  const [mini, setMini] = useState(false) // the side menu folded to its icons (desktop)
+  const [drawer, setDrawer] = useState(false) // the side menu slid in (phones)
+  const [openDrinks, setOpenDrinks] = useState(true)
+  const [openFood, setOpenFood] = useState(true)
+  const local = useAllOrders()
+  const all = backendOn ? remote.orders : local
+  const orders = all.filter((o) => (o.branch ?? BRANCHES[0].id) === data.branch)
+  const active = orders.filter((o) => isActive(o)).length
+  const [sound, setSound] = useState(() => { try { return localStorage.getItem('mars-staff-sound') !== '0' } catch { return true } })
+  const toggleSound = () => {
+    const on = !sound
+    setSound(on)
+    try { localStorage.setItem('mars-staff-sound', on ? '1' : '0') } catch { /* ignore */ }
+    if (on) chime() // also unlocks audio on this tap
+  }
+  // a chime when an order id shows up that was not there before (not on the first render)
+  const known = useRef<Set<string> | null>(null)
+  useEffect(() => {
+    const ids = new Set(all.map((o) => o.uid ?? o.id))
+    if (known.current && ok && sound && all.some((o) => !known.current!.has(o.uid ?? o.id))) chime()
+    known.current = ids
+  }, [all, ok, sound])
+  const go = (p: string) => {
+    setPage(p)
+    setDrawer(false)
+    try { sessionStorage.setItem('mars-staff-page', p) } catch { /* ignore */ }
+    window.scrollTo({ top: 0, behavior: 'instant' })
+  }
+  const enter = (e: FormEvent) => {
+    e.preventDefault()
+    unlockAudio()
+    if (pin === PIN) { setOk(true); try { sessionStorage.setItem('mars-staff', '1') } catch { /* ignore */ } } else setErr(true)
+  }
+  const leave = () => { if (backendOn) { void staffSignOut(); setPassword(''); return } setOk(false); setPin(''); try { sessionStorage.removeItem('mars-staff') } catch { /* ignore */ } }
+  const signIn = async (e: FormEvent) => {
+    e.preventDefault()
+    unlockAudio()
+    setBusy(true); setSignErr('')
+    const res = await staffSignIn(email, password)
+    setBusy(false)
+    if (res === 'ok') setPassword('')
+    else setSignErr(res)
+  }
+
+  const langSelect = (
+    <select className="d-lang" value={lang} onChange={(e) => setLang(e.target.value as Lang)} aria-label={t('language')}>
+      {LANGS.map(({ code, label }) => <option key={code} value={code}>{label}</option>)}
+    </select>
+  )
+  if (!ok) {
+    return (
+      <div className="dash dash-gate">
+        <a href="#top" className="d-brand"><Logo /></a>
+        {backendOn ? (
+          <form className="staff-gate sign" onSubmit={signIn}>
+            <label htmlFor="staff-email">{s('staffEmail')}</label>
+            <input id="staff-email" type="email" autoComplete="username" value={email} onChange={(e) => { setEmail(e.target.value); setSignErr('') }} dir="ltr" required />
+            <label htmlFor="staff-password">{s('staffPassword')}</label>
+            <input id="staff-password" type="password" autoComplete="current-password" value={password} onChange={(e) => { setPassword(e.target.value); setSignErr('') }} dir="ltr" required />
+            <button type="submit" className="d-btn solid" disabled={busy || !remote.ready}>{busy || !remote.ready ? s('staffChecking') : s('staffSignIn')}</button>
+            <p className={'staff-hint' + (signErr ? ' err' : '')}>{signErr === 'bad' ? s('staffBadLogin') : signErr === 'notstaff' ? s('staffNotStaff') : signErr === 'error' ? s('staffConnErr') : s('staffSignHint')}</p>
+          </form>
+        ) : (
+          <form className="staff-gate" onSubmit={enter}>
+            <label htmlFor="staff-pin">{t('staffPin')}</label>
+            <input id="staff-pin" inputMode="numeric" autoComplete="one-time-code" value={pin} onChange={(e) => { setPin(e.target.value); setErr(false) }} dir="ltr" />
+            <button type="submit" className="d-btn solid">{t('staffEnter')}</button>
+            <p className={'staff-hint' + (err ? ' err' : '')}>{err ? t('staffWrongPin') : t('staffPinHint')}</p>
+          </form>
+        )}
+        {langSelect}
+      </div>
+    )
+  }
+
+  const kind = page.startsWith('cat:') ? 'cat' : page.startsWith('item:') ? 'item' : page.startsWith('new:') ? 'new' : page.startsWith('newcat:') ? 'newcat' : page.startsWith('editcat:') ? 'editcat' : page
+  const DRINK_CATS = branchCats('drink')
+  const FOOD_CATS = branchCats('food')
+  const asked = page.slice(page.indexOf(':') + 1)
+  // a category the other branch added is not this branch's: show them all instead
+  const arg = (kind === 'cat' || kind === 'new' || kind === 'editcat') && asked !== 'all' && !DRINK_CATS.includes(asked) && !FOOD_CATS.includes(asked) ? 'all' : asked
+  const catId = kind === 'cat' || kind === 'new' || kind === 'editcat' ? arg : kind === 'item' ? categoryOf(arg) : ''
+  const catName = (id: string) => (id === 'all' ? s('allCategories') : catLabel(id, lang))
+  const group = FOOD_CATS.includes(catId) || page === 'newcat:food' ? s('navFood') : s('navDrinks')
+  const title = kind === 'cat' ? catName(arg) : kind === 'item' ? s('editItem') : kind === 'new' ? s('addItem') : kind === 'newcat' ? s('addCategory') : kind === 'editcat' ? s('renameCategory') : kind === 'tools' ? s('navTools') : kind === 'branches' ? s('navBranches') : s(MAIN.find((m) => m.id === kind)?.key ?? 'navDashboard')
+  const catLink = (id: string) => (
+    <button key={id} type="button" className={'d-nav-sub' + (catId === id && kind === 'cat' ? ' on' : catId === id ? ' near' : '')} onClick={() => go('cat:' + id)} title={catName(id)}>
+      {id === 'all' && <I.dashboard />}<span>{catName(id)}</span>
+    </button>
+  )
+  const addCat = (k: 'drink' | 'food') => (
+    <button type="button" className={'d-nav-sub add' + (page === 'newcat:' + k ? ' on' : '')} onClick={() => go('newcat:' + k)} title={s('addCategory')}>
+      <I.plus /><span>{s('addCategory')}</span>
+    </button>
+  )
+
+  return (
+    <div className={'dash' + (mini ? ' mini' : '') + (drawer ? ' drawer' : '')}>
+      <aside className="d-side" aria-label={s('menu')}>
+        <div className="d-side-top">
+          <a href="#top" className="d-brand" title={s('toSite')}><Logo /></a>
+          <button type="button" className="d-icon-btn d-fold" aria-label={s('foldMenu')} aria-expanded={!mini} onClick={() => (drawer ? setDrawer(false) : setMini(!mini))}><I.chevron dir={mini ? 'end' : 'start'} /></button>
+        </div>
+        <label className="d-branch">
+          <I.store />
+          <span className="sr-only">{t('branch')}</span>
+          <select value={data.branch} disabled={!!fixedBranch} onChange={(e) => update(() => ({ branch: e.target.value as BranchId }))}>
+            {BRANCHES.map((b) => <option key={b.id} value={b.id}>{b.name}{b.active ? '' : ` · ${s('branchHidden')}`}</option>)}
+          </select>
+        </label>
+        <nav className="d-nav">
+          {MAIN.map((m) => (
+            <button key={m.id} type="button" className={kind === m.id ? 'on' : ''} aria-current={kind === m.id ? 'page' : undefined} onClick={() => go(m.id)} title={s(m.key)}>
+              <m.icon /><span>{s(m.key)}</span>{m.id === 'orders' && active > 0 && <b className="d-count">{active}</b>}
+            </button>
+          ))}
+          <hr />
+          <button type="button" className={DRINK_CATS.includes(catId) || catId === 'all' ? 'near' : ''} aria-expanded={openDrinks} onClick={() => (mini ? go('cat:all') : setOpenDrinks(!openDrinks))} title={s('navDrinks')}>
+            <I.drinks /><span>{s('navDrinks')}</span><I.chevron dir={openDrinks ? 'up' : 'down'} />
+          </button>
+          {openDrinks && !mini && <>{catLink('all')}{DRINK_CATS.map(catLink)}{addCat('drink')}</>}
+          <button type="button" className={FOOD_CATS.includes(catId) ? 'near' : ''} aria-expanded={openFood} onClick={() => (mini ? go('cat:' + FOOD_CATS[0]) : setOpenFood(!openFood))} title={s('navFood')}>
+            <I.food /><span>{s('navFood')}</span><I.chevron dir={openFood ? 'up' : 'down'} />
+          </button>
+          {openFood && !mini && <>{FOOD_CATS.map(catLink)}{addCat('food')}</>}
+          <hr />
+          {owner && (
+            <button type="button" className={kind === 'branches' ? 'on' : ''} aria-current={kind === 'branches' ? 'page' : undefined} onClick={() => go('branches')} title={s('navBranches')}>
+              <I.store /><span>{s('navBranches')}</span>
+            </button>
+          )}
+          <button type="button" className={kind === 'tools' ? 'on' : ''} aria-current={kind === 'tools' ? 'page' : undefined} onClick={() => go('tools')} title={s('navTools')}>
+            <I.tools /><span>{s('navTools')}</span>
+          </button>
+        </nav>
+        <div className="d-side-foot">
+          {langSelect}
+          <button type="button" className={'d-foot-btn' + (sound ? ' on' : '')} aria-pressed={sound} onClick={toggleSound} title={sound ? t('soundOn') : t('soundOff')}><I.sound /><span>{sound ? t('soundOn') : t('soundOff')}</span></button>
+          <button type="button" className="d-foot-btn" onClick={leave} title={t('staffLeave')}><I.exit /><span>{t('staffLeave')}</span></button>
+        </div>
+      </aside>
+      {drawer && <div className="d-scrim" onClick={() => setDrawer(false)} />}
+
+      {/* a div, not <main>: the customer site styles main[data-view] */}
+      <div className="d-main" role="main">
+        <header className="d-top">
+          <button type="button" className="d-icon-btn d-burger" aria-label={s('menu')} onClick={() => setDrawer(true)}><I.menu /></button>
+          <div>
+            {(kind === 'cat' || kind === 'item' || kind === 'new' || kind === 'newcat' || kind === 'editcat') && (
+              <p className="d-crumbs">
+                <span>{group}</span>
+                {kind === 'item' && <> / <button type="button" onClick={() => go('cat:' + catId)}>{catName(catId)}</button> / <span>{nameOf(arg, 'en')}</span></>}
+                {(kind === 'new' || kind === 'editcat') && arg !== 'all' && <> / <button type="button" onClick={() => go('cat:' + catId)}>{catName(catId)}</button></>}
+              </p>
+            )}
+            <h1>{title}<em className="d-pill navy">{branchName(data.branch)}</em><em className={'d-pill ' + (backendOn ? 'ok' : 'line')} title={backendOn ? remote.staff?.email : undefined}>{backendOn ? s('liveOn') : s('liveOff')}</em></h1>
+            {backendOn && remote.error && <p className="d-error" role="alert">{s(remote.error === 'move' ? 'moveFailed' : 'staffConnErr')}</p>}
+          </div>
+        </header>
+        {kind === 'orders' ? <Orders orders={orders} live={backendOn} />
+          : kind === 'analytics' ? <Analytics orders={orders} key={data.branch} />
+            : kind === 'events' ? <Events />
+              : kind === 'offers' ? <Offers />
+                : kind === 'warehouse' ? <Warehouse />
+                  : kind === 'tools' ? <Tools />
+                    : kind === 'branches' && owner ? <Branches />
+                    : kind === 'cat' ? <Category id={arg} go={go} key={arg} />
+                      : kind === 'item' ? <ItemEditor name={arg} go={go} key={arg + data.branch} />
+                        : kind === 'new' ? <NewItem cat={arg} go={go} key={arg + data.branch} />
+                          : kind === 'newcat' ? <NewCategory kind={arg === 'food' ? 'food' : 'drink'} go={go} key={arg} />
+                            : kind === 'editcat' && arg !== 'all' ? <NewCategory kind="drink" edit={arg} go={go} key={'edit' + arg + data.branch} />
+                        : <Overview orders={orders} go={go} />}
+      </div>
+    </div>
+  )
+}

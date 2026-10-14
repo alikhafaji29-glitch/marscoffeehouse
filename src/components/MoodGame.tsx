@@ -1,3 +1,4 @@
+import { nameOf } from '../menuAdmin'
 import { clockNow, useClock } from '../clock'
 import { useEffect, useRef, useState } from 'react'
 import type { KeyboardEvent, MouseEvent, PointerEvent as RPointerEvent, ReactNode } from 'react'
@@ -100,7 +101,7 @@ const POPS: { shape: 'dot' | 'diamond' | 'square' | 'pill'; x: number; y: number
 const PAIRS: Record<string, string[]> = {
   coffee: ['Croissant Nutella', 'Banana Bread', 'San Sebastian'],
   milkshake: ['Cookies Dark', 'Brownies Cup', 'Cookies Red Velvet'],
-  matcha: ['Cheesecake Strawberry', 'Croissant Pistachio', 'Mango Mousse Cake'],
+  matcha: ['Cheesecake Pistachio', 'Croissant Pistachio', 'Mango Mousse Cake'],
   fresh: ['Cookies New York', 'Cheesecake Lotus', 'Croissant Cheese'],
 }
 const PAIR_OF: Record<string, keyof typeof PAIRS> = { coffeeMore: 'coffee', coffeeMilk: 'coffee', coldCoffee: 'coffee', milkshake: 'milkshake', matcha: 'matcha' }
@@ -306,17 +307,17 @@ export function MoodGame({ onPick, onWords, onDone }: { onPick: (item: MenuItem)
                   // the whole card is the choice (owner, 2026-09-28: no "Choose this" button); chosen, it shows Order it
                   const choose = (el: Element) => { setPicked(it.name); sketchFrom(el, '#002f6d', 12, 1.3) }
                   const tap = on ? {} : {
-                    role: 'button', tabIndex: 0, 'aria-label': `${t('moodChoose')}: ${it.name}`,
+                    role: 'button', tabIndex: 0, 'aria-label': `${t('moodChoose')}: ${nameOf(it.name, lang)}`,
                     onClick: (e: MouseEvent<HTMLDivElement>) => choose(e.currentTarget),
                     onKeyDown: (e: KeyboardEvent<HTMLDivElement>) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); choose(e.currentTarget) } },
                   }
                   return (
                     <div className={'reveal-option' + (on ? ' chosen' : ' pickable')} key={it.name} style={{ animationDelay: `${0.1 + k * 0.15}s` }} {...tap}>
                       <MiniCup color={LAYER_BLUES[1]} ice={chosen('temp')?.id === 'cold' ? 1 : 0} size={52} />
-                      <h3 className="reveal-name">{it.name}</h3>
+                      <h3 className="reveal-name">{nameOf(it.name, lang)}</h3>
                       <p className="reveal-meta" dir="ltr">{iqd(pr)} IQD</p>
                       {on && lessNote}
-                      {on && <button type="button" className="pill solid small" onClick={() => orderNow(it)}>{t('orderIt')}</button>}
+                      {on && <button type="button" className="pill solid small" onClick={() => orderNow(it)} disabled={it.soldOut}>{t('orderIt')}</button>}
                     </div>
                   )
                 })}
@@ -330,13 +331,13 @@ export function MoodGame({ onPick, onWords, onDone }: { onPick: (item: MenuItem)
           ) : (<>
           <div className="reveal-cup"><MiniCup color={LAYER_BLUES[1]} ice={chosen('temp')?.id === 'cold' ? 1 : 0} size={64} /></div>
           <p className="eyebrow">{t('moodPickedForYou')}</p>
-          <h3 className="reveal-name">{a.item.name}</h3>
+          <h3 className="reveal-name">{nameOf(a.item.name, lang)}</h3>
           <p className="reveal-meta">{t('moodMenuTag')}{price ? <> · <span dir="ltr">{iqd(price)} IQD</span></> : null}</p>
           {lessNote}
           <p className="reveal-reason">{a.reason}</p>
           <small className="mood-source">{result.source === 'local' ? t('moodByMars') : t('moodByAI')}</small>
           <div className="reveal-actions">
-            <button type="button" className="pill solid" onClick={() => orderNow(a.item)}>{t('orderIt')}</button>
+            <button type="button" className="pill solid" onClick={() => orderNow(a.item)} disabled={a.item.soldOut}>{t('orderIt')}</button>
             <button type="button" className="pill outline small" onClick={empty}>{t('emptyCup')}</button>
           </div>
           </>)}
@@ -349,7 +350,7 @@ export function MoodGame({ onPick, onWords, onDone }: { onPick: (item: MenuItem)
                 return (
                   <div className="mood-pair" key={p.name} style={{ animationDelay: `${0.35 + k * 0.12}s` }}>
                     <span className="mood-pair-icon">{PASTRY}</span>
-                    <span className="mood-pair-name">{p.name}<small dir="ltr">{iqd(pr)} IQD</small></span>
+                    <span className="mood-pair-name">{nameOf(p.name, lang)}<small dir="ltr">{iqd(pr)} IQD</small></span>
                     <button type="button" className={'pill small ' + (on ? 'soft' : 'solid')} disabled={on}
                       onClick={(e) => { add({ name: p.name, price: pr }, 1); setAdded((xs) => [...xs, p.name]); sketchFrom(e.currentTarget, '#002f6d', 10, 1) }}>
                       {on ? t('shopAdded') : t('shopAdd')}

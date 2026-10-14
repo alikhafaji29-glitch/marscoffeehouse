@@ -9,6 +9,8 @@ import type { MoodAnswer, MoodSource } from '../mood'
 import { iqd } from '../account'
 import { MiniCup } from './MiniCup'
 import { ReviewPrompt } from './ReviewPrompt'
+import { nameOf } from '../menuAdmin'
+import { FEATURES } from '../features'
 
 const CHIPS: TKey[] = ['chipTired', 'chipStressed', 'chipHappy', 'chipHot', 'chipFocus', 'chipSweet', 'chipLight']
 
@@ -40,7 +42,7 @@ export function MoodAsk({ onPick, chips = true, onDone }: { onPick: (item: MenuI
   const again = () => { setResult(null); setReview(false) }
 
   const a = result?.answer
-  const title = a ? a.item.name : ''
+  const title = a ? nameOf(a.item.name, lang) : ''
   const price = a ? (Array.isArray(a.item.price) ? a.item.price[0] : a.item.price) : 0
 
   return (
@@ -71,7 +73,7 @@ export function MoodAsk({ onPick, chips = true, onDone }: { onPick: (item: MenuI
           <small className="mood-source">{result!.source === 'local' ? t('moodByMars') : t('moodByAI')}</small>
           <div className="mood-actions">
             <button className="btn-pill" onClick={() => { onDone?.(); onPick(a.item) }}>{t('orderNow')}</button>
-            <button className="btn-pill ghost" onClick={() => setReview(true)}>{t('rateThis')}</button>
+            {FEATURES.community && <button className="btn-pill ghost" onClick={() => setReview(true)}>{t('rateThis')}</button>}
           </div>
           <button className="mood-again" onClick={again}>{t('moodAgain')}</button>
           {review && <ReviewPrompt recipe={{ kind: 'mood', drink: a.item.name }} defaultTitle={title} onClose={() => setReview(false)} />}

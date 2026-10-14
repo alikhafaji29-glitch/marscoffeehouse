@@ -1,3 +1,4 @@
+import { nameOf } from '../menuAdmin'
 import { useEffect, useState } from 'react'
 import { lineKey, useCart } from '../cart'
 import { useLang } from '../i18n'
@@ -35,7 +36,7 @@ export function CartModal({
   onClose: () => void
   onCheckout: () => void
 }) {
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const { lines, setQty, clear, total, basket } = useCart()
 
   return (
@@ -49,7 +50,7 @@ export function CartModal({
             return (
               <div key={key} className="cart-line">
                 <div className="cart-line-main">
-                  <span className="cart-line-name">{l.name}</span>
+                  <span className="cart-line-name">{nameOf(l.name, lang)}</span>
                   {l.size && <span className="cart-line-size">{l.size}</span>}
                   {l.opts?.length ? <span className="cart-line-opts">{l.opts.join(', ')}</span> : null}
                 </div>

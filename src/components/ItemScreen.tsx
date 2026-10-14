@@ -6,11 +6,15 @@ import { dropsFrom } from '../fx'
 import { useLang } from '../i18n'
 import type { MenuItem } from '../menu'
 import { iqd } from '../account'
-import { DESC, PHOTO, TINT, categoryOf, isIced } from '../menuMeta'
+import { DESC, TINT, categoryOf, isIced } from '../menuMeta'
 import { groupsFor, defaultPicks, extras, summary } from '../customize'
+import { itemState, nameOf, useMenuVersion, photoOf } from '../menuAdmin'
 import type { CustGroup, Picks } from '../customize'
 import { MiniCup } from './MiniCup'
 import { IconCheck } from './Icons'
+import { NUTRIENTS } from '../staff/store'
+import { useS } from '../staff/strings'
+import { nutrientLabel, nutrientUnit } from '../staff/nutrients'
 
 /*
  * Full-screen item page (owner, 2026-09-14, modelled on Blank Street's): back button, big photo on a
@@ -31,24 +35,31 @@ const Back = () => (
 )
 
 export function ItemScreen({ item, gift = false, onClose, onAdded }: { item: MenuItem; gift?: boolean; onClose: () => void; onAdded?: () => void }) {
-  const { t } = useLang()
+  const { t, lang } = useLang()
+  const s = useS()
   const { add } = useCart()
   const dual = typeof item.price !== 'number'
   const [sizeIdx, setSizeIdx] = useState(0)
   const [qty, setQty] = useState(1)
-  const groups = groupsFor(item.name)
+  useMenuVersion()
+  const groups = groupsFor(item, lang) // the item's flavours and the branch's add-ons (customize.ts)
   const [picks, setPicks] = useState<Picks>(() => defaultPicks(groups))
-  const [open, setOpen] = useState<Record<string, boolean>>({})
+  const [open, setOpen] = useState<Record<string, boolean>>({ flavor: true })
   const [scrolled, setScrolled] = useState(false)
   const [fade, setFade] = useState(1)
   const scroller = useRef<HTMLDivElement>(null)
 
   const cat = categoryOf(item.name)
-  const photo = PHOTO[item.name]
-  const base = dual ? (item.price as [number, number])[sizeIdx] : (item.price as number)
+  const photo = photoOf(item.name)
+  const base = dual ? (item.price as number[])[sizeIdx] : (item.price as number)
   const size = dual && item.sizes ? item.sizes[sizeIdx] : undefined
   const unit = base + extras(picks, groups)
-  const opts = summary(picks, t, groups)
+  const opts = summary(picks, groups)
+  // the menu's own words for this branch: its description, and the nutrition of the chosen size and flavour
+  const meta = itemState(item.name)
+  const flavor = picks.flavor?.[0] ?? ''
+  const facts = meta?.nutrition.find((e) => e.size === (size ?? '') && e.flavor === flavor) ?? meta?.nutrition.find((e) => e.size === (size ?? '') && !e.flavor)
+  const nutrition = NUTRIENTS.filter((k) => facts?.[k] !== undefined)
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
@@ -67,7 +78,7 @@ export function ItemScreen({ item, gift = false, onClose, onAdded }: { item: Men
     if (g.kind === 'toggle') return { ...p, [g.id]: cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id] }
     return { ...p, [g.id]: g.optional && cur[0] === id ? [] : [id] }
   })
-  const chosen = (g: CustGroup) => g.options.filter((o) => picks[g.id]?.includes(o.id)).map((o) => t(o.label)).join(', ')
+  const chosen = (g: CustGroup) => g.options.filter((o) => picks[g.id]?.includes(o.id)).map((o) => o.label).join(', ')
   const confirm = (e: MouseEvent<HTMLButtonElement>) => {
     dropsFrom(e.currentTarget, '#73c3ff', 14, 1.1)
     add({ name: item.name, size, price: unit, opts }, qty)
@@ -81,7 +92,7 @@ export function ItemScreen({ item, gift = false, onClose, onAdded }: { item: Men
       <button type="button" className="item-back" onClick={onClose} aria-label={t('back')}><Back /></button>
       <div className={'item-topbar' + (scrolled ? ' show' : '')} aria-hidden={!scrolled}>
         <span className="item-thumb">{photo ? <img src={photo} alt="" /> : cup(34)}</span>
-        <span className="item-topbar-text"><strong>{item.name}</strong><span dir="ltr">{iqd(unit)} IQD</span></span>
+        <span className="item-topbar-text"><strong>{nameOf(item.name, lang)}</strong><span dir="ltr">{iqd(unit)} IQD</span></span>
       </div>
 
       <div className="item-hero" style={{ opacity: fade, transform: `scale(${0.85 + 0.15 * fade})` }}>
@@ -91,20 +102,28 @@ export function ItemScreen({ item, gift = false, onClose, onAdded }: { item: Men
 
       <div className="item-body">
         <section className="item-card">
-          <h1 id="item-title">{item.name}</h1>
-          <p className="item-desc">{DESC[item.name] ? t(DESC[item.name]) : t('descDefault')}</p>
+          <h1 id="item-title">{nameOf(item.name, lang)}</h1>
+          <p className="item-desc">{meta?.desc[lang] || (DESC[item.name] ? t(DESC[item.name]) : t('descDefault'))}</p>
           <p className="item-desc">{t('allergenNote')}</p>
           {dual && item.sizes && (
             <>
               <p className="item-label">{t('size')}</p>
               <div className="size-cards" role="radiogroup" aria-label={t('size')}>
-                {item.sizes.map((s, i) => (
+                {item.sizes.map((s, i, all) => (
                   <button key={s} type="button" role="radio" aria-checked={i === sizeIdx} className={'opt-card' + (i === sizeIdx ? ' on' : '')} onClick={() => setSizeIdx(i)}>
-                    <span className="opt-head"><span className="opt-radio">{i === sizeIdx && <IconCheck />}</span><strong>{t(i === 0 ? 'sizeSmall' : 'sizeBig')}</strong><em dir="ltr">{s}</em></span>
-                    <span className="opt-price" dir="ltr">{iqd((item.price as [number, number])[i])} IQD</span>
+                    <span className="opt-head"><span className="opt-radio">{i === sizeIdx && <IconCheck />}</span><strong>{t(i === 0 ? 'sizeSmall' : i === all.length - 1 ? 'sizeBig' : 'sizeMedium')}</strong><em dir="ltr">{s}</em></span>
+                    <span className="opt-price" dir="ltr">{iqd((item.price as number[])[i])} IQD</span>
                   </button>
                 ))}
               </div>
+            </>
+          )}
+          {nutrition.length > 0 && (
+            <>
+              <p className="item-label">{s('siteNutrition')}{(size || flavor) && <em> · <span dir="ltr">{size}</span>{size && flavor ? ', ' : ''}{flavor && groups[0]?.options.find((o) => o.id === flavor)?.label}</em>}</p>
+              <dl className="nutri">
+                {nutrition.map((k) => <div key={k}><dt>{s(nutrientLabel[k])}</dt><dd dir="ltr">{facts![k]} {nutrientUnit[k]}</dd></div>)}
+              </dl>
             </>
           )}
           {(
@@ -124,21 +143,19 @@ export function ItemScreen({ item, gift = false, onClose, onAdded }: { item: Men
           return (
             <section key={g.id} className={'cust-group' + (isOpen ? ' open' : '')}>
               <button type="button" className="cust-head" aria-expanded={isOpen} onClick={() => setOpen((o) => ({ ...o, [g.id]: !isOpen }))}>
-                <span className="cust-title">{t(g.title)}</span>
+                <span className="cust-title">{g.title}</span>
                 <span className="cust-value">{chosen(g)}</span>
                 <span className="cust-chev"><Chevron up={isOpen} /></span>
               </button>
               {isOpen && (
                 <div className="cust-body">
-                  {g.hint && <p className="cust-hint">{t(g.hint)}</p>}
                   {g.kind === 'choice' ? (
                     <div className="opt-grid" role={g.optional ? 'group' : 'radiogroup'}>
                       {g.options.map((o) => {
                         const on = !!picks[g.id]?.includes(o.id)
                         return (
                           <button key={o.id} type="button" role={g.optional ? 'checkbox' : 'radio'} aria-checked={on} className={'opt-card' + (on ? ' on' : '')} onClick={() => choose(g, o.id)}>
-                            <span className="opt-head"><span className="opt-radio">{on && <IconCheck />}</span><strong>{t(o.label)}</strong></span>
-                            {o.note && <span className="opt-note">{t(o.note)}</span>}
+                            <span className="opt-head"><span className="opt-radio">{on && <IconCheck />}</span><strong>{o.label}</strong></span>
                             {o.price ? <span className="opt-price" dir="ltr">+{iqd(o.price)} IQD</span> : null}
                           </button>
                         )
@@ -149,9 +166,9 @@ export function ItemScreen({ item, gift = false, onClose, onAdded }: { item: Men
                       const on = !!picks[g.id]?.includes(o.id)
                       return (
                         <div key={o.id} className="toggle-row">
-                          <span className="toggle-label">{t(o.label)}</span>
+                          <span className="toggle-label">{o.label}{o.price ? <small dir="ltr"> +{iqd(o.price)} IQD</small> : null}</span>
                           <span className="toggle-state">{on ? t('on') : t('off')}</span>
-                          <button type="button" role="switch" aria-checked={on} className={'switch' + (on ? ' on' : '')} onClick={() => choose(g, o.id)} aria-label={t(o.label)}>
+                          <button type="button" role="switch" aria-checked={on} className={'switch' + (on ? ' on' : '')} onClick={() => choose(g, o.id)} aria-label={o.label}>
                             <span className="knob">{on ? <IconCheck /> : '×'}</span>
                           </button>
                         </div>
@@ -168,7 +185,9 @@ export function ItemScreen({ item, gift = false, onClose, onAdded }: { item: Men
 
       <div className="item-cta">
         {/* gift mode: the item joins the gift basket (several items, like an ordinary order — owner 2026-09-14) */}
-        <button type="button" className="cta-btn" onClick={confirm}>{t(gift ? 'addToGift' : 'addToOrder')} · {iqd(unit * qty)} IQD</button>
+        {item.soldOut
+          ? <button type="button" className="cta-btn" disabled>{t('soldOutToday')}</button>
+          : <button type="button" className="cta-btn" onClick={confirm}>{t(gift ? 'addToGift' : 'addToOrder')} · {iqd(unit * qty)} IQD</button>}
       </div>
     </div>,
     document.body,

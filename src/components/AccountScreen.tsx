@@ -1,3 +1,4 @@
+import { FEATURES } from '../features'
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useLang } from '../i18n'
@@ -251,7 +252,7 @@ function Profile({ a }: { a: Account }) {
         )}
       </div>
 
-      <div className="acct-card">
+      {FEATURES.wallet && <div className="acct-card">
         <h3>{t('wallet')}</h3>
         <p className="acct-big">{iqd(a.balance)} <small>IQD</small></p>
         <div className="chips">
@@ -265,16 +266,16 @@ function Profile({ a }: { a: Account }) {
             ))}
           </ul>
         )}
-      </div>
+      </div>}
 
-      {inbox.length > 0 && (
+      {FEATURES.gifts && inbox.length > 0 && (
         <div className="acct-card acct-inbox">
           <h3>{t('giftsForYou')}</h3>
           <ul className="creations">{inbox.map((g) => <InboxRow key={g.id} g={g} />)}</ul>
         </div>
       )}
 
-      <div className="acct-card">
+      {FEATURES.community && <div className="acct-card">
         <h3><IconCommunity /> {t('navCommunityTitle')}</h3>
         <ul className="acct-stats" aria-label={t('navCommunityTitle')}>
           <li><b>{mine.length}</b><span>{t('statPosts')}</span></li>
@@ -286,9 +287,9 @@ function Profile({ a }: { a: Account }) {
         ) : (
           <p className="acct-hint">{t('noPostsYet')} <a href="#community" className="inline-link">{t('navCommunityTitle')} <IconArrow /></a></p>
         )}
-      </div>
+      </div>}
 
-      <div className="acct-card">
+      {FEATURES.gifts && <div className="acct-card">
         <h3>{t('giftCards')}</h3>
         <p className="acct-hint">{t('giftCardHint')}</p>
         <div className="chips">
@@ -296,7 +297,7 @@ function Profile({ a }: { a: Account }) {
         </div>
         {buyMsg && <p className="acct-hint" role="status">{buyMsg}</p>}
         {a.giftCards.length > 0 && <ul className="giftcards">{a.giftCards.map((g) => <GiftCardRow key={g.id} g={g} from={a.name} />)}</ul>}
-      </div>
+      </div>}
 
       <TrackCard orders={a.orders} />
       <p className="demo-note">{t('demoNote')}</p>
@@ -336,7 +337,7 @@ export function AccountScreen() {
   const a = useAccount()
   return (
     <section className="account" id="account">
-      <SectionHead eyebrow={t('accountEyebrow')} title={a ? t('helloName').replace('{name}', a.name) : t('signInTitle')} sub={a ? undefined : t('signInSub')} />
+      <SectionHead eyebrow={t('accountEyebrow')} title={a ? t('helloName').replace('{name}', a.name) : t('signInTitle')} sub={a ? undefined : t(FEATURES.wallet || FEATURES.gifts ? 'signInSub' : 'signInSubLaunch')} />
       {a ? <Profile a={a} /> : <SignIn />}
     </section>
   )

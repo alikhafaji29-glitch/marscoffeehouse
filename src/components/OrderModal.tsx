@@ -3,8 +3,12 @@ import { useLang } from '../i18n'
 import { useCart } from '../cart'
 import { iqd, normPhone, payAtPickup, payFromWallet, sendDrinkGift, useAccount } from '../account'
 import { SendToFriend } from './SendToFriend'
-import type { Delivery } from '../account'
+import type { Delivery, GeoPoint } from '../account'
+import { ShareLocation, mapsLink } from './ShareLocation'
 import { OrderTracker } from './OrderTracker'
+import { settingsFor } from '../staff/store'
+import { useS } from '../staff/strings'
+import { FEATURES } from '../features'
 
 /*
  * How to pay: at pickup (demo order, nothing charged) or from the demo wallet;
@@ -13,22 +17,29 @@ import { OrderTracker } from './OrderTracker'
  */
 export function OrderModal({ onClose }: { onClose: () => void }) {
   const { t } = useLang()
+  const s = useS()
+  const set = settingsFor() // the branch's order settings (staff dashboard → Tools)
   const { lines, total, clear, basket } = useCart()
   const a = useAccount()
   const [note, setNote] = useState('')
   const [paid, setPaid] = useState<{ orderId: string; points: number; reward: boolean } | null>(null)
-  const [how, setHow] = useState<'pickup' | 'delivery'>('pickup')
+  const [how, setHow] = useState<'pickup' | 'delivery'>(set.pickup ? 'pickup' : 'delivery')
   const [phone, setPhone] = useState(a?.phone ?? '')
   const [address, setAddress] = useState(a?.address ?? '')
+  const [location, setLocation] = useState<GeoPoint | null>(null)
   const canWallet = !!a && total > 0
   const placed = paid ? a?.orders.find((o) => o.id === paid.orderId) : undefined
+  // orders by WhatsApp: the order written out, for the customer to send to the branch
+  const waLink = placed && set.reach === 'whatsapp'
+    ? `https://wa.me/${set.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent([`Mars CoffeeHouse · #${placed.id}`, ...placed.items, `${iqd(placed.total)} IQD`, ...(placed.delivery ? [`${t('getDelivery')}: ${placed.delivery.address} · ${placed.delivery.phone}`, placed.delivery.location ? mapsLink(placed.delivery.location) : ''].filter(Boolean) : [t('getPickup')])].join('\n'))}`
+    : ''
 
   const itemLines = () => lines.map((l) => `${l.name}${l.size ? ` (${l.size})` : ''}${l.opts?.length ? ` · ${l.opts.join(', ')}` : ''} ×${l.qty}`)
   /** the delivery details when delivering; null when something is missing (a note is shown) */
   const details = (): Delivery | undefined | null => {
     if (how !== 'delivery') return undefined
-    if (normPhone(phone).length < 10 || address.trim().length < 6) { setNote(t('needAddress')); return null }
-    return { phone: phone.trim(), address: address.trim() }
+    if (normPhone(phone).length < 10 || (address.trim().length < 6 && !location)) { setNote(t('needAddress')); return null }
+    return { phone: phone.trim(), address: address.trim(), location: location ?? undefined }
   }
   const payWallet = () => {
     const d = details(); if (d === null) return
@@ -81,6 +92,7 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
           <>
             <h3>{t('orderPlaced')}</h3>
             {placed && <OrderTracker order={placed} dark />}
+            {waLink && <><a className="btn-pill" href={waLink} target="_blank" rel="noreferrer">{s('siteSendWhatsapp')}</a><p className="modal-line small">{s('siteWhatsappHint')}</p></>}
             <p className="modal-line">{t('pointsEarned').replace('{n}', String(paid.points))}</p>
             {paid.reward && <p className="modal-line"><b>{t('rewardUnlocked')}</b></p>}
             <button className="btn-pill" onClick={onClose}>{t('close')}</button>
@@ -90,10 +102,10 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
             <h3>{t('howPay')}</h3>
             {canWallet && (
               <>
-                <div className="get-toggle" role="radiogroup" aria-label={t('getHow')}>
+                {set.pickup && set.delivery && <div className="get-toggle" role="radiogroup" aria-label={t('getHow')}>
                   <button type="button" role="radio" aria-checked={how === 'pickup'} className={how === 'pickup' ? 'on' : ''} onClick={() => { setHow('pickup'); setNote('') }}>{t('getPickup')}</button>
                   <button type="button" role="radio" aria-checked={how === 'delivery'} className={how === 'delivery' ? 'on' : ''} onClick={() => setHow('delivery')}>{t('getDelivery')}</button>
-                </div>
+                </div>}
                 {how === 'delivery' && (
                   <div className="deliv-form">
                     <label>
@@ -104,6 +116,7 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
                       <span>{t('deliveryAddress')}</span>
                       <textarea rows={2} value={address} onChange={(e) => { setAddress(e.target.value); setNote('') }} placeholder={t('addressHint')} autoComplete="street-address" />
                     </label>
+                    <ShareLocation value={location} onChange={(p) => { setLocation(p); setNote('') }} />
                   </div>
                 )}
                 <button className="btn-pill wallet-pay" onClick={pickup}>
@@ -112,14 +125,14 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
                 </button>
               </>
             )}
-            {canWallet && (
+            {canWallet && FEATURES.wallet && (
               <button className="btn-pill wallet-pay" onClick={payWallet} disabled={a!.balance < total}>
                 {t('payWallet')} · {iqd(total)} IQD
                 <small>{t('walletBalance')} {iqd(a!.balance)}{a!.balance < total ? <> · <a href="#account" onClick={onClose} className="inline-link light">{t('topUpLink')}</a></> : null}</small>
               </button>
             )}
             {!a && total > 0 && (
-              <a className="btn-pill ghost" href="#account" onClick={onClose}>{t('signInToPay')}</a>
+              <a className="btn-pill ghost" href="#account" onClick={onClose}>{t(FEATURES.wallet ? 'signInToPay' : 'signInToOrder')}</a>
             )}
             {note && <div className="note" role="status">{note}</div>}
           </>

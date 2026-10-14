@@ -1,4 +1,5 @@
-import { onCheckout, openBuild } from './bus'
+import { onCheckout, onOpenCombo, openBuild } from './bus'
+import { ComboFlow } from './components/ComboFlow'
 import { TimeChanger } from './components/TimeChanger'
 import { useEffect, useState } from 'react'
 import { Header } from './components/Header'
@@ -11,8 +12,11 @@ import { CartBar, CartModal } from './components/Cart'
 import { TrackBar } from './components/TrackBar'
 import { AccountScreen } from './components/AccountScreen'
 import { GiftLanding } from './components/GiftLanding'
-import { StaffScreen } from './components/StaffScreen'
+import { StaffScreen } from './staff/StaffScreen'
+import { staffData, useStaff } from './staff/store'
+import { FEATURES } from './features'
 import { CartProvider } from './cart'
+import { useMenuVersion } from './menuAdmin'
 import type { MenuItem } from './menu'
 
 /*
@@ -32,20 +36,32 @@ const viewFromHash = (): View => {
   const h = location.hash.replace('#', '')
   if (h === 'mood') { history.replaceState(null, '', '#mood-home'); return 'home' } // old links to the removed Mood screen
   if (h === GIFT) return 'menu'
+  if (h === 'community' && !FEATURES.community) return 'home' // hidden for launch (features.ts)
   if (h === 'join') return 'account' // Join now: the account screen on the new-customer (code) step
   return (VIEWS as string[]).includes(h) ? (h as View) : 'home'
 }
 
 export default function App() {
+  useMenuVersion() // staff price / stock changes redraw the site
+  useStaff() // and so do the dashboard's events, offers, item details and order settings
   const [orderOpen, setOrderOpen] = useState(false)
   const [cartOpen, setCartOpen] = useState(false)
   const [sheetItem, setSheetItem] = useState<MenuItem | null>(null)
   const [sheetToCheckout, setSheetToCheckout] = useState(false) // opened from New this season: Add to order goes on to checkout
   const [view, setView] = useState<View>(viewFromHash)
-  const [gift, setGift] = useState(() => location.hash === '#' + GIFT)
+  const [gift, setGift] = useState(() => FEATURES.gifts && location.hash === '#' + GIFT)
   const openOrder = () => setOrderOpen(true)
   useEffect(() => onCheckout(() => setCartOpen(true)), []) // the mood game's Order it goes straight to checkout
   useEffect(() => { if (location.hash === '#build') openBuild() }, []) // old links to the removed soda builder screen
+  // an offer's combo order: from the Positive Hours slide, or from the offer's own link (#positive-hours)
+  const [combo, setCombo] = useState('')
+  useEffect(() => onOpenCombo(setCombo), [])
+  useEffect(() => {
+    const fromLink = () => { const o = staffData().offers.find((x) => x.active && x.slug && '#' + x.slug === location.hash); if (o) setCombo(o.id) }
+    fromLink()
+    window.addEventListener('hashchange', fromLink)
+    return () => window.removeEventListener('hashchange', fromLink)
+  }, [])
   // desktop is one long page: a link that opens the site on a section (#menu, #community, #account, #gift, #join)
   // scrolls there once React has drawn it (the browser's own jump happens before the section exists)
   useEffect(() => {
@@ -66,7 +82,7 @@ export default function App() {
     const onHash = () => {
       const v = viewFromHash()
       setView(v)
-      setGift(location.hash === '#' + GIFT)
+      setGift(FEATURES.gifts && location.hash === '#' + GIFT)
       if (!isPhone()) return
       const id = location.hash.replace('#', '')
       // a screen switch starts at the top (after React has shown the screen); an anchor inside the
@@ -111,14 +127,16 @@ export default function App() {
         <div className="screen screen-menu">
           <MenuSection onPick={setSheetItem} gift={gift} />
         </div>
-        <div className="screen screen-community">
-          <Community />
-        </div>
+        {FEATURES.community && (
+          <div className="screen screen-community">
+            <Community />
+          </div>
+        )}
         <div className="screen screen-account">
           <AccountScreen />
         </div>
       </main>
-      <GiftLanding />
+      {FEATURES.gifts && <GiftLanding />}
       <TrackBar />
       <CartBar onOpen={() => setCartOpen(true)} />
       {sheetItem && <ItemScreen item={sheetItem} gift={gift} onClose={() => setSheetItem(null)} onAdded={sheetToCheckout ? () => { setSheetToCheckout(false); setCartOpen(true) } : undefined} />}
@@ -132,6 +150,7 @@ export default function App() {
         />
       )}
       {orderOpen && <OrderModal onClose={() => setOrderOpen(false)} />}
+      {combo && <ComboFlow offerId={combo} onClose={() => setCombo('')} />}
     </CartProvider>
   )
 }

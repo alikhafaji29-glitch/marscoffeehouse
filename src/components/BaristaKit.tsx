@@ -13,7 +13,13 @@ import { openCheckout } from '../bus'
  * palette, the drawing helpers and props (backdrop, bottles, pumps, ice scoop, carton, blender, hand), and the game
  * frame (step dots, hint, scene, action row, ice buttons, result panel).
  */
-export const EXTRA = { shot: 1000, lactose: 1000, whip: 2000, foam: 1000, pump: 1000 } // the menu's "extra" prices (pump = Add Flavors)
+// the menu's "extra" prices (pump = Add Flavors), read from the menu so a staff price change reaches the games
+const extraPrice = (name: string, fallback: number) => { const it = findItem(name); return it ? priceAt(it, 0) : fallback }
+export const EXTRA = {
+  get shot() { return extraPrice('Espresso Shot', 1000) }, get lactose() { return extraPrice('Free Lactose', 1000) },
+  get whip() { return extraPrice('Whipped Cream', 2000) }, get foam() { return extraPrice('Cold Foam', 1000) },
+  get pump() { return extraPrice('Add Flavors', 1000) },
+}
 export const MAX_PUMPS = 3, MAX_SYRUPS = 2 // syrup pumps per drink, different syrups per drink
 export const findItem = (name: string): MenuItem | undefined => MENU.flatMap((c) => c.items).find((i) => i.name === name)
 export const priceAt = (it: MenuItem, i: number) => (Array.isArray(it.price) ? it.price[i] : it.price)
@@ -338,8 +344,9 @@ export function ServePanel({ item, opts, size, setSize, price, onDone, onAgain }
         </div>
       )}
       <p className="lg-price" dir="ltr">{iqd(price)} IQD</p>
+      {item.soldOut && <p className="sold-note">{t('soldOutToday')}</p>}
       <div className="lg-serve-actions">
-        <button type="button" className="pill solid" onClick={order}>{t('lgAdd')}</button>
+        <button type="button" className="pill solid" onClick={order} disabled={item.soldOut}>{t('lgAdd')}</button>
         <button type="button" className="pill outline small" onClick={onAgain}>{t('lgAgain')}</button>
       </div>
     </div>
