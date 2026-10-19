@@ -66,10 +66,13 @@ if (backendOn && typeof document !== 'undefined') {
   document.addEventListener('visibilitychange', () => { if (!document.hidden && state.staff) void getClient().then((sb) => sb && load(sb)) })
 }
 
+/** a sign-in name without @ is a username: "demo" signs in as demo@marscoffeehouse.com (owner, 2026-10-19) */
+const STAFF_DOMAIN = 'marscoffeehouse.com'
+export const staffEmailOf = (name: string) => { const n = name.trim().toLowerCase(); return n.includes('@') ? n : `${n}@${STAFF_DOMAIN}` }
 export async function staffSignIn(email: string, password: string): Promise<'ok' | 'bad' | 'notstaff' | 'error'> {
   const sb = await getClient()
   if (!sb) return 'error'
-  const { error } = await sb.auth.signInWithPassword({ email: email.trim(), password })
+  const { error } = await sb.auth.signInWithPassword({ email: staffEmailOf(email), password })
   if (error) return error.status === 400 ? 'bad' : 'error'
   const res = await enter(sb)
   if (res === 'notstaff') await sb.auth.signOut() // a real sign-in, but not one the owner listed as staff

@@ -124,8 +124,8 @@ export function StaffScreen() {
         <a href="#top" className="d-brand"><Logo /></a>
         {backendOn ? (
           <form className="staff-gate sign" onSubmit={signIn}>
-            <label htmlFor="staff-email">{s('staffEmail')}</label>
-            <input id="staff-email" type="email" autoComplete="username" value={email} onChange={(e) => { setEmail(e.target.value); setSignErr('') }} dir="ltr" required />
+            <label htmlFor="staff-email">{s('staffEmailOrUser')}</label>
+            <input id="staff-email" type="text" autoCapitalize="none" autoCorrect="off" spellCheck={false} autoComplete="username" value={email} onChange={(e) => { setEmail(e.target.value); setSignErr('') }} dir="ltr" required />
             <label htmlFor="staff-password">{s('staffPassword')}</label>
             <input id="staff-password" type="password" autoComplete="current-password" value={password} onChange={(e) => { setPassword(e.target.value); setSignErr('') }} dir="ltr" required />
             <button type="submit" className="d-btn solid" disabled={busy || !remote.ready}>{busy || !remote.ready ? s('staffChecking') : s('staffSignIn')}</button>

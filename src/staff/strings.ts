@@ -23,6 +23,7 @@ const S = {
   staffEmail: ['Email', 'البريد الإلكتروني', 'ئیمەیڵ'],
   staffPassword: ['Password', 'كلمة المرور', 'وشەی نهێنی'],
   staffUsername: ['Username', 'اسم المستخدم', 'ناوی بەکارهێنەر'],
+  staffEmailOrUser: ['Username or email', 'اسم المستخدم أو البريد الإلكتروني', 'ناوی بەکارهێنەر یان ئیمەیڵ'],
   staffSignIn: ['Sign in', 'تسجيل الدخول', 'چوونەژوورەوە'],
   staffChecking: ['One moment…', 'لحظة…', 'چرکەیەک…'],
   staffSignHint: ['Staff accounts are created by the owner.', 'حسابات الموظفين يُنشئها المالك.', 'هەژماری کارمەندان لەلایەن خاوەنەکەوە دروست دەکرێن.'],
