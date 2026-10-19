@@ -234,7 +234,7 @@ export function markSynced(uid: string) {
 /** the stage staff moved the order to, as the backend has it */
 export function applyRemoteStatus(uid: string, status: Status, history?: Order['history'], reason?: string | null) {
   const { mine, o } = findByUid(uid)
-  if (!o || (o.status === status && (history?.length ?? 0) <= (o.history?.length ?? 0))) return
+  if (!o || (o.status === status && (history?.length ?? 0) <= (o.history?.length ?? 0) && (status !== 'cancelled' || !reason || o.cancelReason === reason))) return
   o.status = status
   if (status === 'cancelled') o.cancelReason = reason ?? undefined
   if (history?.length) o.history = history

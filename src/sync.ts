@@ -2,7 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { applyRemoteStatus, markSynced, myOrders, setOrderPlacedHook } from './account'
 import type { Order } from './account'
 import { backendOn, ensureUser, getClient } from './backend'
-import { isActive } from './orders'
+import { isActive, recentlyCancelled } from './orders'
 import type { Status } from './orders'
 
 /*
@@ -45,7 +45,8 @@ async function push(sb: SupabaseClient, o: Order) {
 
 /** the stages of this device's orders, as the database has them now */
 async function pull(sb: SupabaseClient) {
-  const uids = myOrders().filter((o) => o.uid && o.synced && isActive(o)).map((o) => o.uid!)
+  // the ones on their way, and a recent cancellation whose reason this device has not heard yet
+  const uids = myOrders().filter((o) => o.uid && o.synced && (isActive(o) || (recentlyCancelled(o) && !o.cancelReason))).map((o) => o.uid!)
   if (!uids.length) return
   const { data, error } = await sb.from('orders').select('uid,status,history,cancel_reason').in('uid', uids)
   if (error) { console.warn('[backend] could not read order stages:', error.message); return }
@@ -55,7 +56,7 @@ async function pull(sb: SupabaseClient) {
 async function run() {
   const mine = myOrders().filter((o) => o.uid)
   const waiting = mine.filter((o) => !o.synced)
-  const active = mine.filter((o) => o.synced && isActive(o))
+  const active = mine.filter((o) => o.synced && (isActive(o) || (recentlyCancelled(o) && !o.cancelReason)))
   if (!waiting.length && !active.length) return // nothing of this device's is in flight: no connection is opened
   const sb = await getClient()
   if (!sb || !(await ensureUser(sb))) return

@@ -156,6 +156,10 @@ body {
   flex-direction: column;
   gap: 1rem;
   box-shadow: 0 18px 50px rgba(3, 30, 70, 0.35);
+  /* a tall window (several orders in Track order) scrolls inside the screen instead of running off it */
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 .modal h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 0.4rem; }
 .modal .note { font-size: 0.85rem; opacity: 0.9; min-height: 1.1em; }
