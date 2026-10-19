@@ -310,6 +310,8 @@ const S = {
   comboN: ['Combo {n}', 'كومبو {n}', 'کۆمبۆی {n}'],
   comboOf: ['Combo {n} of {of}', 'كومبو {n} من {of}', 'کۆمبۆی {n} لە {of}'],
   comboSame: ['Same as combo {n}', 'مثل كومبو {n}', 'وەک کۆمبۆی {n}'],
+  comboRemove: ['Remove combo {n}', 'حذف كومبو {n}', 'لابردنی کۆمبۆی {n}'],
+  comboRemoveShort: ['Remove', 'حذف', 'لابردن'],
   comboFewer: ['One combo fewer', 'كومبو أقل', 'کۆمبۆیەک کەمتر'],
   comboMore: ['One combo more', 'كومبو إضافي', 'کۆمبۆیەکی زیاتر'],
   comboNext: ['Next', 'التالي', 'دواتر'],

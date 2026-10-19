@@ -1076,6 +1076,12 @@ body[data-view='home'] .deck > .slide:first-child::before { content: ''; positio
 .combo-count-sum { margin: 0; color: rgba(0, 47, 109, 0.75); }
 .combo-count-sum b { color: var(--navy); }
 .combo-of { font: 700 0.66rem/1 var(--font-sans); text-transform: uppercase; letter-spacing: 0.06em; color: var(--navy); background: rgba(0, 47, 109, 0.08); border-radius: 999px; padding: 0.3rem 0.55rem; }
+.combo-tools { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.combo-remove { font: 600 0.85rem/1 var(--font-sans); min-height: 42px; padding: 0 1rem; border-radius: 999px; border: 1.5px solid rgba(179, 38, 30, 0.35); background: #fff; color: #b3261e; cursor: pointer; }
+.combo-tools .combo-remove { margin-inline-start: auto; }
+.combo-summary li.combo-sum-head { background: rgba(0, 47, 109, 0.04); padding: 0.45rem 0.9rem; }
+.combo-sum-head b { font-family: var(--font-serif); font-size: 1.05rem; }
+.combo-sum-head .combo-remove { min-height: 34px; padding: 0 0.8rem; font-size: 0.78rem; }
 .combo-same { align-self: flex-start; font: 600 0.88rem/1 var(--font-sans); min-height: 42px; padding: 0 1rem; border-radius: 999px; border: 1.5px dashed var(--sky-deep); background: #f7fbff; color: var(--navy); cursor: pointer; }
 /* the category chips of the drink step: stay at the top of the list while it scrolls */
 .combo-cats { position: sticky; top: -1rem; z-index: 2; flex: none; display: flex; gap: 0.4rem; overflow-x: auto; scrollbar-width: none; margin: 0 -1.3rem; padding: 0.6rem 1.3rem; background: var(--cream); border-bottom: 1px solid rgba(0, 36, 76, 0.1); }

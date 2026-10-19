@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useLang } from '../i18n'
 import { iqd, normPhone, placeOfferOrder, useAccount, useMyOrders } from '../account'
@@ -24,7 +24,8 @@ import { useCountdown } from './useCountdown'
  * is placed at the combo price (plus the service fee when the offer has one), cash on delivery, with no sign-in.
  * It lands on the staff Orders page as "Request received" and the customer follows it on the tracker.
  * It starts by asking how many combos (owner, 2026-10-19); each combo's steps then follow in turn ("Combo 2 of 3",
- * with "Same as combo 1"), the bill is the count times the combo price plus one service fee.
+ * with "Same as combo 1"), the bill is the count times the combo price plus one service fee. While there are two or
+ * more, any one combo can be removed before ordering (on its steps, or in the details' list).
  * A step with several menu categories (the drinks) has a row of category chips on top that stays in view: it lights
  * the category being looked at and a tap jumps to one (owner, 2026-10-19).
  */
@@ -142,6 +143,22 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
     setSizes((z) => Object.fromEntries(Object.entries(z).filter(([key]) => keep(key))))
   }
   // "Same as combo n": the previous combo's choices, then on to the next combo (or the details)
+  // remove one combo before ordering: the ones after it move up a place, with their choices
+  const removeCombo = (k: number) => {
+    if (count <= 1) return
+    const shift = <T,>(m: Record<string, T>) => Object.fromEntries(Object.entries(m).flatMap(([key, v]) => {
+      const at = key.indexOf(':')
+      const c = Number(key.slice(0, at))
+      return c === k ? [] : [[c > k ? `${c - 1}${key.slice(at)}` : key, v]]
+    }))
+    setPicks((m) => shift(m))
+    setSizes((m) => shift(m))
+    setCount(count - 1)
+    setNote('')
+    // from the details stay on the details; from a combo's steps go on to the next combo (or the details)
+    const details = (count - 1) * groups.length + 1
+    setStep(step >= DETAILS ? details : Math.min(k * groups.length + 1, details))
+  }
   const sameAsBefore = () => {
     if (!ps || ps.k === 0) return
     const from = ps.k - 1
@@ -219,8 +236,13 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
           {ps && (
             <>
               <p className="combo-hint">{s('comboPick', { n: cur.g.pick })}</p>
-              {ps.k > 0 && ps.i === 0 && groups.every(({ g }) => chosen(ps.k - 1, g.id).length >= g.pick) && (
-                <button type="button" className="combo-same" onClick={sameAsBefore}>{s('comboSame', { n: ps.k })}</button>
+              {(count > 1 || (ps.k > 0 && ps.i === 0)) && (
+                <div className="combo-tools">
+                  {ps.k > 0 && ps.i === 0 && groups.every(({ g }) => chosen(ps.k - 1, g.id).length >= g.pick) && (
+                    <button type="button" className="combo-same" onClick={sameAsBefore}>{s('comboSame', { n: ps.k })}</button>
+                  )}
+                  {count > 1 && <button type="button" className="combo-remove" onClick={() => removeCombo(ps.k)}>{s('comboRemove', { n: ps.k + 1 })}</button>}
+                </div>
               )}
               {cur.cats.length > 1 && (
                 <div className="combo-cats" ref={chipsRef} role="tablist" aria-label={s('category')}>
@@ -263,7 +285,12 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
             <>
               <ul className="combo-summary">
                 {pickSteps.map((x, n) => (
-                  <li key={kk(x.k, groups[x.i].g.id)}><span>{stepLabel(x)}</span><b>{chosen(x.k, groups[x.i].g.id).map((m) => { const it = ALL.find((y) => y.name === m); const z = it && sizeOf(x.k, it); return nameOf(m, lang) + (z ? ` (${z})` : '') }).join(', ')}</b><button type="button" className="link-btn" onClick={() => setStep(n + 1)}>{s('comboChange')}</button></li>
+                  <Fragment key={kk(x.k, groups[x.i].g.id)}>
+                  {count > 1 && x.i === 0 && (
+                    <li className="combo-sum-head"><b>{s('comboN', { n: x.k + 1 })}</b><button type="button" className="combo-remove" onClick={() => removeCombo(x.k)} aria-label={s('comboRemove', { n: x.k + 1 })}>{s('comboRemoveShort')}</button></li>
+                  )}
+                  <li><span>{count > 1 ? label(groups[x.i].g) : stepLabel(x)}</span><b>{chosen(x.k, groups[x.i].g.id).map((m) => { const it = ALL.find((y) => y.name === m); const z = it && sizeOf(x.k, it); return nameOf(m, lang) + (z ? ` (${z})` : '') }).join(', ')}</b><button type="button" className="link-btn" onClick={() => setStep(n + 1)}>{s('comboChange')}</button></li>
+                  </Fragment>
                 ))}
               </ul>
               <div className="combo-form">
