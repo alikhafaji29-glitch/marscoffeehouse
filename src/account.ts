@@ -2,7 +2,7 @@ import { customerBranch } from './staff/store'
 import { newUid } from './backend'
 import { useEffect, useState } from 'react'
 import { pushNotice } from './notify'
-import type { Stage } from './orders'
+import type { Status } from './orders'
 
 /*
  * Customer account — DEMO. Everything lives in localStorage on this device:
@@ -29,8 +29,9 @@ export interface Order {
   items: string[]
   points: number
   pay?: 'wallet' | 'pickup'
-  status?: Stage // set by the staff dashboard; missing = 'received'
-  history?: { stage: Stage; at: number }[]
+  status?: Status // set by the staff dashboard; missing = 'received'
+  history?: { stage: Status; at: number }[]
+  cancelReason?: string // when cancelled: 'r:<code>' for a ready-made reason (CANCEL_REASONS), else the staff's words
   customer?: { name: string; phone: string }
   fulfil?: 'pickup' | 'delivery'
   delivery?: Delivery // phone to call + address, delivery orders only
@@ -181,11 +182,12 @@ function placeOrder(total: number, items: string[], pay: 'wallet' | 'pickup', de
   return { ok: true, points, reward, orderId }
 }
 /** Staff dashboard: move an order to a stage. Works whether or not the customer is signed in on this device. */
-export function setOrderStatus(id: string, stage: Stage) {
+export function setOrderStatus(id: string, stage: Status, reason?: string) {
   const mine = account?.orders.find((x) => x.id === id)
   const o = mine ?? guest.find((x) => x.id === id)
   if (!o || o.status === stage) return
   o.status = stage
+  if (stage === 'cancelled') o.cancelReason = reason
   o.history = [...(o.history ?? []), { stage, at: Date.now() }]
   if (mine) { account = { ...account! }; save() } else { guest = [...guest]; saveGuest() }
 }
@@ -230,10 +232,11 @@ export function markSynced(uid: string) {
   commit(mine)
 }
 /** the stage staff moved the order to, as the backend has it */
-export function applyRemoteStatus(uid: string, status: Stage, history?: Order['history']) {
+export function applyRemoteStatus(uid: string, status: Status, history?: Order['history'], reason?: string | null) {
   const { mine, o } = findByUid(uid)
   if (!o || (o.status === status && (history?.length ?? 0) <= (o.history?.length ?? 0))) return
   o.status = status
+  if (status === 'cancelled') o.cancelReason = reason ?? undefined
   if (history?.length) o.history = history
   commit(mine)
 }

@@ -2,6 +2,7 @@
  * New-order chime for the staff dashboard: two soft bell notes, synthesised with
  * the Web Audio API (no audio file to load). Browsers only let audio start after a
  * tap, so unlockAudio() runs on the PIN "Enter" and on the sound toggle.
+ * statusSound() is the customer's: a short tone when staff move their order (owner, 2026-10-19).
  */
 let ctx: AudioContext | null = null
 
@@ -35,4 +36,15 @@ export function chime() {
     note(880, t0 + rep, 0.45)          // A5
     note(1318.5, t0 + rep + 0.18, 0.6) // E6
   }
+}
+
+/** the customer's order moved on: a short rising ding; delivered = three rising notes; cancelled = two falling, lower.
+ *  Phones that can also buzz do so. Silent until the visitor has tapped the page once (the browser's rule). */
+export function statusSound(status: string) {
+  try { navigator.vibrate?.(status === 'cancelled' ? [120, 80, 120] : 90) } catch { /* no vibration */ }
+  if (!ctx || ctx.state !== 'running') return
+  const t0 = ctx.currentTime + 0.02
+  if (status === 'cancelled') { note(659.3, t0, 0.35, 0.2); note(523.3, t0 + 0.22, 0.5, 0.2); return } // E5 → C5
+  if (status === 'delivered') { note(1046.5, t0, 0.3); note(1318.5, t0 + 0.14, 0.3); note(1568, t0 + 0.28, 0.55); return } // C6 E6 G6
+  note(1046.5, t0, 0.3); note(1318.5, t0 + 0.15, 0.5) // C6 → E6
 }

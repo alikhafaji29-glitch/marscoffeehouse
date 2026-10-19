@@ -3,7 +3,7 @@ import { applyRemoteStatus, markSynced, myOrders, setOrderPlacedHook } from './a
 import type { Order } from './account'
 import { backendOn, ensureUser, getClient } from './backend'
 import { isActive } from './orders'
-import type { Stage } from './orders'
+import type { Status } from './orders'
 
 /*
  * The customer's side of the shared backend: an order placed on this device is also written to the database (so the
@@ -12,7 +12,7 @@ import type { Stage } from './orders'
  * and it is sent as soon as the page can reach the server again.
  */
 export interface OrderRow {
-  uid: string; code: string; created_at: string; branch: string; status: Stage; history: { stage: Stage; at: number }[]
+  uid: string; code: string; created_at: string; branch: string; status: Status; history: { stage: Status; at: number }[]; cancel_reason: string | null
   total: number; items: string[]; pay: 'wallet' | 'pickup'; fulfil: 'pickup' | 'delivery'
   customer_name: string | null; customer_phone: string | null; delivery_phone: string | null; address: string | null
   location: { lat: number; lng: number; acc?: number } | null; gift_to: string | null
@@ -26,7 +26,7 @@ export const toRow = (o: Order) => ({
 })
 export const fromRow = (r: OrderRow): Order => ({
   id: r.code, uid: r.uid, synced: true, at: Date.parse(r.created_at), total: r.total, items: r.items, points: r.points, pay: r.pay,
-  status: r.status, history: r.history ?? [],
+  status: r.status, history: r.history ?? [], cancelReason: r.cancel_reason ?? undefined,
   customer: r.customer_name || r.customer_phone ? { name: r.customer_name ?? '', phone: r.customer_phone ?? '' } : undefined,
   fulfil: r.fulfil,
   delivery: r.fulfil === 'delivery' ? { phone: r.delivery_phone ?? r.customer_phone ?? '', address: r.address ?? '', location: r.location ?? undefined } : undefined,
@@ -47,9 +47,9 @@ async function push(sb: SupabaseClient, o: Order) {
 async function pull(sb: SupabaseClient) {
   const uids = myOrders().filter((o) => o.uid && o.synced && isActive(o)).map((o) => o.uid!)
   if (!uids.length) return
-  const { data, error } = await sb.from('orders').select('uid,status,history').in('uid', uids)
+  const { data, error } = await sb.from('orders').select('uid,status,history,cancel_reason').in('uid', uids)
   if (error) { console.warn('[backend] could not read order stages:', error.message); return }
-  for (const r of data as Pick<OrderRow, 'uid' | 'status' | 'history'>[]) applyRemoteStatus(r.uid, r.status, r.history)
+  for (const r of data as Pick<OrderRow, 'uid' | 'status' | 'history' | 'cancel_reason'>[]) applyRemoteStatus(r.uid, r.status, r.history, r.cancel_reason)
 }
 
 async function run() {
@@ -66,8 +66,8 @@ async function run() {
     // the row rules let a customer hear only their own orders
     sb.channel('my-orders')
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, (p) => {
-        const r = p.new as Pick<OrderRow, 'uid' | 'status' | 'history'>
-        applyRemoteStatus(r.uid, r.status, r.history)
+        const r = p.new as Pick<OrderRow, 'uid' | 'status' | 'history' | 'cancel_reason'>
+        applyRemoteStatus(r.uid, r.status, r.history, r.cancel_reason)
       })
       .subscribe()
   }

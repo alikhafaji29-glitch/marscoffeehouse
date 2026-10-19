@@ -1,7 +1,7 @@
 import { useLang } from '../i18n'
 import { iqd } from '../account'
 import type { Order } from '../account'
-import { stageIndex, stagesFor, useNow } from '../orders'
+import { isCancelled, reasonText, stageIndex, stagesFor, useNow } from '../orders'
 import { IconCheck } from './Icons'
 import { useS } from '../staff/strings'
 
@@ -21,14 +21,20 @@ export function OrderTracker({ order, dark = false }: { order: Order; dark?: boo
       </div>
       <p className="track-items">{order.items.join(', ')}</p>
       {order.delivery && <p className="track-items">{t('deliveryTo')}: {[order.delivery.address, order.delivery.location && s('locPin')].filter(Boolean).join(' · ')}</p>}
-      <ol className="track-steps">
+      {isCancelled(order) && (
+        <div className="track-cancelled" role="status">
+          <b>{t('orderCancelled')}</b>
+          {order.cancelReason && <span>{t('cancelReason')}: {reasonText(order.cancelReason, t)}</span>}
+        </div>
+      )}
+      {!isCancelled(order) && <ol className="track-steps">
         {stagesFor(order).map((s, i) => (
           <li key={s} className={i < cur ? 'past' : i === cur ? 'now' : ''} aria-current={i === cur ? 'step' : undefined}>
             <span className="track-dot">{i < cur ? <IconCheck /> : null}</span>
             <span className="track-label">{t(LABEL[s])}</span>
           </li>
         ))}
-      </ol>
+      </ol>}
     </div>
   )
 }

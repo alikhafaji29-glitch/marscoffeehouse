@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useLang } from '../i18n'
+import { unlockAudio } from '../chime'
 import { useCart } from '../cart'
 import { iqd, normPhone, payAtPickup, payFromWallet, sendDrinkGift, useAccount } from '../account'
 import { SendToFriend } from './SendToFriend'
@@ -42,6 +43,7 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
     return { phone: phone.trim(), address: address.trim(), location: location ?? undefined }
   }
   const payWallet = () => {
+    unlockAudio() // this tap lets the order's status sounds play later
     const d = details(); if (d === null) return
     const res = payFromWallet(total, itemLines(), d)
     if (!res.ok) { setNote(t('notEnough')); return }
@@ -49,6 +51,7 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
     setPaid(res)
   }
   const pickup = () => {
+    unlockAudio()
     const d = details(); if (d === null) return
     const res = payAtPickup(total, itemLines(), d)
     if (!res.ok) return
@@ -90,7 +93,8 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         {paid ? (
           <>
-            <h3>{t('orderPlaced')}</h3>
+            <h3>{a?.name ? t('thanksName').replace('{name}', a.name.trim().split(/\s+/)[0]) : t('orderPlaced')}</h3>
+            {placed && <p className="modal-line">{t('thanksLine').replace('{id}', placed.id)}</p>}
             {placed && <OrderTracker order={placed} dark />}
             {waLink && <><a className="btn-pill" href={waLink} target="_blank" rel="noreferrer">{s('siteSendWhatsapp')}</a><p className="modal-line small">{s('siteWhatsappHint')}</p></>}
             <p className="modal-line">{t('pointsEarned').replace('{n}', String(paid.points))}</p>

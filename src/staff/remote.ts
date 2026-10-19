@@ -87,6 +87,19 @@ export async function staffSignOut() {
 }
 
 /** move an order to a stage: in the database when it lives there (the customer's phone follows), else on this device */
+/** cancel an order, with the reason the customer will read (owner, 2026-10-19) */
+export function cancelOrder(o: Order, reason: string) {
+  if (!backendOn || !state.staff || !o.uid) { setOrderStatus(o.id, 'cancelled', reason); return }
+  if (o.status === 'cancelled') return
+  const before = state.orders
+  upsert({ ...o, status: 'cancelled', cancelReason: reason, history: [...(o.history ?? []), { stage: 'cancelled', at: Date.now() }] })
+  void getClient().then(async (sb) => {
+    if (!sb) return
+    const { error } = await sb.from('orders').update({ status: 'cancelled', cancel_reason: reason }).eq('uid', o.uid!)
+    if (error) { console.warn('[backend] could not cancel the order:', error.message); set({ orders: before, error: 'move' }) }
+    else if (state.error === 'move') set({ error: '' })
+  })
+}
 export function moveOrder(o: Order, stage: Stage) {
   if (!backendOn || !state.staff || !o.uid) { setOrderStatus(o.id, stage); return }
   if (o.status === stage) return

@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useLang } from '../i18n'
+import { unlockAudio } from '../chime'
 import { iqd, normPhone, placeOfferOrder, useAccount, useMyOrders } from '../account'
 import type { GeoPoint } from '../account'
 import { ALL_ITEMS as ALL, MENU } from '../menu'
@@ -181,6 +182,7 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
     if (g.pick === 1 && !now.includes(n) && !(offer.sizes && ALL.find((i) => i.name === n)?.sizes)) setTimeout(() => setStep((x) => x + 1), 260)
   }
   const place = () => {
+    unlockAudio() // this tap lets the order's status sounds play later
     const nm = name.trim()
     if (nm.length < 2 || normPhone(phone).length < 10 || (delivery && address.trim().length < 6 && !location)) { setNote(delivery ? s('comboNeed') : s('comboNeedPickup')); return }
     const res = placeOfferOrder({ total, items: lines, name: nm, phone: phone.trim(), address: delivery ? address.trim() : undefined, location: delivery && location ? location : undefined, offer: { name: offer.name.en, price: offer.price, count: count > 1 ? count : undefined, fee: fee || undefined, pre: !live || undefined } })
@@ -190,6 +192,7 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
     setStep(DONE)
   }
   const placed = orders.find((o) => o.id === placedId)
+  const firstName = name.trim().split(/\s+/)[0] ?? '' // the thank-you after ordering says it
   const waLink = placed && set.reach === 'whatsapp'
     ? `https://wa.me/${set.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent([`Mars CoffeeHouse · ${offer.name.en} · #${placed.id}`, ...placed.items, `${iqd(placed.total)} IQD`, `${name.trim()} · ${phone.trim()}`, ...(placed.delivery ? [placed.delivery.address, placed.delivery.location ? mapsLink(placed.delivery.location) : ''].filter(Boolean) : [t('getPickup')])].join('\n'))}`
     : ''
@@ -202,7 +205,7 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
         <header className="combo-head">
           <div>
             <p className="combo-eyebrow">{title}{ps && count > 1 && <span className="combo-of">{s('comboOf', { n: ps.k + 1, of: count })}</span>}{!live && step !== DONE && <em>{t('preOrder').replace(/\s*!$/, '')}</em>}</p>
-            <h2 id="combo-title">{step === DONE ? t('orderPlaced') : step === DETAILS ? s('comboDetails') : step === ASK ? s('comboHowMany') : label(cur.g)}</h2>
+            <h2 id="combo-title">{step === DONE ? (firstName ? t('thanksName').replace('{name}', firstName) : t('orderPlaced')) : step === DETAILS ? s('comboDetails') : step === ASK ? s('comboHowMany') : label(cur.g)}</h2>
           </div>
           <button type="button" className="combo-close" onClick={onClose} aria-label={t('close')}>
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
@@ -316,6 +319,7 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
 
           {step === DONE && (
             <>
+              {placed && <p className="combo-thanks">{t('thanksLine').replace('{id}', placed.id)}</p>}
               {placed && <OrderTracker order={placed} />}
               <p className="combo-hint">{!live ? t('preOrderHint') : s('comboTrackHint')}</p>
               {waLink && <a className="combo-wa" href={waLink} target="_blank" rel="noreferrer">{s('siteSendWhatsapp')}</a>}

@@ -21,7 +21,7 @@ function parseLine(line: string) {
   const name = line.replace(/\s*×\d+\s*$/, '').split(' · ')[0].replace(/\s*\((8|12|16)oz\)$/, '').trim()
   return { name, qty }
 }
-export const rowsFromOrders = (orders: Order[]): Row[] => orders.map((o) => ({
+export const rowsFromOrders = (orders: Order[]): Row[] => orders.filter((o) => o.status !== 'cancelled').map((o) => ({ // a cancelled order is not a sale
   at: o.at, total: o.total, items: o.items.map(parseLine), delivery: o.fulfil === 'delivery', done: (o.status ?? 'received') === 'delivered', wallet: o.pay === 'wallet', combo: !!o.offer,
 }))
 

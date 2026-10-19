@@ -2,14 +2,14 @@ import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { useLang } from '../i18n'
 import type { Order } from '../account'
-import { isActive, useNow } from '../orders'
+import { isActive, recentlyCancelled, useNow } from '../orders'
 import { OrderTracker } from './OrderTracker'
 
 /** Small window opened by the "Track order" button: one live tracker per order still on its way. */
 export function TrackModal({ orders, onClose }: { orders: Order[]; onClose: () => void }) {
   const { t } = useLang()
   const now = useNow()
-  const active = orders.filter((o) => isActive(o, now))
+  const active = orders.filter((o) => isActive(o, now) || recentlyCancelled(o, now)) // a recent cancellation shows with its reason
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     window.addEventListener('keydown', onKey)
