@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useLang } from '../i18n'
 import { iqd, normPhone, placeOfferOrder, useAccount, useMyOrders } from '../account'
@@ -23,6 +23,8 @@ import { useCountdown } from './useCountdown'
  * The steps are the offer's groups from the staff dashboard (Offers), in their order; then the details; then the order
  * is placed at the combo price (plus the service fee when the offer has one), cash on delivery, with no sign-in.
  * It lands on the staff Orders page as "Request received" and the customer follows it on the tracker.
+ * A step with several menu categories (the drinks) has a row of category chips on top that stays in view: it lights
+ * the category being looked at and a tap jumps to one (owner, 2026-10-19).
  */
 const GUEST = 'mars-guest' // the name / number / address typed last time, for the next order
 const saved = (): { name?: string; phone?: string; address?: string } => { try { return JSON.parse(localStorage.getItem(GUEST) || '{}') } catch { return {} } }
@@ -64,6 +66,40 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
   const [location, setLocation] = useState<GeoPoint | null>(null) // "Share my location": asked fresh for each order, never remembered
   const [note, setNote] = useState('')
   const [placedId, setPlacedId] = useState('')
+  // the category chips of a step with several categories: the one in view, and a jump to one
+  const bodyRef = useRef<HTMLDivElement>(null)
+  const chipsRef = useRef<HTMLDivElement>(null)
+  const [inView, setInView] = useState('')
+  const stepCats = (groups[step]?.cats ?? []).map((c) => c.cat).join('|')
+  useEffect(() => { bodyRef.current?.scrollTo({ top: 0 }); setInView(stepCats.split('|')[0] ?? '') }, [step, stepCats])
+  const watch = () => {
+    const body = bodyRef.current
+    if (!body || !chipsRef.current) return
+    const line = body.scrollTop + chipsRef.current.offsetHeight + 24
+    const secs = [...body.querySelectorAll<HTMLElement>('section[data-cat]')]
+    let now = secs[0]?.dataset.cat ?? '' // above the first heading the first category is the one in view
+    for (const sec of secs) if (sec.offsetTop <= line) now = sec.dataset.cat ?? ''
+    // at the very bottom the last category is the one in view, even when it is short
+    if (body.scrollTop > 0 && body.scrollTop + body.clientHeight >= body.scrollHeight - 2) now = secs[secs.length - 1]?.dataset.cat ?? now
+    if (now && now !== inView) setInView(now)
+  }
+  useEffect(() => { // keep the lit chip in sight in its row (the row only, never the page)
+    const row = chipsRef.current
+    const chip = row?.querySelector<HTMLElement>(`[data-cat="${inView}"]`)
+    if (!row || !chip) return
+    // by how far the chip's middle is from the row's middle: the same sum left-to-right and right-to-left
+    const r = row.getBoundingClientRect(), c = chip.getBoundingClientRect()
+    const by = c.left + c.width / 2 - (r.left + r.width / 2)
+    if (Math.abs(by) > 2) row.scrollBy({ left: by, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
+  }, [inView])
+  const jump = (cat: string) => {
+    const body = bodyRef.current
+    const sec = body?.querySelector<HTMLElement>(`section[data-cat="${cat}"]`)
+    if (!body || !sec) return
+    setInView(cat)
+    const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    body.scrollTo({ top: sec.offsetTop - (chipsRef.current?.offsetHeight ?? 0) - 8, behavior: smooth ? 'smooth' : 'auto' })
+  }
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
@@ -132,12 +168,21 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
           </ol>
         )}
 
-        <div className="combo-body">
+        <div className="combo-body" ref={bodyRef} onScroll={watch}>
           {step < DETAILS && (
             <>
               <p className="combo-hint">{s('comboPick', { n: cur.g.pick })}</p>
+              {cur.cats.length > 1 && (
+                <div className="combo-cats" ref={chipsRef} role="tablist" aria-label={s('category')}>
+                  {cur.cats.map((c) => (
+                    <button key={c.cat} type="button" role="tab" data-cat={c.cat} aria-selected={inView === c.cat} className={inView === c.cat ? 'on' : ''} onClick={() => jump(c.cat)}>
+                      {catLabel(c.cat, lang)}
+                    </button>
+                  ))}
+                </div>
+              )}
               {cur.cats.map((c) => (
-                <section key={c.cat}>
+                <section key={c.cat} data-cat={c.cat}>
                   {cur.cats.length > 1 && <h3>{catLabel(c.cat, lang)}</h3>}
                   <div className="combo-grid" role={cur.g.pick === 1 ? 'radiogroup' : 'group'}>
                     {c.items.map((it) => {

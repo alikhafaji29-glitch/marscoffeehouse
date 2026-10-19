@@ -1066,7 +1066,13 @@ body[data-view='home'] .deck > .slide:first-child::before { content: ''; positio
 .combo-steps .past button > span { background: var(--sky-deep); color: #fff; }
 .combo-steps .now button { background: var(--navy); border-color: var(--navy); color: #fff; }
 .combo-steps .now button > span { background: #fff; color: var(--navy); }
-.combo-body { flex: 1; overflow-y: auto; padding: 1rem 1.3rem 1.2rem; display: flex; flex-direction: column; gap: 0.9rem; }
+.combo-body { flex: 1; overflow-y: auto; padding: 1rem 1.3rem 1.2rem; display: flex; flex-direction: column; gap: 0.9rem; position: relative; }
+/* the category chips of the drink step: stay at the top of the list while it scrolls */
+.combo-cats { position: sticky; top: -1rem; z-index: 2; flex: none; display: flex; gap: 0.4rem; overflow-x: auto; scrollbar-width: none; margin: 0 -1.3rem; padding: 0.6rem 1.3rem; background: var(--cream); border-bottom: 1px solid rgba(0, 36, 76, 0.1); }
+.combo-cats::-webkit-scrollbar { display: none; }
+.combo-cats button { flex: none; font: 600 0.85rem/1 var(--font-sans); min-height: 40px; padding: 0 1rem; border-radius: 999px; border: 1.5px solid rgba(0, 47, 109, 0.22); background: #fff; color: var(--navy); cursor: pointer; white-space: nowrap; }
+.combo-cats button.on { background: var(--navy); border-color: var(--navy); color: #fff; }
+.combo-body section[data-cat] { scroll-margin-top: 4rem; }
 .combo-body h3 { margin: 0.2rem 0 0.5rem; font-family: var(--font-serif); font-size: 1.25rem; color: var(--navy); }
 .combo-hint { margin: 0; font-size: 0.85rem; color: rgba(0, 47, 109, 0.7); }
 .combo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr)); gap: 0.5rem; }
