@@ -43,7 +43,7 @@ export function OrderCard({ o }: { o: Order }) {
       <p className="staff-customer">
         <span className={'staff-how ' + (o.fulfil === 'delivery' ? 'deliv' : 'pick')}>{o.fulfil === 'delivery' ? t('getDelivery') : t('getPickup')}</span>
         {o.giftTo && <span className="staff-how gift">{t('giftBadge')}</span>}
-        {o.offer && <span className="staff-how offer">{o.offer.name}</span>}
+        {o.offer && <span className="staff-how offer">{o.offer.name}{(o.offer.count ?? 1) > 1 && <span dir="ltr"> ×{o.offer.count}</span>}</span>}
         {o.offer?.pre && <span className="staff-how pre">{s('preOrderBadge')}</span>}
         {o.customer && <>{o.customer.name} · <a dir="ltr" href={'tel:' + (o.delivery?.phone ?? o.customer.phone)}>{o.delivery?.phone ?? o.customer.phone}</a></>}
       </p>

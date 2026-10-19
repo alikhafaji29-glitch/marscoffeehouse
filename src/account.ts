@@ -36,7 +36,7 @@ export interface Order {
   delivery?: Delivery // phone to call + address, delivery orders only
   giftTo?: string // a drink sent to a friend: their number (delivery goes to them, the sender paid)
   branch?: string // the branch picked on the Order screen (staff/store.ts); missing = the first branch
-  offer?: { name: string; price: number; fee?: number; pre?: boolean } // a combo from the dashboard's Offers (Positive Hours); pre = placed outside its hours
+  offer?: { name: string; price: number; count?: number; fee?: number; pre?: boolean } // a combo from the dashboard's Offers (Positive Hours); count = how many combos (1 when missing); pre = placed outside its hours
   uid?: string // the order's identity in the shared backend (src/sync.ts); `id` is the short code people see
   synced?: boolean // the backend has it
 }
