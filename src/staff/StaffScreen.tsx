@@ -34,6 +34,7 @@ import './staff.css'
  * customer sees. DEMO: a PIN gate (1234) and everything stored in this browser.
  */
 const PIN = '1234'
+const DEMO_USER = 'demo' // the demo build only (no backend, nothing real behind it): username demo, password 1234
 const MAIN: { id: string; key: SKey; icon: () => ReactNode }[] = [
   { id: 'dashboard', key: 'navDashboard', icon: I.dashboard },
   { id: 'orders', key: 'navOrders', icon: I.orders },
@@ -55,6 +56,7 @@ export function StaffScreen() {
   const [pinOk, setOk] = useState(() => read('mars-staff', '') === '1')
   const ok = backendOn ? !!remote.staff : pinOk
   const [pin, setPin] = useState('')
+  const [user, setUser] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
@@ -98,9 +100,9 @@ export function StaffScreen() {
   const enter = (e: FormEvent) => {
     e.preventDefault()
     unlockAudio()
-    if (pin === PIN) { setOk(true); try { sessionStorage.setItem('mars-staff', '1') } catch { /* ignore */ } } else setErr(true)
+    if (pin === PIN && user.trim().toLowerCase() === DEMO_USER) { setOk(true); try { sessionStorage.setItem('mars-staff', '1') } catch { /* ignore */ } } else setErr(true)
   }
-  const leave = () => { if (backendOn) { void staffSignOut(); setPassword(''); return } setOk(false); setPin(''); try { sessionStorage.removeItem('mars-staff') } catch { /* ignore */ } }
+  const leave = () => { if (backendOn) { void staffSignOut(); setPassword(''); return } setOk(false); setPin(''); setUser(''); try { sessionStorage.removeItem('mars-staff') } catch { /* ignore */ } }
   const signIn = async (e: FormEvent) => {
     e.preventDefault()
     unlockAudio()
@@ -131,8 +133,10 @@ export function StaffScreen() {
           </form>
         ) : (
           <form className="staff-gate" onSubmit={enter}>
-            <label htmlFor="staff-pin">{t('staffPin')}</label>
-            <input id="staff-pin" inputMode="numeric" autoComplete="one-time-code" value={pin} onChange={(e) => { setPin(e.target.value); setErr(false) }} dir="ltr" />
+            <label htmlFor="staff-user">{s('staffUsername')}</label>
+            <input id="staff-user" autoComplete="username" autoCapitalize="none" value={user} onChange={(e) => { setUser(e.target.value); setErr(false) }} dir="ltr" />
+            <label htmlFor="staff-pin">{s('staffPassword')}</label>
+            <input id="staff-pin" type="password" inputMode="numeric" autoComplete="current-password" value={pin} onChange={(e) => { setPin(e.target.value); setErr(false) }} dir="ltr" />
             <button type="submit" className="d-btn solid">{t('staffEnter')}</button>
             <p className={'staff-hint' + (err ? ' err' : '')}>{err ? t('staffWrongPin') : t('staffPinHint')}</p>
           </form>

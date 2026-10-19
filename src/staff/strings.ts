@@ -22,6 +22,7 @@ const S = {
   // sign-in and connection (the shared backend)
   staffEmail: ['Email', 'البريد الإلكتروني', 'ئیمەیڵ'],
   staffPassword: ['Password', 'كلمة المرور', 'وشەی نهێنی'],
+  staffUsername: ['Username', 'اسم المستخدم', 'ناوی بەکارهێنەر'],
   staffSignIn: ['Sign in', 'تسجيل الدخول', 'چوونەژوورەوە'],
   staffChecking: ['One moment…', 'لحظة…', 'چرکەیەک…'],
   staffSignHint: ['Staff accounts are created by the owner.', 'حسابات الموظفين يُنشئها المالك.', 'هەژماری کارمەندان لەلایەن خاوەنەکەوە دروست دەکرێن.'],
