@@ -312,6 +312,7 @@ const S = {
   comboSame: ['Same as combo {n}', 'مثل كومبو {n}', 'وەک کۆمبۆی {n}'],
   comboRemove: ['Remove combo {n}', 'حذف كومبو {n}', 'لابردنی کۆمبۆی {n}'],
   comboRemoveShort: ['Remove', 'حذف', 'لابردن'],
+  comboSkip: ['Skip combo {n}', 'تخطّي كومبو {n}', 'کۆمبۆی {n} بپەڕێنە'],
   comboFewer: ['One combo fewer', 'كومبو أقل', 'کۆمبۆیەک کەمتر'],
   comboMore: ['One combo more', 'كومبو إضافي', 'کۆمبۆیەکی زیاتر'],
   comboNext: ['Next', 'التالي', 'دواتر'],

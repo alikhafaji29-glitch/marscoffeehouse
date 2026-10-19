@@ -25,7 +25,7 @@ import { useCountdown } from './useCountdown'
  * It lands on the staff Orders page as "Request received" and the customer follows it on the tracker.
  * It starts by asking how many combos (owner, 2026-10-19); each combo's steps then follow in turn ("Combo 2 of 3",
  * with "Same as combo 1"), the bill is the count times the combo price plus one service fee. While there are two or
- * more, any one combo can be removed before ordering (on its steps, or in the details' list).
+ * more, any one combo can be skipped on its steps ("Skip combo 2") or removed in the details' list before ordering.
  * A step with several menu categories (the drinks) has a row of category chips on top that stays in view: it lights
  * the category being looked at and a tap jumps to one (owner, 2026-10-19).
  */
@@ -241,7 +241,7 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
                   {ps.k > 0 && ps.i === 0 && groups.every(({ g }) => chosen(ps.k - 1, g.id).length >= g.pick) && (
                     <button type="button" className="combo-same" onClick={sameAsBefore}>{s('comboSame', { n: ps.k })}</button>
                   )}
-                  {count > 1 && <button type="button" className="combo-remove" onClick={() => removeCombo(ps.k)}>{s('comboRemove', { n: ps.k + 1 })}</button>}
+                  {count > 1 && <button type="button" className="combo-remove" onClick={() => removeCombo(ps.k)}>{s('comboSkip', { n: ps.k + 1 })}</button>}
                 </div>
               )}
               {cur.cats.length > 1 && (
