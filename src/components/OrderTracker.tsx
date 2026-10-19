@@ -8,7 +8,7 @@ import { useS } from '../staff/strings'
 const LABEL = { received: 'stReceived', preparing: 'stPreparing', done: 'stDone', onway: 'stOnWay', delivered: 'stDelivered' } as const
 
 /** Where an order is right now: five steps, the ones passed ticked, the current one pulsing. */
-export function OrderTracker({ order, dark = false }: { order: Order; dark?: boolean }) {
+export function OrderTracker({ order, dark = false, onOk }: { order: Order; dark?: boolean; onOk?: () => void }) {
   const { t } = useLang()
   const s = useS()
   const now = useNow()
@@ -25,6 +25,7 @@ export function OrderTracker({ order, dark = false }: { order: Order; dark?: boo
         <div className="track-cancelled" role="status">
           <b>{t('orderCancelled')}</b>
           {order.cancelReason && <span>{t('cancelReason')}: {reasonText(order.cancelReason, t)}</span>}
+          {onOk && <button type="button" className="track-ok" onClick={onOk}>{t('cancelOk')}</button>}
         </div>
       )}
       {!isCancelled(order) && <ol className="track-steps">
