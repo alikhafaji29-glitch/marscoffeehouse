@@ -14,9 +14,11 @@ import { catLabel } from './MenuSection'
 import { MiniCup } from './MiniCup'
 import { OrderTracker } from './OrderTracker'
 import { nameOf, photoOf } from '../menuAdmin'
+import { whenText } from '../orders'
 import { ShareLocation, mapsLink } from './ShareLocation'
 import { IconCheck } from './Icons'
 import { useCountdown } from './useCountdown'
+import { clockNow } from '../clock'
 
 /*
  * An offer's combo order (owner, 2026-10-12: "first the user chooses the sandwich, then chooses the drink, then fills
@@ -49,6 +51,23 @@ const FoodIcon = ({ sweet }: { sweet: boolean }) => (
   </svg>
 )
 const MAX_COMBOS = 10 // in one order
+/** the times a pre-order can be asked for: every 15 minutes within the offer's hours, today if they are still to
+ *  come, else tomorrow (by the review clock, like the countdown) */
+function preorderSlots(start: string, end: string): { at: number; time: string; today: boolean }[] {
+  const now = clockNow()
+  const [s, e] = [hm(start), hm(end)]
+  const day = new Date(now)
+  day.setHours(s.h, s.m, 0, 0)
+  const endToday = new Date(now)
+  endToday.setHours(e.h, e.m, 0, 0)
+  const today = now < day
+  if (!today && now >= endToday) day.setDate(day.getDate() + 1)
+  const out: { at: number; time: string; today: boolean }[] = []
+  const stop = new Date(day)
+  stop.setHours(e.h, e.m, 0, 0)
+  for (const t = new Date(day); t < stop; t.setMinutes(t.getMinutes() + 15)) out.push({ at: t.getTime(), time: `${String(t.getHours()).padStart(2, '0')}:${String(t.getMinutes()).padStart(2, '0')}`, today })
+  return out
+}
 const hm = (x: string) => { const [h, m] = x.split(':').map(Number); return { h: h || 0, m: m || 0 } }
 
 export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () => void }) {
@@ -61,7 +80,10 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
   const groups = useMemo(() => (offer?.groups ?? []).map((g) => ({ g, cats: choices(g) })).filter((x) => x.cats.length), [offer, data])
   const live = useCountdown(offer ? [hm(offer.start), hm(offer.end)] : undefined).active
   const set = settingsFor()
-  const delivery = set.delivery // the combo is delivered where the branch delivers; otherwise it is picked up
+  // delivery or pickup: the customer chooses among what the branch offers (Tools); delivery first when it can
+  const [how, setHow] = useState<'delivery' | 'pickup'>(() => (set.delivery ? 'delivery' : 'pickup'))
+  const delivery = set.delivery && (how === 'delivery' || !set.pickup)
+  const [wantAt, setWantAt] = useState(0) // a pre-order's chosen time (ms); 0 = not chosen yet
   const [step, setStep] = useState(0) // 0 = how many, then each combo's groups in turn, then the details, then placed
   const [count, setCount] = useState(1) // how many combos
   const [picks, setPicks] = useState<Record<string, string[]>>({}) // 'combo:group' → item names
@@ -71,6 +93,7 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
   const [address, setAddress] = useState(() => a?.address ?? saved().address ?? '')
   const [location, setLocation] = useState<GeoPoint | null>(null) // "Share my location": asked fresh for each order, never remembered
   const [note, setNote] = useState('')
+  const [staffNote, setStaffNote] = useState('') // the customer's note for the café
   const [placedId, setPlacedId] = useState('')
   // the category chips of a step with several categories: the one in view, and a jump to one
   const bodyRef = useRef<HTMLDivElement>(null)
@@ -185,7 +208,8 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
     unlockAudio() // this tap lets the order's status sounds play later
     const nm = name.trim()
     if (nm.length < 2 || normPhone(phone).length < 10 || (delivery && address.trim().length < 6 && !location)) { setNote(delivery ? s('comboNeed') : s('comboNeedPickup')); return }
-    const res = placeOfferOrder({ total, items: lines, name: nm, phone: phone.trim(), address: delivery ? address.trim() : undefined, location: delivery && location ? location : undefined, offer: { name: offer.name.en, price: offer.price, count: count > 1 ? count : undefined, fee: fee || undefined, pre: !live || undefined } })
+    if (!live && !wantAt) { setNote(s('comboNeedTime')); return }
+    const res = placeOfferOrder({ total, items: lines, name: nm, phone: phone.trim(), address: delivery ? address.trim() : undefined, location: delivery && location ? location : undefined, offer: { name: offer.name.en, price: offer.price, count: count > 1 ? count : undefined, fee: fee || undefined, pre: !live || undefined, wantAt: !live ? wantAt : undefined }, note: staffNote.trim() || undefined })
     if (!res.ok) return
     try { localStorage.setItem(GUEST, JSON.stringify({ name: nm, phone: phone.trim(), address: address.trim() })) } catch { /* ignore */ }
     setPlacedId(res.orderId)
@@ -194,7 +218,7 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
   const placed = orders.find((o) => o.id === placedId)
   const firstName = name.trim().split(/\s+/)[0] ?? '' // the thank-you after ordering says it
   const waLink = placed && set.reach === 'whatsapp'
-    ? `https://wa.me/${set.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent([`Mars CoffeeHouse · ${offer.name.en} · #${placed.id}`, ...placed.items, `${iqd(placed.total)} IQD`, `${name.trim()} · ${phone.trim()}`, ...(placed.delivery ? [placed.delivery.address, placed.delivery.location ? mapsLink(placed.delivery.location) : ''].filter(Boolean) : [t('getPickup')])].join('\n'))}`
+    ? `https://wa.me/${set.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent([`Mars CoffeeHouse · ${offer.name.en} · #${placed.id}`, ...placed.items, `${iqd(placed.total)} IQD`, `${name.trim()} · ${phone.trim()}`, ...(placed.delivery ? [placed.delivery.address, placed.delivery.location ? mapsLink(placed.delivery.location) : ''].filter(Boolean) : [t('getPickup')]), ...(placed.offer?.wantAt ? [t('scheduledFor').replace('{t}', whenText(placed.offer.wantAt, lang))] : []), ...(placed.note ? [`${t('orderNote')}: ${placed.note}`] : [])].join('\n'))}`
     : ''
   const steps = [s('comboHowMany'), ...pickSteps.map(stepLabel), s('comboDetails')]
   const reachable = (i: number) => i <= step || pickSteps.slice(0, Math.max(0, i - 1)).every((_, n) => full(n)) // a later step once every pick before it is made
@@ -297,6 +321,20 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
                 ))}
               </ul>
               <div className="combo-form">
+                {set.delivery && set.pickup && (
+                  <div className="combo-how" role="radiogroup" aria-label={s('comboHow')}>
+                    <button type="button" role="radio" aria-checked={delivery} className={delivery ? 'on' : ''} onClick={() => { setHow('delivery'); setNote('') }}>{t('getDelivery')}</button>
+                    <button type="button" role="radio" aria-checked={!delivery} className={!delivery ? 'on' : ''} onClick={() => { setHow('pickup'); setNote('') }}>{t('getPickup')}</button>
+                  </div>
+                )}
+                {!live && (
+                  <label><span>{s(delivery ? 'comboWhenDelivery' : 'comboWhenPickup')}</span>
+                    <select value={wantAt || ''} onChange={(e) => { setWantAt(Number(e.target.value)); setNote('') }}>
+                      <option value="" disabled>{s('comboPickTime')}</option>
+                      {preorderSlots(offer.start, offer.end).map((x) => <option key={x.at} value={x.at}>{x.today ? s('comboToday') : s('comboTomorrow')} · {x.time}</option>)}
+                    </select>
+                  </label>
+                )}
                 <label><span>{t('nameLabel')}</span><input value={name} onChange={(e) => { setName(e.target.value); setNote('') }} autoComplete="given-name" /></label>
                 <label><span>{t('deliveryPhone')}</span><input type="tel" inputMode="tel" dir="ltr" value={phone} onChange={(e) => { setPhone(e.target.value); setNote('') }} autoComplete="tel" placeholder="0750 000 0000" /></label>
                 {delivery
@@ -305,6 +343,7 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
                     <ShareLocation value={location} onChange={(p) => { setLocation(p); setNote('') }} />
                   </>
                   : <p className="combo-hint">{s('comboPickupNote')}</p>}
+                <label><span>{t('orderNoteLabel')}</span><textarea rows={2} maxLength={300} value={staffNote} onChange={(e) => setStaffNote(e.target.value)} placeholder={t('orderNotePh')} /></label>
               </div>
               <dl className="combo-bill">
                 <div><dt>{title}{count > 1 && <span dir="ltr"> × {count}</span>}</dt><dd dir="ltr">{iqd(offer.price * count)} IQD</dd></div>
@@ -312,7 +351,7 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
                 {delivery && offer.freeDelivery && <div><dt>{t('getDelivery')}</dt><dd>{t('free')}</dd></div>}
                 <div className="sum"><dt>{s('comboTotal')}</dt><dd dir="ltr">{iqd(total)} IQD</dd></div>
               </dl>
-              <p className="combo-hint">{delivery ? `${t('payOnDelivery')} · ${t('payOnDeliveryHint')}` : t('payAtPickup')}{!live && <> · {t('preOrderHint')}</>}</p>
+              <p className="combo-hint">{delivery ? `${t('payOnDelivery')} · ${t('payOnDeliveryHint')}` : t('payAtPickup')}</p>{/* a pre-order's day and time are the chosen time above */}
               {note && <p className="combo-note" role="alert">{note}</p>}
             </>
           )}
@@ -321,7 +360,7 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
             <>
               {placed && <p className="combo-thanks">{t('thanksLine').replace('{id}', placed.id)}</p>}
               {placed && <OrderTracker order={placed} />}
-              <p className="combo-hint">{!live ? t('preOrderHint') : s('comboTrackHint')}</p>
+              <p className="combo-hint">{s('comboTrackHint')}</p>
               {waLink && <a className="combo-wa" href={waLink} target="_blank" rel="noreferrer">{s('siteSendWhatsapp')}</a>}
             </>
           )}

@@ -16,13 +16,13 @@ export interface OrderRow {
   total: number; items: string[]; pay: 'wallet' | 'pickup'; fulfil: 'pickup' | 'delivery'
   customer_name: string | null; customer_phone: string | null; delivery_phone: string | null; address: string | null
   location: { lat: number; lng: number; acc?: number } | null; gift_to: string | null
-  offer: NonNullable<Order['offer']> | null; points: number
+  offer: NonNullable<Order['offer']> | null; points: number; note: string | null
 }
 export const toRow = (o: Order) => ({
   uid: o.uid!, code: o.id, branch: o.branch ?? 'erbil', total: o.total, items: o.items, pay: o.pay ?? 'pickup', fulfil: o.fulfil ?? 'pickup',
   customer_name: o.customer?.name ?? null, customer_phone: o.customer?.phone ?? null,
   delivery_phone: o.delivery?.phone ?? null, address: o.delivery?.address ?? null, location: o.delivery?.location ?? null,
-  gift_to: o.giftTo ?? null, offer: o.offer ?? null, points: o.points,
+  gift_to: o.giftTo ?? null, offer: o.offer ?? null, points: o.points, note: o.note ?? null,
 })
 export const fromRow = (r: OrderRow): Order => ({
   id: r.code, uid: r.uid, synced: true, at: Date.parse(r.created_at), total: r.total, items: r.items, points: r.points, pay: r.pay,
@@ -30,7 +30,7 @@ export const fromRow = (r: OrderRow): Order => ({
   customer: r.customer_name || r.customer_phone ? { name: r.customer_name ?? '', phone: r.customer_phone ?? '' } : undefined,
   fulfil: r.fulfil,
   delivery: r.fulfil === 'delivery' ? { phone: r.delivery_phone ?? r.customer_phone ?? '', address: r.address ?? '', location: r.location ?? undefined } : undefined,
-  giftTo: r.gift_to ?? undefined, branch: r.branch, offer: r.offer ?? undefined,
+  giftTo: r.gift_to ?? undefined, branch: r.branch, offer: r.offer ?? undefined, note: r.note ?? undefined,
 })
 
 let listening = false

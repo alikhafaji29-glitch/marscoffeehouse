@@ -3,7 +3,7 @@ import { useLang } from '../i18n'
 import type { Lang, TKey } from '../i18n'
 import { iqd } from '../account'
 import type { Order } from '../account'
-import { CANCEL_REASONS, STAGES, isActive, isCancelled, nextStage, reasonText, stageIndex, stagesFor, useNow } from '../orders'
+import { CANCEL_REASONS, STAGES, isActive, isCancelled, nextStage, reasonText, stageIndex, stagesFor, useNow, whenText } from '../orders'
 import type { Stage } from '../orders'
 import { IconCheck, IconPin } from '../components/Icons'
 import { mapsLink } from '../components/ShareLocation'
@@ -74,6 +74,7 @@ export function OrderCard({ o }: { o: Order }) {
         {o.offer && <span className="staff-how offer">{o.offer.name}{(o.offer.count ?? 1) > 1 && <span dir="ltr"> ×{o.offer.count}</span>}</span>}
         {o.offer?.pre && <span className="staff-how pre">{s('preOrderBadge')}</span>}
       </p>
+      {o.offer?.wantAt && <p className="staff-want">{t('scheduledFor').replace('{t}', whenText(o.offer.wantAt, lang))}</p>}
       {/* top to bottom, as the cashier works through it (owner, 2026-10-19): who, how to reach them, what, where */}
       {o.customer && (
         <div className="staff-sec staff-who">
@@ -90,6 +91,7 @@ export function OrderCard({ o }: { o: Order }) {
             <ul className="staff-items">{g.lines.map((it, i) => <li key={i}>{it}</li>)}</ul>
           </div>
         ))}
+        {o.note && <p className="staff-note"><b>{t('orderNote')}:</b> {o.note}</p>}
       </div>
       {o.delivery && (
         <div className="staff-sec staff-where">

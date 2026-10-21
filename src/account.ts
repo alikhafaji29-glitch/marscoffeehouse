@@ -31,13 +31,14 @@ export interface Order {
   pay?: 'wallet' | 'pickup'
   status?: Status // set by the staff dashboard; missing = 'received'
   history?: { stage: Status; at: number }[]
+  note?: string // the customer's note for the café ("less ice", "call when you arrive"), shown to staff
   cancelReason?: string // when cancelled: 'r:<code>' for a ready-made reason (CANCEL_REASONS), else the staff's words
   customer?: { name: string; phone: string }
   fulfil?: 'pickup' | 'delivery'
   delivery?: Delivery // phone to call + address, delivery orders only
   giftTo?: string // a drink sent to a friend: their number (delivery goes to them, the sender paid)
   branch?: string // the branch picked on the Order screen (staff/store.ts); missing = the first branch
-  offer?: { name: string; price: number; count?: number; fee?: number; pre?: boolean } // a combo from the dashboard's Offers (Positive Hours); count = how many combos (1 when missing); pre = placed outside its hours
+  offer?: { name: string; price: number; count?: number; fee?: number; pre?: boolean; wantAt?: number } // a combo from the dashboard's Offers (Positive Hours); count = how many combos (1 when missing); pre = placed outside its hours; wantAt = the time the customer chose for a pre-order (ms)
   uid?: string // the order's identity in the shared backend (src/sync.ts); `id` is the short code people see
   synced?: boolean // the backend has it
 }
@@ -152,14 +153,14 @@ export function topUp(amount: number) {
 
 export type PayResult = { ok: boolean; points: number; reward: boolean; orderId: string }
 /** Pay an order from the wallet; earns points and turns every REWARD_AT points into a free-drink reward. */
-export function payFromWallet(total: number, items: string[], delivery?: Delivery): PayResult {
+export function payFromWallet(total: number, items: string[], delivery?: Delivery, note?: string): PayResult {
   if (!account || account.balance < total) return { ok: false, points: 0, reward: false, orderId: '' }
-  return placeOrder(total, items, 'wallet', delivery)
+  return placeOrder(total, items, 'wallet', delivery, undefined, note ? { note } : undefined)
 }
 /** Place the order and pay in cash — at the counter on pickup, or at the door on delivery (DEMO: nothing is charged; points still earned). */
-export function payAtPickup(total: number, items: string[], delivery?: Delivery): PayResult {
+export function payAtPickup(total: number, items: string[], delivery?: Delivery, note?: string): PayResult {
   if (!account || total <= 0) return { ok: false, points: 0, reward: false, orderId: '' }
-  return placeOrder(total, items, 'pickup', delivery)
+  return placeOrder(total, items, 'pickup', delivery, undefined, note ? { note } : undefined)
 }
 function placeOrder(total: number, items: string[], pay: 'wallet' | 'pickup', delivery?: Delivery, giftTo?: string, extra?: Partial<Order>): PayResult {
   const points = Math.floor(total / 1000) * POINTS_PER_1000
@@ -204,13 +205,13 @@ const saveGuest = () => {
   listeners.forEach((l) => l())
 }
 /** A combo order: on the signed-in account when there is one (points are earned), otherwise as a guest order. Cash on delivery / at pickup. */
-export function placeOfferOrder(o: { total: number; items: string[]; name: string; phone: string; address?: string; location?: GeoPoint; offer: NonNullable<Order['offer']> }): PayResult {
+export function placeOfferOrder(o: { total: number; items: string[]; name: string; phone: string; address?: string; location?: GeoPoint; offer: NonNullable<Order['offer']>; note?: string }): PayResult {
   // address undefined = pickup; a delivery may carry a typed address, a shared pin, or both
   const delivery: Delivery | undefined = o.address !== undefined ? { phone: o.phone, address: o.address, location: o.location } : undefined
   const customer = { name: o.name, phone: o.phone }
-  if (account && session) return placeOrder(o.total, o.items, 'pickup', delivery, undefined, { offer: o.offer, customer })
+  if (account && session) return placeOrder(o.total, o.items, 'pickup', delivery, undefined, { offer: o.offer, customer, ...(o.note && { note: o.note }) })
   const orderId = 'M' + Date.now().toString().slice(-6)
-  guest = [{ id: orderId, at: Date.now(), total: o.total, items: o.items, points: 0, pay: 'pickup', status: 'received', history: [{ stage: 'received', at: Date.now() }], customer, fulfil: delivery ? 'delivery' : 'pickup', delivery, branch: customerBranch(), offer: o.offer, uid: newUid() }, ...guest]
+  guest = [{ id: orderId, at: Date.now(), total: o.total, items: o.items, points: 0, pay: 'pickup', status: 'received', history: [{ stage: 'received', at: Date.now() }], customer, fulfil: delivery ? 'delivery' : 'pickup', delivery, branch: customerBranch(), offer: o.offer, uid: newUid(), ...(o.note && { note: o.note }) }, ...guest]
   saveGuest()
   onPlaced?.()
   return { ok: true, points: 0, reward: false, orderId }

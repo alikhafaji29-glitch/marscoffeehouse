@@ -27,6 +27,8 @@ export function markCancelSeen(order: Order) {
 }
 /** the ready-made reasons; anything else is the staff's own words */
 export const CANCEL_REASONS = ['customer', 'stock', 'unreachable', 'area', 'closed'] as const
+/** a chosen time in the reader's language: "Wed 08:30" */
+export const whenText = (at: number, lang: string) => new Intl.DateTimeFormat(lang === 'ku' ? 'ckb' : lang, { weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false }).format(at)
 /** a cancellation reason in the reader's language: a ready-made one ('r:stock') is translated, the staff's own words as typed */
 export const reasonText = (r: string | undefined, t: (k: TKey) => string) => (r?.startsWith('r:') ? t(('cr_' + r.slice(2)) as TKey) : r ?? '')
 

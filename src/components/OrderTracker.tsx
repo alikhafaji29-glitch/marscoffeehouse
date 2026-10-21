@@ -1,7 +1,7 @@
 import { useLang } from '../i18n'
 import { iqd } from '../account'
 import type { Order } from '../account'
-import { isCancelled, reasonText, stageIndex, stagesFor, useNow } from '../orders'
+import { isCancelled, reasonText, stageIndex, stagesFor, useNow, whenText } from '../orders'
 import { IconCheck } from './Icons'
 import { useS } from '../staff/strings'
 
@@ -9,7 +9,7 @@ const LABEL = { received: 'stReceived', preparing: 'stPreparing', done: 'stDone'
 
 /** Where an order is right now: five steps, the ones passed ticked, the current one pulsing. */
 export function OrderTracker({ order, dark = false, onOk }: { order: Order; dark?: boolean; onOk?: () => void }) {
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const s = useS()
   const now = useNow()
   const cur = stageIndex(order, now)
@@ -20,6 +20,8 @@ export function OrderTracker({ order, dark = false, onOk }: { order: Order; dark
         <span dir="ltr">{iqd(order.total)} IQD</span>
       </div>
       <p className="track-items">{order.items.join(', ')}</p>
+      {order.offer?.wantAt && <p className="track-items"><b>{t('scheduledFor').replace('{t}', whenText(order.offer.wantAt, lang))}</b></p>}
+      {order.note && <p className="track-items">{t('orderNote')}: {order.note}</p>}
       {order.delivery && <p className="track-items">{t('deliveryTo')}: {[order.delivery.address, order.delivery.location && s('locPin')].filter(Boolean).join(' · ')}</p>}
       {isCancelled(order) && (
         <div className="track-cancelled" role="status">

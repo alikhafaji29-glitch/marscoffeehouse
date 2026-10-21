@@ -23,6 +23,7 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
   const { lines, total, clear, basket } = useCart()
   const a = useAccount()
   const [note, setNote] = useState('')
+  const [staffNote, setStaffNote] = useState('') // the customer's note for the café
   const [paid, setPaid] = useState<{ orderId: string; points: number; reward: boolean } | null>(null)
   const [how, setHow] = useState<'pickup' | 'delivery'>(set.pickup ? 'pickup' : 'delivery')
   const [phone, setPhone] = useState(a?.phone ?? '')
@@ -32,7 +33,7 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
   const placed = paid ? a?.orders.find((o) => o.id === paid.orderId) : undefined
   // orders by WhatsApp: the order written out, for the customer to send to the branch
   const waLink = placed && set.reach === 'whatsapp'
-    ? `https://wa.me/${set.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent([`Mars CoffeeHouse · #${placed.id}`, ...placed.items, `${iqd(placed.total)} IQD`, ...(placed.delivery ? [`${t('getDelivery')}: ${placed.delivery.address} · ${placed.delivery.phone}`, placed.delivery.location ? mapsLink(placed.delivery.location) : ''].filter(Boolean) : [t('getPickup')])].join('\n'))}`
+    ? `https://wa.me/${set.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent([`Mars CoffeeHouse · #${placed.id}`, ...placed.items, `${iqd(placed.total)} IQD`, ...(placed.delivery ? [`${t('getDelivery')}: ${placed.delivery.address} · ${placed.delivery.phone}`, placed.delivery.location ? mapsLink(placed.delivery.location) : ''].filter(Boolean) : [t('getPickup')]), ...(placed.note ? [`${t('orderNote')}: ${placed.note}`] : [])].join('\n'))}`
     : ''
 
   const itemLines = () => lines.map((l) => `${l.name}${l.size ? ` (${l.size})` : ''}${l.opts?.length ? ` · ${l.opts.join(', ')}` : ''} ×${l.qty}`)
@@ -45,7 +46,7 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
   const payWallet = () => {
     unlockAudio() // this tap lets the order's status sounds play later
     const d = details(); if (d === null) return
-    const res = payFromWallet(total, itemLines(), d)
+    const res = payFromWallet(total, itemLines(), d, staffNote.trim() || undefined)
     if (!res.ok) { setNote(t('notEnough')); return }
     clear()
     setPaid(res)
@@ -53,7 +54,7 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
   const pickup = () => {
     unlockAudio()
     const d = details(); if (d === null) return
-    const res = payAtPickup(total, itemLines(), d)
+    const res = payAtPickup(total, itemLines(), d, staffNote.trim() || undefined)
     if (!res.ok) return
     clear()
     setPaid(res)
@@ -123,6 +124,10 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
                     <ShareLocation value={location} onChange={(p) => { setLocation(p); setNote('') }} />
                   </div>
                 )}
+                <label className="order-note">
+                  <span>{t('orderNoteLabel')}</span>
+                  <textarea rows={2} maxLength={300} value={staffNote} onChange={(e) => setStaffNote(e.target.value)} placeholder={t('orderNotePh')} />
+                </label>
                 <button className="btn-pill wallet-pay" onClick={pickup}>
                   {how === 'delivery' ? t('payOnDelivery') : t('payAtPickup')} · {iqd(total)} IQD
                   <small>{how === 'delivery' ? t('payOnDeliveryHint') : t('payAtPickupHint')}</small>

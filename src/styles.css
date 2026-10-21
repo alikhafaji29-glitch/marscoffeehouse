@@ -1049,6 +1049,9 @@ body[data-view='home'] .deck > .slide:first-child::before { content: ''; positio
 /* the customer's tracker when the branch cancelled */
 .track-cancelled { display: grid; gap: 0.2rem; padding: 0.7rem 0.8rem; border-radius: 0.8rem; background: #fde7e5; color: #8a1f17; }
 .track-bar.cancelled { background: #b3261e; color: #fff; }
+.staff-note { margin: 0.2rem 0 0; padding: 0.5rem 0.7rem; border-radius: 0.6rem; background: #fff3cd; color: #5c4400; font-size: 0.9rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+.order-note { display: grid; gap: 0.3rem; text-align: start; font-size: 0.85rem; }
+.order-note textarea { font: inherit; padding: 0.6rem 0.75rem; border-radius: 0.8rem; border: 1.5px solid rgba(0, 47, 109, 0.25); resize: vertical; }
 .track-ok { justify-self: center; margin-top: 0.4rem; font: 700 0.9rem/1 var(--font-sans); min-height: 40px; min-width: 6rem; padding: 0 1.2rem; border: none; border-radius: 999px; background: #b3261e; color: #fff; cursor: pointer; }
 .staff-empty { text-align: center; color: rgba(0, 47, 109, 0.6); padding: 3rem 1rem; }
 /* Prices & stock */
@@ -1100,6 +1103,11 @@ body[data-view='home'] .deck > .slide:first-child::before { content: ''; positio
 .combo-steps .now button { background: var(--navy); border-color: var(--navy); color: #fff; }
 .combo-steps .now button > span { background: #fff; color: var(--navy); }
 .combo-body { flex: 1; overflow-y: auto; padding: 1rem 1.3rem 1.2rem; display: flex; flex-direction: column; gap: 0.9rem; position: relative; }
+.combo-how { display: flex; padding: 3px; border-radius: 999px; background: rgba(0, 47, 109, 0.08); }
+.combo-how button { flex: 1; font: 700 0.92rem/1 var(--font-sans); min-height: 44px; border: none; border-radius: 999px; background: transparent; color: var(--navy); cursor: pointer; }
+.combo-how button.on { background: var(--navy); color: #fff; }
+.combo-form select { font: inherit; padding: 0.7rem 0.8rem; border-radius: 0.8rem; border: 1.5px solid rgba(0, 47, 109, 0.25); background: #fff; color: var(--navy); }
+.staff-want { margin: 0; padding: 0.45rem 0.7rem; border-radius: 0.6rem; background: var(--navy); color: #fff; font-weight: 700; font-size: 0.9rem; }
 .combo-thanks { margin: 0; font-size: 1rem; line-height: 1.5; color: var(--navy); }
 /* how many combos */
 .combo-count { display: grid; justify-items: center; gap: 1rem; padding: 1.5rem 0; text-align: center; }
