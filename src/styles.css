@@ -1111,6 +1111,17 @@ body[data-view='home'] .deck > .slide:first-child::before { content: ''; positio
 .combo-steps .now button { background: var(--navy); border-color: var(--navy); color: #fff; }
 .combo-steps .now button > span { background: #fff; color: var(--navy); }
 .combo-body { flex: 1; overflow-y: auto; padding: 1rem 1.3rem 1.2rem; display: flex; flex-direction: column; gap: 0.9rem; position: relative; }
+.combo-choices { display: grid; gap: 0.55rem; padding: 0.2rem 0.7rem 0.75rem; }
+.combo-choice-title { display: block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(0, 47, 109, 0.6); margin-bottom: 0.3rem; }
+.combo-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.combo-chip { font: 600 0.82rem/1.1 var(--font-sans); min-height: 36px; padding: 0.35rem 0.75rem; border-radius: 999px; border: 1.5px solid rgba(0, 47, 109, 0.22); background: #fff; color: var(--navy); cursor: pointer; display: inline-flex; align-items: center; gap: 0.2rem; }
+.combo-chip.on { background: var(--navy); border-color: var(--navy); color: #fff; }
+.combo-chip small { font-size: 0.72rem; opacity: 0.8; }
+.combo-chip.count { padding: 0 0.2rem; cursor: default; }
+.combo-chip.count button { width: 30px; height: 30px; border: none; border-radius: 50%; background: rgba(0, 47, 109, 0.08); color: inherit; font: 700 1rem/1 var(--font-sans); cursor: pointer; }
+.combo-chip.count.on button { background: rgba(255, 255, 255, 0.22); }
+.combo-chip.count button:disabled { opacity: 0.3; cursor: default; }
+.combo-chip.count > span { padding: 0 0.3rem; }
 .combo-how { display: flex; padding: 3px; border-radius: 999px; background: rgba(0, 47, 109, 0.08); }
 .combo-how button { flex: 1; font: 700 0.92rem/1 var(--font-sans); min-height: 44px; border: none; border-radius: 999px; background: transparent; color: var(--navy); cursor: pointer; }
 .combo-how button.on { background: var(--navy); color: #fff; }

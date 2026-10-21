@@ -324,6 +324,7 @@ const S = {
   cancelNeed: ['Choose or write a reason.', 'اختر سبباً أو اكتبه.', 'هۆکارێک هەڵبژێرە یان بینووسە.'],
   comboSkip: ['Skip combo {n}', 'تخطّي كومبو {n}', 'کۆمبۆی {n} بپەڕێنە'],
   comboHow: ['Delivery or pickup', 'توصيل أم استلام', 'گەیاندن یان وەرگرتن'],
+  comboExtras: ['Drink extras', 'إضافات المشروب', 'زیادەکانی خواردنەوە'],
   comboWhenDelivery: ['When should we deliver it?', 'متى نوصل طلبك؟', 'کەی بۆت بگەیەنین؟'],
   comboWhenPickup: ['When will you pick it up?', 'متى ستستلم طلبك؟', 'کەی وەریدەگریت؟'],
   comboPickTime: ['Choose a time', 'اختر الوقت', 'کاتێک هەڵبژێرە'],

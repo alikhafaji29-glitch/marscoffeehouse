@@ -14,6 +14,8 @@ import { catLabel } from './MenuSection'
 import { MiniCup } from './MiniCup'
 import { OrderTracker } from './OrderTracker'
 import { nameOf, photoOf } from '../menuAdmin'
+import { defaultPicks, extras, groupsFor, summary, timesPicked } from '../customize'
+import type { CustGroup, Picks } from '../customize'
 import { whenText } from '../orders'
 import { ShareLocation, mapsLink } from './ShareLocation'
 import { IconCheck } from './Icons'
@@ -29,6 +31,8 @@ import { clockNow } from '../clock'
  * It starts by asking how many combos (owner, 2026-10-19); each combo's steps then follow in turn ("Combo 2 of 3",
  * with "Same as combo 1"), the bill is the count times the combo price plus one service fee. While there are two or
  * more, any one combo can be skipped on its steps ("Skip combo 2") or removed in the details' list before ordering.
+ * A drink in a combo has the same choices as on its menu page (owner, 2026-10-21): its flavour, the milk, flavour
+ * pumps and add-ons, at the menu's prices on top of the combo price (`custom`, per combo and item).
  * A step with several menu categories (the drinks) has a row of category chips on top that stays in view: it lights
  * the category being looked at and a tap jumps to one (owner, 2026-10-19).
  */
@@ -51,6 +55,43 @@ const FoodIcon = ({ sweet }: { sweet: boolean }) => (
   </svg>
 )
 const MAX_COMBOS = 10 // in one order
+/** a combo drink's choices, compact, under its card: one row of chips per group (flavour, milk, add-ons) and − n +
+ *  for pumps; the same groups and prices as the item's menu page (customize.ts) */
+function ComboChoices({ groups, picks: given, onChange }: { groups: CustGroup[]; picks?: Picks; onChange: (p: Picks) => void }) {
+  const { t } = useLang()
+  if (!groups.length) return null
+  const picks = given ?? defaultPicks(groups)
+  const set = (g: CustGroup, ids: string[]) => onChange({ ...picks, [g.id]: ids })
+  return (
+    <div className="combo-choices">
+      {groups.map((g) => (
+        <div key={g.id} className="combo-choice">
+          <span className="combo-choice-title">{g.title}</span>
+          <div className="combo-chips" role={g.kind === 'choice' ? 'radiogroup' : 'group'} aria-label={g.title}>
+            {g.options.map((o) => {
+              const cur = picks[g.id] ?? []
+              const n = timesPicked(picks, g, o.id)
+              const price = o.price ? <small dir="ltr"> +{iqd(o.price)}</small> : null
+              if (g.kind === 'count') {
+                const full = cur.length >= (g.max ?? 9)
+                return (
+                  <span key={o.id} className={'combo-chip count' + (n ? ' on' : '')}>
+                    <button type="button" disabled={!n} onClick={() => { const at = cur.lastIndexOf(o.id); set(g, [...cur.slice(0, at), ...cur.slice(at + 1)]) }} aria-label={`${t('fewer')} ${o.label}`}>−</button>
+                    <span>{o.label}{n ? <b dir="ltr"> ×{n}</b> : price}</span>
+                    <button type="button" disabled={full} onClick={() => set(g, [...cur, o.id])} aria-label={`${t('more')} ${o.label}`}>+</button>
+                  </span>
+                )
+              }
+              const on = cur.includes(o.id)
+              const tap = () => set(g, g.kind === 'toggle' ? (on ? cur.filter((x) => x !== o.id) : [...cur, o.id]) : [o.id])
+              return <button key={o.id} type="button" role={g.kind === 'choice' ? 'radio' : 'checkbox'} aria-checked={on} className={'combo-chip' + (on ? ' on' : '')} onClick={tap}>{o.label}{price}</button>
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
 /** the times a pre-order can be asked for: every 15 minutes within the offer's hours, today if they are still to
  *  come, else tomorrow (by the review clock, like the countdown) */
 function preorderSlots(start: string, end: string): { at: number; time: string; today: boolean }[] {
@@ -88,6 +129,7 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
   const [count, setCount] = useState(1) // how many combos
   const [picks, setPicks] = useState<Record<string, string[]>>({}) // 'combo:group' → item names
   const [sizes, setSizes] = useState<Record<string, number>>({}) // 'combo:item' → size index (only when the offer lets customers choose)
+  const [custom, setCustom] = useState<Record<string, Picks>>({}) // 'combo:item' → its choices (flavour, milk, pumps, add-ons)
   const [name, setName] = useState(() => a?.name ?? saved().name ?? '')
   const [phone, setPhone] = useState(() => a?.phone ?? saved().phone ?? '')
   const [address, setAddress] = useState(() => a?.address ?? saved().address ?? '')
@@ -141,7 +183,6 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
   if (!offer || !groups.length) return null
   const title = offer.name[lang] || offer.name.en
   const fee = offer.feeOn ? offer.fee : 0
-  const total = offer.price * count + fee // the service fee is per order, not per combo
   // the pick steps: every group of combo 1, then of combo 2, …
   const pickSteps = Array.from({ length: count }, (_, k) => groups.map((_, i) => ({ k, i }))).flat()
   const ASK = 0
@@ -157,14 +198,21 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
   const stepLabel = (x: { k: number; i: number }) => (count > 1 ? `${s('comboN', { n: x.k + 1 })} · ${label(groups[x.i].g)}` : label(groups[x.i].g))
   const sizeOf = (k: number, it: MenuItem) => (it.sizes ? it.sizes[offer.sizes ? sizes[kk(k, it.name)] ?? 0 : 0] : undefined)
   // a line the staff read: the item first (Analytics counts by it), the combo before the quantity when there are several
-  const lineOf = (k: number, n: string) => { const it = ALL.find((i) => i.name === n); const z = it && sizeOf(k, it); return `${n}${z ? ` (${z})` : ''}${count > 1 ? ` · Combo ${k + 1}` : ''} ×1` }
+  const optsOf = (k: number, it: MenuItem): { groups: CustGroup[]; picks: Picks } => { const groups = groupsFor(it, 'en'); return { groups, picks: custom[kk(k, it.name)] ?? defaultPicks(groups) } }
+  // the choices made on a combo drink, in the customer's language, for the details' list
+  const choiceWords = (k: number, it: MenuItem) => { const gs = groupsFor(it, lang); const pk = custom[kk(k, it.name)] ?? defaultPicks(gs); return gs.flatMap((g) => g.options.filter((o) => pk[g.id]?.includes(o.id) && (g.always || o.id !== g.defaultId)).map((o) => { const n = timesPicked(pk, g, o.id); return o.label + (g.kind === 'count' && n > 1 ? ` ×${n}` : '') })).join(', ') }
+  const lineOf = (k: number, n: string) => { const it = ALL.find((i) => i.name === n); const z = it && sizeOf(k, it); const o = it && optsOf(k, it); const words = o ? summary(o.picks, o.groups) : []; return `${n}${z ? ` (${z})` : ''}${words.length ? ` · ${words.join(', ')}` : ''}${count > 1 ? ` · Combo ${k + 1}` : ''} ×1` }
   const lines = pickSteps.flatMap((x) => chosen(x.k, groups[x.i].g.id).map((n) => lineOf(x.k, n)))
+  // a picked item's choices: the ones made, else its defaults; their extra cost on top of the combo price
+  const extraCost = pickSteps.reduce((n, x) => n + chosen(x.k, groups[x.i].g.id).reduce((m, name) => { const it = ALL.find((i) => i.name === name); if (!it) return m; const o = optsOf(x.k, it); return m + extras(o.picks, o.groups) }, 0), 0)
+  const total = offer.price * count + extraCost + fee // the service fee is per order, not per combo
   const setCountTo = (n: number) => {
     const c = Math.min(MAX_COMBOS, Math.max(1, n))
     setCount(c)
     const keep = (key: string) => Number(key.split(':')[0]) < c // a combo taken away takes its choices with it
     setPicks((p) => Object.fromEntries(Object.entries(p).filter(([key]) => keep(key))))
     setSizes((z) => Object.fromEntries(Object.entries(z).filter(([key]) => keep(key))))
+    setCustom((z) => Object.fromEntries(Object.entries(z).filter(([key]) => keep(key))))
   }
   // "Same as combo n": the previous combo's choices, then on to the next combo (or the details)
   // remove one combo before ordering: the ones after it move up a place, with their choices
@@ -177,6 +225,7 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
     }))
     setPicks((m) => shift(m))
     setSizes((m) => shift(m))
+    setCustom((m) => shift(m))
     setCount(count - 1)
     setNote('')
     // from the details stay on the details; from a combo's steps go on to the next combo (or the details)
@@ -188,12 +237,17 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
     const from = ps.k - 1
     const copy: Record<string, string[]> = {}
     const zs: Record<string, number> = {}
+    const cs: Record<string, Picks> = {}
     for (const { g } of groups) {
       copy[kk(ps.k, g.id)] = chosen(from, g.id)
-      for (const n of chosen(from, g.id)) if (sizes[kk(from, n)] !== undefined) zs[kk(ps.k, n)] = sizes[kk(from, n)]
+      for (const n of chosen(from, g.id)) {
+        if (sizes[kk(from, n)] !== undefined) zs[kk(ps.k, n)] = sizes[kk(from, n)]
+        if (custom[kk(from, n)]) cs[kk(ps.k, n)] = custom[kk(from, n)]
+      }
     }
     setPicks({ ...picks, ...copy })
     setSizes({ ...sizes, ...zs })
+    setCustom({ ...custom, ...cs })
     setStep(step + groups.length)
   }
 
@@ -202,7 +256,8 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
     const next = now.includes(n) ? now.filter((x) => x !== n) : g.pick === 1 ? [n] : now.length < g.pick ? [...now, n] : now
     setPicks({ ...picks, [kk(k, g.id)]: next })
     // one choice per step: the tap also moves on (the Back button returns to change it)
-    if (g.pick === 1 && !now.includes(n) && !(offer.sizes && ALL.find((i) => i.name === n)?.sizes)) setTimeout(() => setStep((x) => x + 1), 260)
+    const it = ALL.find((i) => i.name === n)
+    if (g.pick === 1 && !now.includes(n) && !(offer.sizes && it?.sizes) && !(it && groupsFor(it, 'en').length)) setTimeout(() => setStep((x) => x + 1), 260)
   }
   const place = () => {
     unlockAudio() // this tap lets the order's status sounds play later
@@ -299,6 +354,7 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
                               {it.sizes.map((z, i) => <button key={z} type="button" role="radio" aria-checked={(sizes[kk(ck, it.name)] ?? 0) === i} className={(sizes[kk(ck, it.name)] ?? 0) === i ? 'on' : ''} onClick={() => setSizes({ ...sizes, [kk(ck, it.name)]: i })} dir="ltr">{z}</button>)}
                             </div>
                           )}
+                          {on && <ComboChoices groups={groupsFor(it, lang)} picks={custom[kk(ck, it.name)]} onChange={(p) => setCustom({ ...custom, [kk(ck, it.name)]: p })} />}
                         </div>
                       )
                     })}
@@ -316,7 +372,7 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
                   {count > 1 && x.i === 0 && (
                     <li className="combo-sum-head"><b>{s('comboN', { n: x.k + 1 })}</b><button type="button" className="combo-remove" onClick={() => removeCombo(x.k)} aria-label={s('comboRemove', { n: x.k + 1 })}>{s('comboRemoveShort')}</button></li>
                   )}
-                  <li><span>{count > 1 ? label(groups[x.i].g) : stepLabel(x)}</span><b>{chosen(x.k, groups[x.i].g.id).map((m) => { const it = ALL.find((y) => y.name === m); const z = it && sizeOf(x.k, it); return nameOf(m, lang) + (z ? ` (${z})` : '') }).join(', ')}</b><button type="button" className="link-btn" onClick={() => setStep(n + 1)}>{s('comboChange')}</button></li>
+                  <li><span>{count > 1 ? label(groups[x.i].g) : stepLabel(x)}</span><b>{chosen(x.k, groups[x.i].g.id).map((m) => { const it = ALL.find((y) => y.name === m); const z = it && sizeOf(x.k, it); const picked = it ? choiceWords(x.k, it) : ''; return nameOf(m, lang) + (z ? ` (${z})` : '') + (picked ? ` · ${picked}` : '') }).join(', ')}</b><button type="button" className="link-btn" onClick={() => setStep(n + 1)}>{s('comboChange')}</button></li>
                   </Fragment>
                 ))}
               </ul>
@@ -347,6 +403,7 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
               </div>
               <dl className="combo-bill">
                 <div><dt>{title}{count > 1 && <span dir="ltr"> × {count}</span>}</dt><dd dir="ltr">{iqd(offer.price * count)} IQD</dd></div>
+                {extraCost > 0 && <div><dt>{s('comboExtras')}</dt><dd dir="ltr">{iqd(extraCost)} IQD</dd></div>}
                 {fee > 0 && <div><dt>{s('serviceFee')}</dt><dd dir="ltr">{iqd(fee)} IQD</dd></div>}
                 {delivery && offer.freeDelivery && <div><dt>{t('getDelivery')}</dt><dd>{t('free')}</dd></div>}
                 <div className="sum"><dt>{s('comboTotal')}</dt><dd dir="ltr">{iqd(total)} IQD</dd></div>
