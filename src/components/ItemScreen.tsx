@@ -7,7 +7,7 @@ import { useLang } from '../i18n'
 import type { MenuItem } from '../menu'
 import { iqd } from '../account'
 import { DESC, TINT, categoryOf, isIced } from '../menuMeta'
-import { groupsFor, defaultPicks, extras, summary } from '../customize'
+import { groupsFor, defaultPicks, extras, summary, timesPicked } from '../customize'
 import { itemState, nameOf, useMenuVersion, photoOf } from '../menuAdmin'
 import type { CustGroup, Picks } from '../customize'
 import { MiniCup } from './MiniCup'
@@ -78,7 +78,14 @@ export function ItemScreen({ item, gift = false, onClose, onAdded }: { item: Men
     if (g.kind === 'toggle') return { ...p, [g.id]: cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id] }
     return { ...p, [g.id]: g.optional && cur[0] === id ? [] : [id] }
   })
-  const chosen = (g: CustGroup) => g.options.filter((o) => picks[g.id]?.includes(o.id)).map((o) => o.label).join(', ')
+  const chosen = (g: CustGroup) => g.options.filter((o) => picks[g.id]?.includes(o.id)).map((o) => { const n = timesPicked(picks, g, o.id); return o.label + (g.kind === 'count' && n > 1 ? ` ×${n}` : '') }).join(', ')
+  // a count (pumps): one more or one fewer of an option, never more than the group's max in all
+  const bump = (g: CustGroup, id: string, by: 1 | -1) => setPicks((p) => {
+    const cur = p[g.id] ?? []
+    if (by > 0) return cur.length >= (g.max ?? 9) ? p : { ...p, [g.id]: [...cur, id] }
+    const at = cur.lastIndexOf(id)
+    return at < 0 ? p : { ...p, [g.id]: [...cur.slice(0, at), ...cur.slice(at + 1)] }
+  })
   const confirm = (e: MouseEvent<HTMLButtonElement>) => {
     dropsFrom(e.currentTarget, '#73c3ff', 14, 1.1)
     add({ name: item.name, size, price: unit, opts }, qty)
@@ -161,6 +168,24 @@ export function ItemScreen({ item, gift = false, onClose, onAdded }: { item: Men
                         )
                       })}
                     </div>
+                  ) : g.kind === 'count' ? (
+                    <>
+                      <p className="cust-note">{t('pumpsUpTo').replace('{n}', String(g.max ?? 3))}</p>
+                      {g.options.map((o) => {
+                        const n = timesPicked(picks, g, o.id)
+                        const full = (picks[g.id]?.length ?? 0) >= (g.max ?? 9)
+                        return (
+                          <div key={o.id} className={'count-row' + (n ? ' on' : '')}>
+                            <span className="toggle-label">{o.label}{o.price ? <small dir="ltr"> +{iqd(o.price)} IQD</small> : null}</span>
+                            <span className="count-ctl">
+                              <button type="button" onClick={() => bump(g, o.id, -1)} disabled={!n} aria-label={`${t('fewer')} ${o.label}`}>−</button>
+                              <output dir="ltr" aria-live="polite">{n}</output>
+                              <button type="button" onClick={() => bump(g, o.id, 1)} disabled={full} aria-label={`${t('more')} ${o.label}`}>+</button>
+                            </span>
+                          </div>
+                        )
+                      })}
+                    </>
                   ) : (
                     g.options.map((o) => {
                       const on = !!picks[g.id]?.includes(o.id)

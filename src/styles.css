@@ -1049,6 +1049,14 @@ body[data-view='home'] .deck > .slide:first-child::before { content: ''; positio
 /* the customer's tracker when the branch cancelled */
 .track-cancelled { display: grid; gap: 0.2rem; padding: 0.7rem 0.8rem; border-radius: 0.8rem; background: #fde7e5; color: #8a1f17; }
 .track-bar.cancelled { background: #b3261e; color: #fff; }
+.cust-note { margin: 0 0 0.4rem; font-size: 0.82rem; opacity: 0.75; }
+.count-row { display: flex; align-items: center; gap: 0.6rem; padding: 0.45rem 0; border-bottom: 1px solid rgba(0, 47, 109, 0.08); }
+.count-row .toggle-label { flex: 1; }
+.count-row.on .toggle-label { font-weight: 700; }
+.count-ctl { display: inline-flex; align-items: center; gap: 0.5rem; }
+.count-ctl button { width: 2.5rem; height: 2.5rem; border-radius: 50%; border: 1.5px solid rgba(0, 47, 109, 0.25); background: #fff; color: var(--navy); font: 600 1.2rem/1 var(--font-sans); cursor: pointer; }
+.count-ctl button:disabled { opacity: 0.3; cursor: default; }
+.count-ctl output { min-width: 1.4rem; text-align: center; font-weight: 700; color: var(--navy); }
 .staff-note { margin: 0.2rem 0 0; padding: 0.5rem 0.7rem; border-radius: 0.6rem; background: #fff3cd; color: #5c4400; font-size: 0.9rem; white-space: pre-wrap; overflow-wrap: anywhere; }
 .order-note { display: grid; gap: 0.3rem; text-align: start; font-size: 0.85rem; }
 .order-note textarea { font: inherit; padding: 0.6rem 0.75rem; border-radius: 0.8rem; border: 1.5px solid rgba(0, 47, 109, 0.25); resize: vertical; }
