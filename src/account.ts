@@ -1,5 +1,5 @@
 import { customerBranch } from './staff/store'
-import { newUid } from './backend'
+import { backendOn, newUid } from './backend'
 import { useEffect, useState } from 'react'
 import { pushNotice } from './notify'
 import type { Status } from './orders'
@@ -31,6 +31,7 @@ export interface Order {
   pay?: 'wallet' | 'pickup'
   status?: Status // set by the staff dashboard; missing = 'received'
   history?: { stage: Status; at: number }[]
+  arriveAt?: number // a pickup: when the customer said they will arrive (ms; owner, 2026-10-22)
   note?: string // the customer's note for the café ("less ice", "call when you arrive"), shown to staff
   cancelReason?: string // when cancelled: 'r:<code>' for a ready-made reason (CANCEL_REASONS), else the staff's words
   customer?: { name: string; phone: string }
@@ -41,6 +42,7 @@ export interface Order {
   offer?: { name: string; price: number; count?: number; fee?: number; pre?: boolean; wantAt?: number } // a combo from the dashboard's Offers (Positive Hours); count = how many combos (1 when missing); pre = placed outside its hours; wantAt = the time the customer chose for a pre-order (ms)
   uid?: string // the order's identity in the shared backend (src/sync.ts); `id` is the short code people see
   synced?: boolean // the backend has it
+  held?: 'limit' // this device only: the backend refused it for now (10 orders an hour from one device); retried
 }
 export interface GeoPoint { lat: number; lng: number; acc?: number } // acc: the phone's own accuracy estimate, metres
 export interface Delivery { phone: string; address: string; location?: GeoPoint } // location: the pin from "Share my location"
@@ -153,14 +155,14 @@ export function topUp(amount: number) {
 
 export type PayResult = { ok: boolean; points: number; reward: boolean; orderId: string }
 /** Pay an order from the wallet; earns points and turns every REWARD_AT points into a free-drink reward. */
-export function payFromWallet(total: number, items: string[], delivery?: Delivery, note?: string): PayResult {
+export function payFromWallet(total: number, items: string[], delivery?: Delivery, note?: string, arriveAt?: number): PayResult {
   if (!account || account.balance < total) return { ok: false, points: 0, reward: false, orderId: '' }
-  return placeOrder(total, items, 'wallet', delivery, undefined, note ? { note } : undefined)
+  return placeOrder(total, items, 'wallet', delivery, undefined, { ...(note && { note }), ...(arriveAt && { arriveAt }) })
 }
 /** Place the order and pay in cash — at the counter on pickup, or at the door on delivery (DEMO: nothing is charged; points still earned). */
-export function payAtPickup(total: number, items: string[], delivery?: Delivery, note?: string): PayResult {
+export function payAtPickup(total: number, items: string[], delivery?: Delivery, note?: string, arriveAt?: number): PayResult {
   if (!account || total <= 0) return { ok: false, points: 0, reward: false, orderId: '' }
-  return placeOrder(total, items, 'pickup', delivery, undefined, note ? { note } : undefined)
+  return placeOrder(total, items, 'pickup', delivery, undefined, { ...(note && { note }), ...(arriveAt && { arriveAt }) })
 }
 function placeOrder(total: number, items: string[], pay: 'wallet' | 'pickup', delivery?: Delivery, giftTo?: string, extra?: Partial<Order>): PayResult {
   const points = Math.floor(total / 1000) * POINTS_PER_1000
@@ -205,13 +207,13 @@ const saveGuest = () => {
   listeners.forEach((l) => l())
 }
 /** A combo order: on the signed-in account when there is one (points are earned), otherwise as a guest order. Cash on delivery / at pickup. */
-export function placeOfferOrder(o: { total: number; items: string[]; name: string; phone: string; address?: string; location?: GeoPoint; offer: NonNullable<Order['offer']>; note?: string }): PayResult {
+export function placeOfferOrder(o: { total: number; items: string[]; name: string; phone: string; address?: string; location?: GeoPoint; offer: NonNullable<Order['offer']>; note?: string; arriveAt?: number }): PayResult {
   // address undefined = pickup; a delivery may carry a typed address, a shared pin, or both
   const delivery: Delivery | undefined = o.address !== undefined ? { phone: o.phone, address: o.address, location: o.location } : undefined
   const customer = { name: o.name, phone: o.phone }
-  if (account && session) return placeOrder(o.total, o.items, 'pickup', delivery, undefined, { offer: o.offer, customer, ...(o.note && { note: o.note }) })
+  if (account && session) return placeOrder(o.total, o.items, 'pickup', delivery, undefined, { offer: o.offer, customer, ...(o.note && { note: o.note }), ...(o.arriveAt && { arriveAt: o.arriveAt }) })
   const orderId = 'M' + Date.now().toString().slice(-6)
-  guest = [{ id: orderId, at: Date.now(), total: o.total, items: o.items, points: 0, pay: 'pickup', status: 'received', history: [{ stage: 'received', at: Date.now() }], customer, fulfil: delivery ? 'delivery' : 'pickup', delivery, branch: customerBranch(), offer: o.offer, uid: newUid(), ...(o.note && { note: o.note }) }, ...guest]
+  guest = [{ id: orderId, at: Date.now(), total: o.total, items: o.items, points: 0, pay: 'pickup', status: 'received', history: [{ stage: 'received', at: Date.now() }], customer, fulfil: delivery ? 'delivery' : 'pickup', delivery, branch: customerBranch(), offer: o.offer, uid: newUid(), ...(o.note && { note: o.note }), ...(o.arriveAt && { arriveAt: o.arriveAt }) }, ...guest]
   saveGuest()
   onPlaced?.()
   return { ok: true, points: 0, reward: false, orderId }
@@ -230,6 +232,14 @@ export function markSynced(uid: string) {
   const { mine, o } = findByUid(uid)
   if (!o || o.synced) return
   o.synced = true
+  delete o.held
+  commit(mine)
+}
+/** the backend refused the order for now (the hourly limit); it is sent again on the next check */
+export function markHeld(uid: string, why: NonNullable<Order['held']>) {
+  const { mine, o } = findByUid(uid)
+  if (!o || o.synced || o.held === why) return
+  o.held = why
   commit(mine)
 }
 /** the stage staff moved the order to, as the backend has it */
@@ -244,7 +254,9 @@ export function applyRemoteStatus(uid: string, status: Status, history?: Order['
 /** The orders this customer can follow on this device: the signed-in account's and the guest orders, newest first. */
 export function useMyOrders(): Order[] {
   const a = useAccount()
-  return [...(a?.orders ?? []), ...guest].sort((x, y) => y.at - x.at)
+  // with the shared backend on, an order with no `uid` is a leftover from before it (placed before 2026-10-13, kept only
+  // on this device): it can never reach the café nor move, so it is not followed (it stuck at "Request received")
+  return [...(a?.orders ?? []), ...guest].filter((o) => !backendOn || !!o.uid).sort((x, y) => y.at - x.at)
 }
 /** Every order stored on this device (DEMO: the one account's orders and the guest orders), newest first. */
 export function useAllOrders(): Order[] {

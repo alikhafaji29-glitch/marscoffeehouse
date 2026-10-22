@@ -32,10 +32,14 @@ export function TrackBar() {
   const waiting = active.length > 0
   useEffect(() => {
     if (!waiting) return
+    // every tap, and every return to the page, wakes the audio again: phones pause it when the screen locks or the
+    // visitor switches apps, and then the status sound was silent (owner, 2026-10-22)
     const on = () => unlockAudio()
-    document.addEventListener('pointerdown', on, { once: true })
-    document.addEventListener('keydown', on, { once: true })
-    return () => { document.removeEventListener('pointerdown', on); document.removeEventListener('keydown', on) }
+    const back = () => { if (!document.hidden) unlockAudio() }
+    document.addEventListener('pointerdown', on)
+    document.addEventListener('keydown', on)
+    document.addEventListener('visibilitychange', back)
+    return () => { document.removeEventListener('pointerdown', on); document.removeEventListener('keydown', on); document.removeEventListener('visibilitychange', back) }
   }, [waiting])
   if (!active.length && !cancelled.length) return null
   return (

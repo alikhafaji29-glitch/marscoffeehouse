@@ -27,7 +27,7 @@ export const branchName = (id?: string) => BRANCHES.find((b) => b.id === id)?.na
 /** a branch's name in the customer's language */
 export const branchLabel = (id: string, lang: keyof L3) => { const b = BRANCHES.find((x) => x.id === id); return b?.names[lang] || b?.name || id }
 
-export interface Settings { reach: 'dashboard' | 'whatsapp'; whatsapp: string; delivery: boolean; pickup: boolean }
+export interface Settings { reach: 'dashboard' | 'whatsapp'; whatsapp: string; delivery: boolean; pickup: boolean; lead?: number } // lead: minutes before a timed order's time that it moves from Later to Active (LEAD_MIN when missing)
 export interface EventX { id: string; name: L3; theme: string; desc: L3; promo: L3; items: string[]; active: boolean }
 export interface OfferGroup { id: string; label: L3; pick: number; mode: 'cats' | 'items'; cats: string[]; items: string[] }
 export interface Offer {

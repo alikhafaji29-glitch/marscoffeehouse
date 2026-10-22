@@ -9,7 +9,7 @@ let ctx: AudioContext | null = null
 export function unlockAudio() {
   try {
     ctx ??= new AudioContext()
-    if (ctx.state === 'suspended') void ctx.resume()
+    if (ctx.state !== 'running') void ctx.resume() // 'suspended', or iOS's 'interrupted' after the screen locked or the tab was left
   } catch { /* no audio on this device */ }
 }
 
@@ -42,6 +42,12 @@ export function chime() {
  *  Phones that can also buzz do so. Silent until the visitor has tapped the page once (the browser's rule). */
 export function statusSound(status: string) {
   try { navigator.vibrate?.(status === 'cancelled' ? [120, 80, 120] : 90) } catch { /* no vibration */ }
+  if (!ctx) return
+  // the phone may have paused the audio since the tap that started it: wake it, then play
+  if (ctx.state !== 'running') { ctx.resume().then(() => play(status), () => { /* still blocked until the next tap */ }); return }
+  play(status)
+}
+function play(status: string) {
   if (!ctx || ctx.state !== 'running') return
   const t0 = ctx.currentTime + 0.02
   if (status === 'cancelled') { note(659.3, t0, 0.35, 0.2); note(523.3, t0 + 0.22, 0.5, 0.2); return } // E5 → C5

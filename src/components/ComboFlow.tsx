@@ -13,10 +13,11 @@ import { useS } from '../staff/strings'
 import { catLabel } from './MenuSection'
 import { MiniCup } from './MiniCup'
 import { OrderTracker } from './OrderTracker'
+import { TimeWheel } from './TimeWheel'
 import { nameOf, photoOf } from '../menuAdmin'
 import { defaultPicks, extras, groupsFor, summary, timesPicked } from '../customize'
 import type { CustGroup, Picks } from '../customize'
-import { whenText } from '../orders'
+import { arrivalSlots, timeText, whenText } from '../orders'
 import { ShareLocation, mapsLink } from './ShareLocation'
 import { IconCheck } from './Icons'
 import { useCountdown } from './useCountdown'
@@ -30,7 +31,9 @@ import { clockNow } from '../clock'
  * It lands on the staff Orders page as "Request received" and the customer follows it on the tracker.
  * It starts by asking how many combos (owner, 2026-10-19); each combo's steps then follow in turn ("Combo 2 of 3",
  * with "Same as combo 1"), the bill is the count times the combo price plus one service fee. While there are two or
- * more, any one combo can be skipped on its steps ("Skip combo 2") or removed in the details' list before ordering.
+ * more, any one combo can be removed in the details' list before ordering (the Skip button on its steps was taken
+ * out, owner 2026-10-21). Instead, finishing a combo shows a short screen "Combo 1 is ready" with Next combo and
+ * Skip combo 2.
  * A drink in a combo has the same choices as on its menu page (owner, 2026-10-21): its flavour, the milk, flavour
  * pumps and add-ons, at the menu's prices on top of the combo price (`custom`, per combo and item).
  * A step with several menu categories (the drinks) has a row of category chips on top that stays in view: it lights
@@ -109,6 +112,8 @@ function preorderSlots(start: string, end: string): { at: number; time: string; 
   for (const t = new Date(day); t < stop; t.setMinutes(t.getMinutes() + 15)) out.push({ at: t.getTime(), time: `${String(t.getHours()).padStart(2, '0')}:${String(t.getMinutes()).padStart(2, '0')}`, today })
   return out
 }
+/** today's end of the offer's hours (ms), for the latest arrival time */
+const endOfOffer = (end: string, now: number) => { const e = hm(end); const d = new Date(now); d.setHours(e.h, e.m, 0, 0); return d.getTime() }
 const hm = (x: string) => { const [h, m] = x.split(':').map(Number); return { h: h || 0, m: m || 0 } }
 
 export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () => void }) {
@@ -125,6 +130,7 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
   const [how, setHow] = useState<'delivery' | 'pickup'>(() => (set.delivery ? 'delivery' : 'pickup'))
   const delivery = set.delivery && (how === 'delivery' || !set.pickup)
   const [wantAt, setWantAt] = useState(0) // a pre-order's chosen time (ms); 0 = not chosen yet
+  const [arriveAt, setArriveAt] = useState(0) // a live pickup: when the customer will arrive (ms; owner, 2026-10-22)
   const [step, setStep] = useState(0) // 0 = how many, then each combo's groups in turn, then the details, then placed
   const [count, setCount] = useState(1) // how many combos
   const [picks, setPicks] = useState<Record<string, string[]>>({}) // 'combo:group' → item names
@@ -137,6 +143,8 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
   const [note, setNote] = useState('')
   const [staffNote, setStaffNote] = useState('') // the customer's note for the café
   const [placedId, setPlacedId] = useState('')
+  // between two combos (owner, 2026-10-21): after a combo's last step a short screen offers the next combo or skipping it
+  const [between, setBetween] = useState(false)
   // the category chips of a step with several categories: the one in view, and a jump to one
   const bodyRef = useRef<HTMLDivElement>(null)
   const chipsRef = useRef<HTMLDivElement>(null)
@@ -232,6 +240,16 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
     const details = (count - 1) * groups.length + 1
     setStep(step >= DETAILS ? details : Math.min(k * groups.length + 1, details))
   }
+  // forward from a step: after a combo's last step comes "Combo n is ready" (Next combo / Skip) when another combo
+  // follows. The Next button, a tap that moves on by itself and "Same as combo n" all go through here; the tap and
+  // "Same as" used to jump straight to the next combo (owner, 2026-10-22: "next combo screen doesn't show sometimes")
+  const stepNow = useRef(step)
+  stepNow.current = step
+  const forward = (from: number) => {
+    if (stepNow.current !== from) return // already moved (a second tap, or Back during the pause)
+    const p = from > ASK && from < DETAILS ? pickSteps[from - 1] : undefined
+    if (p && p.i === groups.length - 1 && p.k < count - 1) { setStep(from); setBetween(true) } else setStep(from + 1)
+  }
   const sameAsBefore = () => {
     if (!ps || ps.k === 0) return
     const from = ps.k - 1
@@ -248,7 +266,10 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
     setPicks({ ...picks, ...copy })
     setSizes({ ...sizes, ...zs })
     setCustom({ ...custom, ...cs })
-    setStep(step + groups.length)
+    const last = step + groups.length - 1 - ps.i // this combo's last step, all of it now filled
+    stepNow.current = last
+    setStep(last)
+    forward(last)
   }
 
   const pick = (k: number, g: OfferGroup, n: string) => {
@@ -257,14 +278,16 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
     setPicks({ ...picks, [kk(k, g.id)]: next })
     // one choice per step: the tap also moves on (the Back button returns to change it)
     const it = ALL.find((i) => i.name === n)
-    if (g.pick === 1 && !now.includes(n) && !(offer.sizes && it?.sizes) && !(it && groupsFor(it, 'en').length)) setTimeout(() => setStep((x) => x + 1), 260)
+    if (g.pick === 1 && !now.includes(n) && !(offer.sizes && it?.sizes) && !(it && groupsFor(it, 'en').length)) { const from = step; setTimeout(() => forward(from), 260) }
   }
   const place = () => {
     unlockAudio() // this tap lets the order's status sounds play later
     const nm = name.trim()
     if (nm.length < 2 || normPhone(phone).length < 10 || (delivery && address.trim().length < 6 && !location)) { setNote(delivery ? s('comboNeed') : s('comboNeedPickup')); return }
     if (!live && !wantAt) { setNote(s('comboNeedTime')); return }
-    const res = placeOfferOrder({ total, items: lines, name: nm, phone: phone.trim(), address: delivery ? address.trim() : undefined, location: delivery && location ? location : undefined, offer: { name: offer.name.en, price: offer.price, count: count > 1 ? count : undefined, fee: fee || undefined, pre: !live || undefined, wantAt: !live ? wantAt : undefined }, note: staffNote.trim() || undefined })
+    const arrive = live && !delivery ? arriveAt : 0 // a pre-order's pickup time is its chosen time
+    if (live && !delivery && arriveAt < clockNow().getTime()) { setNote(s('arriveNeed')); return }
+    const res = placeOfferOrder({ total, items: lines, name: nm, phone: phone.trim(), address: delivery ? address.trim() : undefined, location: delivery && location ? location : undefined, offer: { name: offer.name.en, price: offer.price, count: count > 1 ? count : undefined, fee: fee || undefined, pre: !live || undefined, wantAt: !live ? wantAt : undefined }, note: staffNote.trim() || undefined, arriveAt: arrive || undefined })
     if (!res.ok) return
     try { localStorage.setItem(GUEST, JSON.stringify({ name: nm, phone: phone.trim(), address: address.trim() })) } catch { /* ignore */ }
     setPlacedId(res.orderId)
@@ -273,34 +296,21 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
   const placed = orders.find((o) => o.id === placedId)
   const firstName = name.trim().split(/\s+/)[0] ?? '' // the thank-you after ordering says it
   const waLink = placed && set.reach === 'whatsapp'
-    ? `https://wa.me/${set.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent([`Mars CoffeeHouse · ${offer.name.en} · #${placed.id}`, ...placed.items, `${iqd(placed.total)} IQD`, `${name.trim()} · ${phone.trim()}`, ...(placed.delivery ? [placed.delivery.address, placed.delivery.location ? mapsLink(placed.delivery.location) : ''].filter(Boolean) : [t('getPickup')]), ...(placed.offer?.wantAt ? [t('scheduledFor').replace('{t}', whenText(placed.offer.wantAt, lang))] : []), ...(placed.note ? [`${t('orderNote')}: ${placed.note}`] : [])].join('\n'))}`
+    ? `https://wa.me/${set.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent([`Mars CoffeeHouse · ${offer.name.en} · #${placed.id}`, ...placed.items, `${iqd(placed.total)} IQD`, `${name.trim()} · ${phone.trim()}`, ...(placed.delivery ? [placed.delivery.address, placed.delivery.location ? mapsLink(placed.delivery.location) : ''].filter(Boolean) : [t('getPickup')]), ...(placed.offer?.wantAt ? [t('scheduledFor').replace('{t}', whenText(placed.offer.wantAt, lang))] : []), ...(placed.arriveAt ? [s('arriveAt', { t: timeText(placed.arriveAt) })] : []), ...(placed.note ? [`${t('orderNote')}: ${placed.note}`] : [])].join('\n'))}`
     : ''
-  const steps = [s('comboHowMany'), ...pickSteps.map(stepLabel), s('comboDetails')]
-  const reachable = (i: number) => i <= step || pickSteps.slice(0, Math.max(0, i - 1)).every((_, n) => full(n)) // a later step once every pick before it is made
 
   return createPortal(
     <div className="modal-overlay combo-overlay" onClick={onClose}>
       <div className="combo" role="dialog" aria-modal="true" aria-labelledby="combo-title" onClick={(e) => e.stopPropagation()}>
         <header className="combo-head">
           <div>
-            <p className="combo-eyebrow">{title}{ps && count > 1 && <span className="combo-of">{s('comboOf', { n: ps.k + 1, of: count })}</span>}{!live && step !== DONE && <em>{t('preOrder').replace(/\s*!$/, '')}</em>}</p>
-            <h2 id="combo-title">{step === DONE ? (firstName ? t('thanksName').replace('{name}', firstName) : t('orderPlaced')) : step === DETAILS ? s('comboDetails') : step === ASK ? s('comboHowMany') : label(cur.g)}</h2>
+            <p className="combo-eyebrow">{title}{ps && count > 1 && !between && <span className="combo-of">{s('comboOf', { n: ps.k + 1, of: count })}</span>}{!live && step !== DONE && <em>{t('preOrder').replace(/\s*!$/, '')}</em>}</p>
+            <h2 id="combo-title">{between && ps ? s('comboReady', { n: ps.k + 1 }) : step === DONE ? (firstName ? t('thanksName').replace('{name}', firstName) : t('orderPlaced')) : step === DETAILS ? s('comboDetails') : step === ASK ? s('comboHowMany') : label(cur.g)}</h2>
           </div>
           <button type="button" className="combo-close" onClick={onClose} aria-label={t('close')}>
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
           </button>
         </header>
-        {step !== DONE && (
-          <ol className="combo-steps" aria-label={s('comboSteps')}>
-            {steps.map((x, i) => (
-              <li key={i} className={i < step ? 'past' : i === step ? 'now' : ''} aria-current={i === step ? 'step' : undefined}>
-                <button type="button" disabled={!reachable(i)} onClick={() => { setNote(''); setStep(i) }}>
-                  <span>{i < step ? <IconCheck /> : i + 1}</span>{x}
-                </button>
-              </li>
-            ))}
-          </ol>
-        )}
 
         <div className="combo-body" ref={bodyRef} onScroll={watch}>
           {step === ASK && (
@@ -312,18 +322,26 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
                 <button type="button" onClick={() => setCountTo(count + 1)} disabled={count >= MAX_COMBOS} aria-label={s('comboMore')}>+</button>
               </div>
               <p className="combo-count-sum" dir="ltr">{count} × {iqd(offer.price)} = <b>{iqd(offer.price * count)} IQD</b></p>
+              {/* Next right under the counter, not at the foot of an empty screen (owner, 2026-10-21) */}
+              <button type="button" className="combo-next combo-next-inline" onClick={() => setStep(step + 1)}>{s('comboNext')}</button>
             </div>
           )}
 
-          {ps && (
+          {between && ps && (
+            <div className="combo-between">
+              <p className="combo-hint">{s('comboReadyHint', { n: ps.k + 2 })}</p>
+              <button type="button" className="combo-next combo-next-inline" onClick={() => { setBetween(false); setStep(step + 1) }}>{s('comboNextCombo')}</button>
+              <button type="button" className="combo-skip" onClick={() => { setBetween(false); removeCombo(ps.k + 1) }}>{s('comboSkip', { n: ps.k + 2 })}</button>
+            </div>
+          )}
+          {ps && !between && (
             <>
               <p className="combo-hint">{s('comboPick', { n: cur.g.pick })}</p>
-              {(count > 1 || (ps.k > 0 && ps.i === 0)) && (
+              {ps.k > 0 && ps.i === 0 && (
                 <div className="combo-tools">
                   {ps.k > 0 && ps.i === 0 && groups.every(({ g }) => chosen(ps.k - 1, g.id).length >= g.pick) && (
                     <button type="button" className="combo-same" onClick={sameAsBefore}>{s('comboSame', { n: ps.k })}</button>
                   )}
-                  {count > 1 && <button type="button" className="combo-remove" onClick={() => removeCombo(ps.k)}>{s('comboSkip', { n: ps.k + 1 })}</button>}
                 </div>
               )}
               {cur.cats.length > 1 && (
@@ -376,6 +394,9 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
                   </Fragment>
                 ))}
               </ul>
+              {count < MAX_COMBOS && (
+                <button type="button" className="combo-add" onClick={() => { setNote(''); setStep(count * groups.length + 1); setCount(count + 1) }}>+ {s('comboAddAnother')}</button>
+              )}
               <div className="combo-form">
                 {set.delivery && set.pickup && (
                   <div className="combo-how" role="radiogroup" aria-label={s('comboHow')}>
@@ -391,6 +412,13 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
                     </select>
                   </label>
                 )}
+                {live && !delivery && (() => { const now = clockNow().getTime(); return (
+                  <div className="arrive">
+                    <span className="arrive-title">{s('arriveWhen')}</span>
+                    <TimeWheel slots={arrivalSlots(now, endOfOffer(offer.end, now))} value={arriveAt} onChange={(at) => { setArriveAt(at); setNote('') }} label={s('arriveWhen')} />
+                    {arriveAt > 0 && <small className="arrive-in">{s('arriveIn', { n: Math.max(1, Math.round((arriveAt - now) / 60_000)) })}</small>}
+                  </div>
+                ) })()}
                 <label><span>{t('nameLabel')}</span><input value={name} onChange={(e) => { setName(e.target.value); setNote('') }} autoComplete="given-name" /></label>
                 <label><span>{t('deliveryPhone')}</span><input type="tel" inputMode="tel" dir="ltr" value={phone} onChange={(e) => { setPhone(e.target.value); setNote('') }} autoComplete="tel" placeholder="0750 000 0000" /></label>
                 {delivery
@@ -415,26 +443,25 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
 
           {step === DONE && (
             <>
-              {placed && <p className="combo-thanks">{t('thanksLine').replace('{id}', placed.id)}</p>}
+              {placed && <p className="combo-thanks">{t('thanksReady')}</p>}
               {placed && <OrderTracker order={placed} />}
-              <p className="combo-hint">{s('comboTrackHint')}</p>
               {waLink && <a className="combo-wa" href={waLink} target="_blank" rel="noreferrer">{s('siteSendWhatsapp')}</a>}
             </>
           )}
         </div>
 
-        <footer className="combo-foot">
+        {step !== ASK && <footer className="combo-foot">
           {step === DONE ? (
             <button type="button" className="combo-next" onClick={onClose}>{t('close')}</button>
           ) : (
             <>
-              {step > 0 && <button type="button" className="combo-back" onClick={() => { setNote(''); setStep(step - 1) }}>{t('back')}</button>}
-              {step < DETAILS
-                ? <button type="button" className="combo-next" disabled={step > ASK && !full(step - 1)} onClick={() => setStep(step + 1)}>{s('comboNext')} · <span dir="ltr">{iqd(offer.price * count)} IQD</span></button>
+              {step > 0 && <button type="button" className="combo-back" onClick={() => { setNote(''); if (between) setBetween(false); else setStep(step - 1) }}>{t('back')}</button>}
+              {between ? null : step < DETAILS
+                ? <button type="button" className="combo-next" disabled={step > ASK && !full(step - 1)} onClick={() => forward(step)}>{s('comboNext')}</button>
                 : <button type="button" className="combo-next" onClick={place}>{live ? s('comboPlace') : s('comboPlacePre')} · <span dir="ltr">{iqd(total)} IQD</span></button>}
             </>
           )}
-        </footer>
+        </footer>}
       </div>
     </div>,
     document.body,

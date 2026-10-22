@@ -3,7 +3,7 @@ import type { FormEvent, ReactNode } from 'react'
 import { LANGS, useLang } from '../i18n'
 import type { Lang } from '../i18n'
 import { useAllOrders } from '../account'
-import { isActive } from '../orders'
+import { LEAD_MIN, isActive, isLater, useNow } from '../orders'
 import { Logo } from '../components/Header'
 import { catLabel } from '../components/MenuSection'
 import { chime, unlockAudio } from '../chime'
@@ -20,7 +20,7 @@ import { Tools } from './Tools'
 import { Warehouse } from './Warehouse'
 import { backendOn } from '../backend'
 import { staffSignIn, staffSignOut, useRemote, wakeRemote } from './remote'
-import { BRANCHES, branchName, update, useStaff } from './store'
+import { BRANCHES, branchName, settingsFor, update, useStaff } from './store'
 import type { BranchId } from './store'
 import { useS } from './strings'
 import type { SKey } from './strings'
@@ -76,7 +76,9 @@ export function StaffScreen() {
   const local = useAllOrders()
   const all = backendOn ? remote.orders : local
   const orders = all.filter((o) => (o.branch ?? BRANCHES[0].id) === data.branch)
-  const active = orders.filter((o) => isActive(o)).length
+  const now = useNow(15000)
+  const lead = settingsFor(data.branch).lead ?? LEAD_MIN
+  const active = orders.filter((o) => isActive(o) && !isLater(o, now, lead)).length // the menu badge: what to make now
   const [sound, setSound] = useState(() => { try { return localStorage.getItem('mars-staff-sound') !== '0' } catch { return true } })
   const toggleSound = () => {
     const on = !sound
@@ -91,6 +93,15 @@ export function StaffScreen() {
     if (known.current && ok && sound && all.some((o) => !known.current!.has(o.uid ?? o.id))) chime()
     known.current = ids
   }, [all, ok, sound])
+  // and a chime when an order waiting under Later comes due (its time within `lead` minutes) and moves to Active
+  const laterKey = orders.filter((o) => isLater(o, now, lead)).map((o) => o.uid ?? o.id).join(',')
+  const wasLater = useRef<string[] | null>(null)
+  useEffect(() => {
+    const cur = laterKey ? laterKey.split(',') : []
+    const due = (wasLater.current ?? []).some((id) => !cur.includes(id) && orders.some((o) => (o.uid ?? o.id) === id && isActive(o) && (o.status ?? 'received') === 'received'))
+    if (wasLater.current && ok && sound && due) chime()
+    wasLater.current = cur
+  }, [laterKey]) // eslint-disable-line react-hooks/exhaustive-deps
   const go = (p: string) => {
     setPage(p)
     setDrawer(false)

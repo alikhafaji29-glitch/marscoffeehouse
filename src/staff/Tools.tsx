@@ -1,6 +1,7 @@
 import { branchName, settingsFor, update, useStaff } from './store'
 import type { Settings } from './store'
 import { useS } from './strings'
+import { LEAD_MIN } from '../orders'
 import { Card, Field, I, Switch } from './ui'
 
 /* Tools, after the live panel's order settings: how a finished order reaches the staff, and which of Delivery /
@@ -37,6 +38,11 @@ export function Tools() {
           <Switch on={set.pickup} onChange={(v) => patch({ pickup: v })} label={s('pickup')} disabled={set.pickup && !set.delivery} />
         </div>
         <p className="d-hint">{s('fulfilOne')}</p>
+      </Card>
+      <Card title={s('leadTitle')} sub={s('leadSub')}>
+        <div className="d-seg" role="radiogroup" aria-label={s('leadTitle')}>
+          {[10, 15, 20, 30].map((n) => <button key={n} type="button" role="radio" aria-checked={(set.lead ?? LEAD_MIN) === n} className={(set.lead ?? LEAD_MIN) === n ? 'on' : ''} onClick={() => patch({ lead: n })}>{s('leadMin', { n })}</button>)}
+        </div>
       </Card>
       <p className="demo-note">{s('savedAuto')}</p>
     </div>

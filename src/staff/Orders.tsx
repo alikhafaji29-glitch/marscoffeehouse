@@ -3,7 +3,8 @@ import { useLang } from '../i18n'
 import type { Lang, TKey } from '../i18n'
 import { iqd } from '../account'
 import type { Order } from '../account'
-import { CANCEL_REASONS, STAGES, isActive, isCancelled, nextStage, reasonText, stageIndex, stagesFor, useNow, whenText } from '../orders'
+import { CANCEL_REASONS, LEAD_MIN, STAGES, dueOf, groupLines, isActive, isCancelled, isLater, nextStage, reasonText, stageIndex, stagesFor, timeText, untilText, useNow, whenText } from '../orders'
+import { settingsFor, useStaff } from './store'
 import type { Stage } from '../orders'
 import { IconCheck, IconPin } from '../components/Icons'
 import { mapsLink } from '../components/ShareLocation'
@@ -28,21 +29,7 @@ export function ago(at: number, now: number, lang: Lang, justNow: string): strin
 
 const phoneOf = (o: Order) => o.delivery?.phone ?? o.customer?.phone ?? ''
 const PhoneIcon = () => <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2" /></svg>
-/** a combo order's lines under "Combo 1", "Combo 2", … (the line's "· Combo n" moves into the heading); other orders as they are */
-function groupLines(items: string[]): { combo?: number; lines: string[] }[] {
-  const out: { combo?: number; lines: string[] }[] = []
-  for (const line of items) {
-    const m = / · Combo (\d+)( ×\d+)$/.exec(line)
-    const combo = m ? Number(m[1]) : undefined
-    const text = m ? line.slice(0, m.index) + m[2] : line
-    const last = out[out.length - 1]
-    if (last && last.combo === combo) last.lines.push(text)
-    else out.push({ combo, lines: [text] })
-  }
-  return out
-}
-
-export function OrderCard({ o }: { o: Order }) {
+export function OrderCard({ o, lead = LEAD_MIN }: { o: Order; lead?: number }) {
   const { t, lang } = useLang()
   const s = useS()
   const now = useNow(15000)
@@ -73,8 +60,10 @@ export function OrderCard({ o }: { o: Order }) {
         {o.giftTo && <span className="staff-how gift">{t('giftBadge')}</span>}
         {o.offer && <span className="staff-how offer">{o.offer.name}{(o.offer.count ?? 1) > 1 && <span dir="ltr"> ×{o.offer.count}</span>}</span>}
         {o.offer?.pre && <span className="staff-how pre">{s('preOrderBadge')}</span>}
+        {dueOf(o) && isActive(o) && (o.status ?? 'received') === 'received' && !isLater(o, now, lead) && <span className="staff-how now">{s('makeNow')}</span>}
       </p>
-      {o.offer?.wantAt && <p className="staff-want">{t('scheduledFor').replace('{t}', whenText(o.offer.wantAt, lang))}</p>}
+      {o.offer?.wantAt && <p className="staff-want">{t('scheduledFor').replace('{t}', whenText(o.offer.wantAt, lang))}{isActive(o) && o.offer.wantAt > now && <small> · {s('inTime', { t: untilText(o.offer.wantAt, now, s('hShort'), s('minShort')) })}</small>}</p>}
+      {o.arriveAt && <p className="staff-want">{s('arriveAt', { t: timeText(o.arriveAt) })}{isActive(o) && o.arriveAt > now && <small> · {s('inTime', { t: untilText(o.arriveAt, now, s('hShort'), s('minShort')) })}</small>}</p>}
       {/* top to bottom, as the cashier works through it (owner, 2026-10-19): who, how to reach them, what, where */}
       {o.customer && (
         <div className="staff-sec staff-who">
@@ -142,10 +131,17 @@ export function OrderCard({ o }: { o: Order }) {
 export function Orders({ orders, live = false }: { orders: Order[]; live?: boolean }) {
   const { t } = useLang()
   const s = useS()
-  const [tab, setTab] = useState<'active' | 'all' | Stage | 'cancelled'>('active')
-  const active = orders.filter((o) => isActive(o))
-  const shown = tab === 'active' ? active : tab === 'all' ? orders : orders.filter((o) => (o.status ?? 'received') === tab)
-  const counts = STAGES.map((st) => orders.filter((o) => (o.status ?? 'received') === st).length)
+  const [tab, setTab] = useState<'active' | 'later' | 'all' | Stage | 'cancelled'>('active')
+  const branch = useStaff().branch
+  const lead = settingsFor(branch).lead ?? LEAD_MIN
+  const now = useNow(15000)
+  // a timed order more than `lead` minutes away waits under Later; Active is sorted by when each order is needed
+  // (its time, else when it was placed), the soonest first (owner, 2026-10-22)
+  const need = (o: Order) => dueOf(o) ?? o.at
+  const later = orders.filter((o) => isLater(o, now, lead)).sort((a, b) => need(a) - need(b))
+  const active = orders.filter((o) => isActive(o) && !isLater(o, now, lead)).sort((a, b) => need(a) - need(b))
+  const shown = tab === 'active' ? active : tab === 'later' ? later : tab === 'all' ? orders : orders.filter((o) => (o.status ?? 'received') === tab && !isLater(o, now, lead))
+  const counts = STAGES.map((st) => orders.filter((o) => (o.status ?? 'received') === st && !isLater(o, now, lead)).length)
   const cancelledCount = orders.filter((o) => isCancelled(o)).length
   return (
     <>
@@ -163,9 +159,10 @@ export function Orders({ orders, live = false }: { orders: Order[]; live?: boole
       </div>
       <div className="staff-tabs" role="tablist">
         <button role="tab" aria-selected={tab === 'active'} className={tab === 'active' ? 'on' : ''} onClick={() => setTab('active')}>{t('staffActive')} · {active.length}</button>
+        <button role="tab" aria-selected={tab === 'later'} className={tab === 'later' ? 'on' : ''} onClick={() => setTab('later')}>{s('laterTab')} · {later.length}</button>
         <button role="tab" aria-selected={tab === 'all'} className={tab === 'all' ? 'on' : ''} onClick={() => setTab('all')}>{t('staffAll')} · {orders.length}</button>
       </div>
-      {shown.length ? <div className="staff-list">{shown.map((o) => <OrderCard key={o.uid ?? o.id} o={o} />)}</div> : <p className="staff-empty">{orders.length ? t('staffNoneHere') : t('staffNoOrders')}</p>}
+      {shown.length ? <div className="staff-list">{shown.map((o) => <OrderCard key={o.uid ?? o.id} o={o} lead={lead} />)}</div> : <p className="staff-empty">{tab === 'later' ? s('laterNone') : orders.length ? t('staffNoneHere') : t('staffNoOrders')}</p>}
       {!live && <p className="demo-note">{t('staffDemoNote')}</p>}
     </>
   )

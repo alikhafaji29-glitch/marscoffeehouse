@@ -7,7 +7,10 @@ import { SendToFriend } from './SendToFriend'
 import type { Delivery, GeoPoint } from '../account'
 import { ShareLocation, mapsLink } from './ShareLocation'
 import { OrderTracker } from './OrderTracker'
+import { TimeWheel } from './TimeWheel'
 import { settingsFor } from '../staff/store'
+import { arrivalSlots, timeText } from '../orders'
+import { clockNow } from '../clock'
 import { useS } from '../staff/strings'
 import { FEATURES } from '../features'
 
@@ -29,24 +32,25 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
   const [phone, setPhone] = useState(a?.phone ?? '')
   const [address, setAddress] = useState(a?.address ?? '')
   const [location, setLocation] = useState<GeoPoint | null>(null)
+  const [arriveAt, setArriveAt] = useState(0) // a pickup: when the customer will arrive (ms; owner, 2026-10-22)
   const canWallet = !!a && total > 0
   const placed = paid ? a?.orders.find((o) => o.id === paid.orderId) : undefined
   // orders by WhatsApp: the order written out, for the customer to send to the branch
   const waLink = placed && set.reach === 'whatsapp'
-    ? `https://wa.me/${set.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent([`Mars CoffeeHouse · #${placed.id}`, ...placed.items, `${iqd(placed.total)} IQD`, ...(placed.delivery ? [`${t('getDelivery')}: ${placed.delivery.address} · ${placed.delivery.phone}`, placed.delivery.location ? mapsLink(placed.delivery.location) : ''].filter(Boolean) : [t('getPickup')]), ...(placed.note ? [`${t('orderNote')}: ${placed.note}`] : [])].join('\n'))}`
+    ? `https://wa.me/${set.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent([`Mars CoffeeHouse · #${placed.id}`, ...placed.items, `${iqd(placed.total)} IQD`, ...(placed.delivery ? [`${t('getDelivery')}: ${placed.delivery.address} · ${placed.delivery.phone}`, placed.delivery.location ? mapsLink(placed.delivery.location) : ''].filter(Boolean) : [t('getPickup'), ...(placed.arriveAt ? [s('arriveAt', { t: timeText(placed.arriveAt) })] : [])]), ...(placed.note ? [`${t('orderNote')}: ${placed.note}`] : [])].join('\n'))}`
     : ''
 
   const itemLines = () => lines.map((l) => `${l.name}${l.size ? ` (${l.size})` : ''}${l.opts?.length ? ` · ${l.opts.join(', ')}` : ''} ×${l.qty}`)
   /** the delivery details when delivering; null when something is missing (a note is shown) */
   const details = (): Delivery | undefined | null => {
-    if (how !== 'delivery') return undefined
+    if (how !== 'delivery') { if (arriveAt < clockNow().getTime()) { setNote(s('arriveNeed')); return null } return undefined }
     if (normPhone(phone).length < 10 || (address.trim().length < 6 && !location)) { setNote(t('needAddress')); return null }
     return { phone: phone.trim(), address: address.trim(), location: location ?? undefined }
   }
   const payWallet = () => {
     unlockAudio() // this tap lets the order's status sounds play later
     const d = details(); if (d === null) return
-    const res = payFromWallet(total, itemLines(), d, staffNote.trim() || undefined)
+    const res = payFromWallet(total, itemLines(), d, staffNote.trim() || undefined, d ? undefined : arriveAt)
     if (!res.ok) { setNote(t('notEnough')); return }
     clear()
     setPaid(res)
@@ -54,7 +58,7 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
   const pickup = () => {
     unlockAudio()
     const d = details(); if (d === null) return
-    const res = payAtPickup(total, itemLines(), d, staffNote.trim() || undefined)
+    const res = payAtPickup(total, itemLines(), d, staffNote.trim() || undefined, d ? undefined : arriveAt)
     if (!res.ok) return
     clear()
     setPaid(res)
@@ -95,7 +99,7 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
         {paid ? (
           <>
             <h3>{a?.name ? t('thanksName').replace('{name}', a.name.trim().split(/\s+/)[0]) : t('orderPlaced')}</h3>
-            {placed && <p className="modal-line">{t('thanksLine').replace('{id}', placed.id)}</p>}
+            {placed && <p className="modal-line">{t('thanksReady')}</p>}
             {placed && <OrderTracker order={placed} dark />}
             {waLink && <><a className="btn-pill" href={waLink} target="_blank" rel="noreferrer">{s('siteSendWhatsapp')}</a><p className="modal-line small">{s('siteWhatsappHint')}</p></>}
             <p className="modal-line">{t('pointsEarned').replace('{n}', String(paid.points))}</p>
@@ -124,6 +128,13 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
                     <ShareLocation value={location} onChange={(p) => { setLocation(p); setNote('') }} />
                   </div>
                 )}
+                {how === 'pickup' && (() => { const now = clockNow().getTime(); return (
+                  <div className="arrive">
+                    <span className="arrive-title">{s('arriveWhen')}</span>
+                    <TimeWheel slots={arrivalSlots(now)} value={arriveAt} onChange={(at) => { setArriveAt(at); setNote('') }} label={s('arriveWhen')} />
+                    {arriveAt > 0 && <small className="arrive-in">{s('arriveIn', { n: Math.max(1, Math.round((arriveAt - now) / 60_000)) })}</small>}
+                  </div>
+                ) })()}
                 <label className="order-note">
                   <span>{t('orderNoteLabel')}</span>
                   <textarea rows={2} maxLength={300} value={staffNote} onChange={(e) => setStaffNote(e.target.value)} placeholder={t('orderNotePh')} />

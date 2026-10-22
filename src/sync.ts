@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { applyRemoteStatus, markSynced, myOrders, setOrderPlacedHook } from './account'
+import { applyRemoteStatus, markHeld, markSynced, myOrders, setOrderPlacedHook } from './account'
 import type { Order } from './account'
 import { backendOn, ensureUser, getClient } from './backend'
 import { isActive, recentlyCancelled } from './orders'
@@ -16,13 +16,14 @@ export interface OrderRow {
   total: number; items: string[]; pay: 'wallet' | 'pickup'; fulfil: 'pickup' | 'delivery'
   customer_name: string | null; customer_phone: string | null; delivery_phone: string | null; address: string | null
   location: { lat: number; lng: number; acc?: number } | null; gift_to: string | null
-  offer: NonNullable<Order['offer']> | null; points: number; note: string | null
+  offer: NonNullable<Order['offer']> | null; points: number; note: string | null; arrive_at: string | null
 }
 export const toRow = (o: Order) => ({
   uid: o.uid!, code: o.id, branch: o.branch ?? 'erbil', total: o.total, items: o.items, pay: o.pay ?? 'pickup', fulfil: o.fulfil ?? 'pickup',
   customer_name: o.customer?.name ?? null, customer_phone: o.customer?.phone ?? null,
   delivery_phone: o.delivery?.phone ?? null, address: o.delivery?.address ?? null, location: o.delivery?.location ?? null,
   gift_to: o.giftTo ?? null, offer: o.offer ?? null, points: o.points, note: o.note ?? null,
+  arrive_at: o.arriveAt ? new Date(o.arriveAt).toISOString() : null,
 })
 export const fromRow = (r: OrderRow): Order => ({
   id: r.code, uid: r.uid, synced: true, at: Date.parse(r.created_at), total: r.total, items: r.items, points: r.points, pay: r.pay,
@@ -31,6 +32,7 @@ export const fromRow = (r: OrderRow): Order => ({
   fulfil: r.fulfil,
   delivery: r.fulfil === 'delivery' ? { phone: r.delivery_phone ?? r.customer_phone ?? '', address: r.address ?? '', location: r.location ?? undefined } : undefined,
   giftTo: r.gift_to ?? undefined, branch: r.branch, offer: r.offer ?? undefined, note: r.note ?? undefined,
+  arriveAt: r.arrive_at ? Date.parse(r.arrive_at) : undefined,
 })
 
 let listening = false
@@ -40,7 +42,11 @@ async function push(sb: SupabaseClient, o: Order) {
   const { error } = await sb.from('orders').insert(toRow(o))
   // 23505: this order is already there (sent, but the page closed before it heard back)
   if (!error || error.code === '23505') markSynced(o.uid!)
-  else console.warn('[backend] order not sent yet:', error.message)
+  else {
+    // P0001: the database's limit of 10 orders an hour from one device; the customer is told, and it is tried again
+    if (error.code === 'P0001') markHeld(o.uid!, 'limit')
+    console.warn('[backend] order not sent yet:', error.message)
+  }
 }
 
 /** the stages of this device's orders, as the database has them now */

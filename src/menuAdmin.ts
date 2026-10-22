@@ -208,8 +208,8 @@ export function useMenuVersion(): number {
 }
 
 /* ---- reading the database ---- */
-async function pull() {
-  if (!backendOn) return
+async function pull(): Promise<boolean> {
+  if (!backendOn) return false
   try {
     const get = (path: string) => fetch(`${backendUrl}/rest/v1/${path}`, { headers: { apikey: backendKey! } })
     const [res, cres, bres] = await Promise.all([
@@ -219,7 +219,7 @@ async function pull() {
     ])
     if (!res.ok) throw new Error(String(res.status))
     const rows = (await res.json()) as DbRow[]
-    if (!rows.length) return // an empty table is a set-up mistake, not a menu: keep what we have
+    if (!rows.length) return false // an empty table is a set-up mistake, not a menu: keep what we have
     const next = blank<ItemState>()
     for (const r of rows) (next[r.branch] ??= {})[r.name] = fromDb(r)
     let nextCats = remoteCats // the categories could not be read: keep the ones we have
@@ -238,7 +238,28 @@ async function pull() {
     write(CACHE, next)
     write(CATS_CACHE, nextCats)
     if (!same) apply()
-  } catch (e) { console.warn('[backend] could not read the menu:', e) }
+    return true
+  } catch (e) { console.warn('[backend] could not read the menu:', e); return false }
+}
+/* The menu is read again only when it changed (owner, 2026-10-22): each minute a page reads the database's one-row
+ * "last changed" mark (menu_version, a few hundred bytes) and reads the whole menu (about 44 kB) only when that mark
+ * moved since this device last read it, or when this device has no copy yet. If the mark cannot be read, the menu is
+ * read as before. */
+const VERSION = 'mars-menu-version'
+let checking = false
+async function check() {
+  if (!backendOn || checking) return
+  checking = true
+  try {
+    let mark = ''
+    try {
+      const res = await fetch(`${backendUrl}/rest/v1/menu_version?select=changed_at`, { headers: { apikey: backendKey! } })
+      if (res.ok) mark = ((await res.json()) as { changed_at: string }[])[0]?.changed_at ?? ''
+    } catch { /* offline, or no mark: read the menu itself */ }
+    const have = read<unknown>(CACHE, null) !== null
+    if (mark && have && mark === read<string>(VERSION, '')) return
+    if ((await pull()) && mark) write(VERSION, mark)
+  } finally { checking = false }
 }
 
 /* ---- staff changes ---- */
@@ -619,8 +640,8 @@ if (typeof window !== 'undefined') {
     if ((e.key === CACHE || e.key === CATS_CACHE) && backendOn) { remote = read(CACHE, remote); remoteCats = loadBranches(CATS_CACHE); apply() }
   })
   if (backendOn) {
-    void pull()
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) void pull() })
-    window.setInterval(() => { if (!document.hidden) void pull() }, 60000)
+    void check()
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) void check() })
+    window.setInterval(() => { if (!document.hidden) void check() }, 60000)
   }
 }

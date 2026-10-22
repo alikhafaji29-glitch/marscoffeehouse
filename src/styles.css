@@ -937,6 +937,42 @@ body[data-view='home'] .deck > .slide:first-child::before { content: ''; positio
 .track { display: flex; flex-direction: column; gap: 0.35rem; text-align: start; }
 .track-head { display: flex; justify-content: space-between; gap: 0.6rem; font-size: 0.9rem; }
 .track-items { margin: 0; font-size: 0.8rem; opacity: 0.75; }
+.track-send { margin: 0; font-size: 0.8rem; font-weight: 600; }
+.track-send.held { padding: 0.5rem 0.7rem; border-radius: 0.6rem; background: #fde7e5; color: #b3261e; font-weight: 500; }
+/* the order's items: a short list, or one card per combo swiped sideways */
+.track-lines { list-style: none; margin: 0.1rem 0 0; padding: 0; display: grid; gap: 0.3rem; font-size: 0.88rem; }
+.track-lines li, .track-combo li { display: grid; gap: 0.05rem; }
+.track-lines small, .track-combo small { font-size: 0.75rem; opacity: 0.7; }
+.track-combos { display: grid; gap: 8px; margin: 0.2rem 0 0; }
+/* only the combo cards scroll, about three in view; the status, the title and Close stay in view (owner, 2026-10-21) */
+.track-combos { max-height: max(12rem, min(19rem, calc(100dvh - 24rem))); overflow-y: auto; overscroll-behavior: contain; align-content: start; scrollbar-width: thin; border-radius: 1rem; }
+.track-combo { display: grid; gap: 0.2rem; align-content: start; padding: 0.5rem 0.8rem; border-radius: 1rem; background: #fff; border: 1.5px solid rgba(0, 47, 109, 0.12); color: var(--navy); }
+.track-combo-title { font-family: var(--font-serif); font-size: 0.95rem; }
+/* several combos: one line "Combo ×4" and Show details; open, the scroll box above and Show less (owner, 2026-10-22) */
+.track-sum { grid-template-columns: 1fr auto; align-items: center; padding: 0.7rem 0.8rem; }
+.track-sum .track-combo-title { font-size: 1.05rem; }
+.track-sum-name { display: block; font-family: var(--font-sans); font-size: 0.85rem; font-weight: 500; opacity: 0.7; }
+.track-more { font: 600 0.82rem/1 var(--font-sans); min-height: 36px; padding: 0 0.9rem; border-radius: 999px; border: 1.5px solid rgba(0, 47, 109, 0.25); background: #fff; color: var(--navy); cursor: pointer; }
+.track-more.less { justify-self: center; background: transparent; border-color: currentColor; color: inherit; margin-top: 0.15rem; }
+.track-combo ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.1rem; font-size: 0.85rem; line-height: 1.3; }
+.track-progress { display: grid; gap: 0.35rem; margin-top: 0.3rem; }
+.tp-segs { display: flex; gap: 4px; }
+.tp-segs span { flex: 1; height: 6px; border-radius: 999px; background: rgba(0, 47, 109, 0.12); }
+.tp-segs span.past { background: var(--sky-deep); }
+.tp-segs span.now { background: var(--navy); animation: tp-pulse 1.6s ease-in-out infinite; }
+@keyframes tp-pulse { 50% { opacity: 0.55; } }
+@media (prefers-reduced-motion: reduce) { .tp-segs span.now { animation: none; } }
+.tp-label { display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; font-size: 0.9rem; }
+.tp-label small { opacity: 0.6; }
+.track.dark .tp-segs span { background: rgba(255, 255, 255, 0.3); }
+.track.dark .tp-segs span.past { background: rgba(255, 255, 255, 0.75); }
+.track.dark .tp-segs span.now { background: #fff; }
+/* a wide order window (a computer): two cards a row, still scrolled down */
+.track { container-type: inline-size; }
+@container (min-width: 520px) { .track-combos { grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); } }
+/* the status stays in view under the orders while they scroll (owner, 2026-10-21) */
+.track-progress { padding: 0.4rem 0 0.2rem; margin-top: 0.2rem; }
+
 .track-steps { list-style: none; margin: 0.4rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0; position: relative; }
 .track-steps li { display: flex; align-items: center; gap: 0.7rem; padding: 0.3rem 0; font-size: 0.88rem; color: rgba(0, 47, 109, 0.45); position: relative; }
 .track-steps li + li::before { content: ''; position: absolute; inset-inline-start: 10px; top: -0.55rem; height: 0.9rem; border-inline-start: 2px solid rgba(0, 47, 109, 0.15); }
@@ -1122,6 +1158,22 @@ body[data-view='home'] .deck > .slide:first-child::before { content: ''; positio
 .combo-chip.count.on button { background: rgba(255, 255, 255, 0.22); }
 .combo-chip.count button:disabled { opacity: 0.3; cursor: default; }
 .combo-chip.count > span { padding: 0 0.3rem; }
+.combo-between { display: grid; justify-items: center; gap: 0.8rem; padding: 2rem 0; text-align: center; }
+.combo-skip { font: 600 0.92rem/1 var(--font-sans); min-height: 46px; padding: 0 1.4rem; border-radius: 999px; border: 1.5px solid rgba(179, 38, 30, 0.35); background: #fff; color: #b3261e; cursor: pointer; }
+.combo-add { align-self: stretch; font: 700 0.92rem/1 var(--font-sans); min-height: 48px; border-radius: 999px; border: 1.5px dashed var(--sky-deep); background: #f7fbff; color: var(--navy); cursor: pointer; }
+/* the arrival time: hour and minute wheels like the iPhone alarm (owner, 2026-10-22) */
+.arrive { display: grid; gap: 0.35rem; }
+.arrive-title { font-size: 0.85rem; font-weight: 600; }
+.arrive-in { font-size: 0.78rem; opacity: 0.7; text-align: center; }
+.time-wheel { position: relative; display: flex; justify-content: center; align-items: center; gap: 0.3rem; height: 200px; border-radius: 1rem; background: #fff; border: 1.5px solid rgba(0, 47, 109, 0.15); color: var(--navy); overflow: hidden; }
+.time-wheel::before { content: ''; position: absolute; inset-inline: 0.6rem; top: 80px; height: 40px; border-radius: 0.6rem; background: rgba(0, 47, 109, 0.07); pointer-events: none; }
+.time-wheel::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(#fff, rgba(255, 255, 255, 0) 38%, rgba(255, 255, 255, 0) 62%, #fff); }
+.tw-col { position: relative; height: 200px; width: 4.6rem; perspective: 500px; -webkit-overflow-scrolling: touch; overflow-y: auto; scroll-snap-type: y mandatory; scrollbar-width: none; padding: 80px 0; box-sizing: border-box; overscroll-behavior: contain; outline: none; }
+.tw-col::-webkit-scrollbar { display: none; }
+.tw-col:focus-visible { box-shadow: inset 0 0 0 2px var(--sky-deep); border-radius: 0.6rem; }
+.tw-row { height: 40px; text-align: center; scroll-snap-align: center; font: 600 1.4rem/40px var(--font-sans); font-variant-numeric: tabular-nums; cursor: pointer; backface-visibility: hidden; will-change: transform, opacity; user-select: none; -webkit-user-select: none; }
+.tw-row.off { cursor: default; }
+.tw-colon { position: relative; z-index: 1; font: 700 1.35rem/1 var(--font-sans); }
 .combo-how { display: flex; padding: 3px; border-radius: 999px; background: rgba(0, 47, 109, 0.08); }
 .combo-how button { flex: 1; font: 700 0.92rem/1 var(--font-sans); min-height: 44px; border: none; border-radius: 999px; background: transparent; color: var(--navy); cursor: pointer; }
 .combo-how button.on { background: var(--navy); color: #fff; }
@@ -1136,6 +1188,7 @@ body[data-view='home'] .deck > .slide:first-child::before { content: ''; positio
 .combo-stepper output { min-width: 3ch; font: 700 2.6rem/1 var(--font-serif); color: var(--navy); }
 .combo-count-sum { margin: 0; color: rgba(0, 47, 109, 0.75); }
 .combo-count-sum b { color: var(--navy); }
+.combo-next.combo-next-inline { flex: none; width: min(100%, 20rem); margin-top: 0.6rem; }
 .combo-of { font: 700 0.66rem/1 var(--font-sans); text-transform: uppercase; letter-spacing: 0.06em; color: var(--navy); background: rgba(0, 47, 109, 0.08); border-radius: 999px; padding: 0.3rem 0.55rem; }
 .combo-tools { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
 .combo-remove { font: 600 0.85rem/1 var(--font-sans); min-height: 42px; padding: 0 1rem; border-radius: 999px; border: 1.5px solid rgba(179, 38, 30, 0.35); background: #fff; color: #b3261e; cursor: pointer; }
@@ -1219,6 +1272,10 @@ body[data-view='home'] .deck > .slide:first-child::before { content: ''; positio
 /* staff order card: the offer and pre-order badges */
 .staff-how.offer { background: var(--caramel); color: #fff; }
 .staff-how.pre { background: var(--navy); color: #fff; }
+.staff-how.now { background: #1f7a3a; color: #fff; animation: make-now 1.4s ease-in-out infinite; }
+@keyframes make-now { 50% { opacity: 0.65; } }
+@media (prefers-reduced-motion: reduce) { .staff-how.now { animation: none; } }
+.staff-want small { font-weight: 500; opacity: 0.8; font-size: 0.82rem; }
 
 .toggle-label small { font-weight: 500; color: rgba(0, 47, 109, 0.6); margin-inline-start: 0.4rem; }
 /* from the staff dashboard: an event's promo strip on top of the menu, and an item's nutrition on its page */
