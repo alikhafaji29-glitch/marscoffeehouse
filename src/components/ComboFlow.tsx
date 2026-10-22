@@ -36,8 +36,8 @@ import { clockNow } from '../clock'
  * Skip combo 2.
  * A drink in a combo has the same choices as on its menu page (owner, 2026-10-21): its flavour, the milk, flavour
  * pumps and add-ons, at the menu's prices on top of the combo price (`custom`, per combo and item).
- * A step with several menu categories (the drinks) has a row of category chips on top that stays in view: it lights
- * the category being looked at and a tap jumps to one (owner, 2026-10-19).
+ * A step with several menu categories (the drinks) asks the section first (Coffee & More, Cold Coffee…), then shows
+ * that section's drinks with a way back to the sections (owner, 2026-10-22; it was one long list with category chips).
  */
 /** what the customer may pick in a group, grouped by menu category; out-of-stock items are left out */
 function choices(g: OfferGroup): { cat: string; items: MenuItem[] }[] {
@@ -143,41 +143,18 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
   const [placedId, setPlacedId] = useState('')
   // between two combos (owner, 2026-10-21): after a combo's last step a short screen offers the next combo or skipping it
   const [between, setBetween] = useState(false)
-  // the category chips of a step with several categories: the one in view, and a jump to one
   const bodyRef = useRef<HTMLDivElement>(null)
-  const chipsRef = useRef<HTMLDivElement>(null)
-  const [inView, setInView] = useState('')
-  const atStep = step >= 1 ? groups[(step - 1) % Math.max(1, groups.length)] : undefined // the group a pick step shows
-  const stepCats = (step >= 1 && step <= count * groups.length ? atStep?.cats ?? [] : []).map((c) => c.cat).join('|')
-  useEffect(() => { bodyRef.current?.scrollTo({ top: 0 }); setInView(stepCats.split('|')[0] ?? '') }, [step, stepCats])
-  const watch = () => {
-    const body = bodyRef.current
-    if (!body || !chipsRef.current) return
-    const line = body.scrollTop + chipsRef.current.offsetHeight + 24
-    const secs = [...body.querySelectorAll<HTMLElement>('section[data-cat]')]
-    let now = secs[0]?.dataset.cat ?? '' // above the first heading the first category is the one in view
-    for (const sec of secs) if (sec.offsetTop <= line) now = sec.dataset.cat ?? ''
-    // at the very bottom the last category is the one in view, even when it is short
-    if (body.scrollTop > 0 && body.scrollTop + body.clientHeight >= body.scrollHeight - 2) now = secs[secs.length - 1]?.dataset.cat ?? now
-    if (now && now !== inView) setInView(now)
-  }
-  useEffect(() => { // keep the lit chip in sight in its row (the row only, never the page)
-    const row = chipsRef.current
-    const chip = row?.querySelector<HTMLElement>(`[data-cat="${inView}"]`)
-    if (!row || !chip) return
-    // by how far the chip's middle is from the row's middle: the same sum left-to-right and right-to-left
-    const r = row.getBoundingClientRect(), c = chip.getBoundingClientRect()
-    const by = c.left + c.width / 2 - (r.left + r.width / 2)
-    if (Math.abs(by) > 2) row.scrollBy({ left: by, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
-  }, [inView])
-  const jump = (cat: string) => {
-    const body = bodyRef.current
-    const sec = body?.querySelector<HTMLElement>(`section[data-cat="${cat}"]`)
-    if (!body || !sec) return
-    setInView(cat)
-    const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    body.scrollTo({ top: sec.offsetTop - (chipsRef.current?.offsetHeight ?? 0) - 8, behavior: smooth ? 'smooth' : 'auto' })
-  }
+  // a step with several categories (the drinks) asks the section first, then shows its drinks (owner, 2026-10-22);
+  // coming back to a step with a drink chosen opens that drink's section
+  const [section, setSection] = useState('')
+  useEffect(() => {
+    const p = step > 0 && step < DETAILS ? pickSteps[step - 1] : undefined
+    const g = p ? groups[p.i] : undefined
+    const had = p && g ? chosen(p.k, g.g.id)[0] : undefined
+    setSection(had && g && g.cats.length > 1 ? (g.cats.find((c) => c.items.some((i) => i.name === had))?.cat ?? '') : '')
+    bodyRef.current?.scrollTo({ top: 0 })
+  }, [step]) // eslint-disable-line react-hooks/exhaustive-deps
+  const openSection = (cat: string) => { setSection(cat); bodyRef.current?.scrollTo({ top: 0 }) }
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
@@ -310,9 +287,14 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
           </button>
         </header>
 
-        <div className="combo-body" ref={bodyRef} onScroll={watch}>
+        <div className="combo-body" ref={bodyRef}>
           {step === ASK && (
             <div className="combo-count">
+              {/* a nudge to order for friends, as white stickers (owner's mock-up, 2026-10-22) */}
+              <div className="combo-cheer" aria-label={`${s('cheer1')} ${s('cheer2')} ${s('cheer3')}`}>
+                <p className="combo-sticker" aria-hidden="true"><span>{s('cheer1')}</span><span>{s('cheer2')}</span><span>{s('cheer3')}</span></p>
+                <p className="combo-sticker small" aria-hidden="true">{s('comboHowMany')}</p>
+              </div>
               <p className="combo-hint">{s('comboHowManyHint')}</p>
               <div className="combo-stepper">
                 <button type="button" onClick={() => setCountTo(count - 1)} disabled={count <= 1} aria-label={s('comboFewer')}>−</button>
@@ -334,7 +316,7 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
           )}
           {ps && !between && (
             <>
-              <p className="combo-hint">{s('comboPick', { n: cur.g.pick })}</p>
+              <p className="combo-hint">{cur.cats.length > 1 && !section ? s('comboSections') : s('comboPick', { n: cur.g.pick })}</p>
               {ps.k > 0 && ps.i === 0 && (
                 <div className="combo-tools">
                   {ps.k > 0 && ps.i === 0 && groups.every(({ g }) => chosen(ps.k - 1, g.id).length >= g.pick) && (
@@ -342,16 +324,24 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
                   )}
                 </div>
               )}
-              {cur.cats.length > 1 && (
-                <div className="combo-cats" ref={chipsRef} role="tablist" aria-label={s('category')}>
-                  {cur.cats.map((c) => (
-                    <button key={c.cat} type="button" role="tab" data-cat={c.cat} aria-selected={inView === c.cat} className={inView === c.cat ? 'on' : ''} onClick={() => jump(c.cat)}>
-                      {catLabel(c.cat, lang)}
-                    </button>
-                  ))}
+              {cur.cats.length > 1 && !section && (
+                <div className="combo-sections" role="list" aria-label={s('comboSections')}>
+                  {cur.cats.map((c) => {
+                    const has = c.items.some((it) => chosen(ck, cur.g.id).includes(it.name))
+                    return (
+                      <button key={c.cat} type="button" role="listitem" className={'combo-section' + (has ? ' on' : '')} onClick={() => openSection(c.cat)}>
+                        <span className="combo-section-cup" aria-hidden="true"><MiniCup color={TINT[c.cat] || [200, 200, 200]} ice={isIced(c.cat) ? 1 : 0} size={40} /></span>
+                        <span className="combo-section-text"><b>{catLabel(c.cat, lang)}</b><small>{s('comboDrinksN', { n: c.items.length })}</small></span>
+                        <span className="combo-section-go" aria-hidden="true">{has ? <IconCheck /> : '›'}</span>
+                      </button>
+                    )
+                  })}
                 </div>
               )}
-              {cur.cats.map((c) => (
+              {cur.cats.length > 1 && section && (
+                <button type="button" className="combo-sections-back" onClick={() => openSection('')}>‹ {s('comboAllSections')}</button>
+              )}
+              {cur.cats.filter((c) => cur.cats.length === 1 || c.cat === section).map((c) => (
                 <section key={c.cat} data-cat={c.cat}>
                   {cur.cats.length > 1 && <h3>{catLabel(c.cat, lang)}</h3>}
                   <div className="combo-grid" role={cur.g.pick === 1 ? 'radiogroup' : 'group'}>
@@ -453,7 +443,7 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
             <button type="button" className="combo-next" onClick={onClose}>{t('close')}</button>
           ) : (
             <>
-              {step > 0 && <button type="button" className="combo-back" onClick={() => { setNote(''); if (between) setBetween(false); else setStep(step - 1) }}>{t('back')}</button>}
+              {step > 0 && <button type="button" className="combo-back" onClick={() => { setNote(''); if (between) setBetween(false); else if (section && ps && cur.cats.length > 1) openSection(''); else setStep(step - 1) }}>{t('back')}</button>}
               {between ? null : step < DETAILS
                 ? <button type="button" className="combo-next" disabled={step > ASK && !full(step - 1)} onClick={() => forward(step)}>{s('comboNext')}</button>
                 : <button type="button" className="combo-next" onClick={place}>{live ? s('comboPlace') : s('comboPlacePre')} · <span dir="ltr">{iqd(total)} IQD</span></button>}

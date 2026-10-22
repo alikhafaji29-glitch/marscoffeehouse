@@ -59,15 +59,16 @@ function Card({ item, cat, onPick }: { item: MenuItem; cat: string; onPick: (i: 
           {item.soldOut && <span className="ocard-sold">{t('soldOut')}</span>}
         </span>
         <span className="ocard-main">
-          <span className="ocard-head">
-            <span className="ocard-name">{nameOf(item.name, lang)}</span>
-            {/* both sizes with their prices, as on the live menu (owner, 2026-10-13) */}
-            {Array.isArray(item.price)
-              ? <span className="ocard-price two" dir="ltr">{item.price.map((p, i) => <span key={i}>{iqd(p)}<small> IQD · {item.sizes?.[i]}</small></span>)}</span>
-              : <span className="ocard-price" dir="ltr">{item.price === 0 ? t('free') : iqd(item.price)}{item.price !== 0 && <small> IQD</small>}</span>}
-          </span>
+          {/* Blank Street's card (owner, 2026-10-22): the name on its own (two lines at most), the description cut at two
+              lines, then the price and the badge on one line; both sizes' prices, as on the live menu (2026-10-13) */}
+          <span className="ocard-name">{nameOf(item.name, lang)}</span>
           {line && <span className="ocard-line">{line}</span>}
-          {item.badge && <span className={'ocard-badge ' + item.badge}>{BADGE_LABELS[item.badge]}</span>}
+          <span className="ocard-foot">
+            {Array.isArray(item.price)
+              ? <span className="ocard-price" dir="ltr" title={item.sizes?.map((z, i) => `${z}: ${iqd((item.price as number[])[i])} IQD`).join(' · ')}>{item.price.map(iqd).join(' / ')}<small> IQD</small></span>
+              : <span className="ocard-price" dir="ltr">{item.price === 0 ? t('free') : iqd(item.price)}{item.price !== 0 && <small> IQD</small>}</span>}
+            {item.badge && <span className={'ocard-badge ' + item.badge}>{BADGE_LABELS[item.badge]}</span>}
+          </span>
         </span>
       </button>
     </li>
