@@ -14,6 +14,7 @@ import { useS } from '../staff/strings'
  */
 const CARD: Record<string, string> = {
   Americano: '/assets/featured/cotd-americano.jpg',
+  'Filter Coffee': '/assets/featured/cotd-filter.jpg',
   Espresso: '/assets/featured/cotd-espresso.jpg',
   'Turkish Coffee': '/assets/featured/cotd-turkish.jpg',
 }
