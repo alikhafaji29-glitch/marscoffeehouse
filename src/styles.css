@@ -2225,3 +2225,5 @@ label.missing input, label.missing textarea, label.missing select, .place-fields
 .fb-tag { border-color: rgba(0, 36, 76, 0.2); }
 .fb-comment { border: 1.5px solid rgba(0, 36, 76, 0.15); }
 .fb-later, .branch-pick-close { color: var(--navy); }
+/* Positive Hours running: no Order now to the menu in the band or the header (owner, 2026-10-22; HomeDeck sets ph-on) */
+body.ph-on .band-pill, body.ph-on .header-order-in { display: none; }

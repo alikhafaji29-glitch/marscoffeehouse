@@ -50,7 +50,7 @@ export type Nutrition = Partial<Record<Nutrient, number>>
 export interface StaffData {
   branch: BranchId // the branch the dashboard is looking at
   customerBranch: BranchId // the branch picked on the Order screen
-  seasonSet?: number // 2 = the saved New Season list was moved to Pink + / Kakaw Crunch (2026-10-22)
+  seasonSet?: number // 3 = the saved New Season list was moved to Pink + / Kakaw Crunch / Carrot Cake (2026-10-22)
   branchChosen?: boolean // the customer chose it (the first-visit question, a /kirkuk link, or the Order screen's list)
   settings: Record<BranchId, Settings> // a branch without an entry has NO_SETTINGS
   events: EventX[]
@@ -109,8 +109,8 @@ function load(): StaffData {
       // offers were one list for every branch until 2026-10-22: each branch starts from that list
       const offers = Array.isArray(raw.offers) ? Object.fromEntries(Object.keys(d.offers).map((b) => [b, raw.offers as unknown as Offer[]])) : { ...d.offers, ...raw.offers }
       // New Season became Pink + and Kakaw Crunch on 2026-10-22 (owner): a device's saved season list is replaced once
-      const events = raw.seasonSet === 2 || !Array.isArray(raw.events) ? raw.events : raw.events.map((e) => e.id === 'season' ? { ...e, items: [...SEASON_PICKS] } : e)
-      return { ...d, ...raw, events: events ?? d.events, seasonSet: 2, settings: { ...d.settings, ...raw.settings }, offers }
+      const events = raw.seasonSet === 3 || !Array.isArray(raw.events) ? raw.events : raw.events.map((e) => e.id === 'season' ? { ...e, items: [...SEASON_PICKS] } : e)
+      return { ...d, ...raw, events: events ?? d.events, seasonSet: 3, settings: { ...d.settings, ...raw.settings }, offers }
     }
   } catch { /* no storage or bad data: the defaults */ }
   return d

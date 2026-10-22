@@ -159,6 +159,7 @@ export const MENU: MenuCategory[] = [
       { name: 'Mango Mousse Cake', price: 6500 },
       { name: 'Orange Cream Cake', price: 7500 },
       { name: 'Red Velvet Cake', price: 6500 },
+      { name: 'Carrot Cake', price: 6000 }, // added 2026-10-22 for New this season (owner); price a placeholder, also in the database
       { name: 'Chocolate Danish', price: 6500 },
       { name: 'Molten Cake', price: 3500 }, // Kirkuk only
       { name: 'Brownies Cup', price: 5500 },
@@ -185,7 +186,7 @@ export const POSITIVE_PICKS = [
   'Cheesecake Lotus', 'Turkey Sandwich (Lightly Spiced)',
 ]
 /* New Season (owner, 2026-09-27): the same drinks as Home's "New this season" cards (three since 2026-09-28) */
-export const SEASON_PICKS = ['Pink +', 'Kakaw Crunch'] // 2026-10-22 (owner); was the mojito, smoothie and Nutella milkshake
+export const SEASON_PICKS = ['Pink +', 'Kakaw Crunch', 'Carrot Cake'] // 2026-10-22 (owner); was the mojito, smoothie and Nutella milkshake
 /** every item of the menu. A live list: menuAdmin.ts rewrites it in place when staff add items, so read it when needed, do not copy it */
 export const ALL_ITEMS = MENU.flatMap((c) => c.items)
 const pick = (names: string[]): MenuItem[] => names.map((n) => ALL_ITEMS.find((i) => i.name === n)).filter((x): x is MenuItem => !!x)

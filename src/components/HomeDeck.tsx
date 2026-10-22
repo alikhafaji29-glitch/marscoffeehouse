@@ -46,6 +46,7 @@ const DESC: Record<string, TKey> = {
 const SEASON: { names: string[]; title: string; img: string; bg: string; cropTop?: boolean; light?: boolean }[] = [
   { names: ['Pink +'], title: 'Pink +', img: '/assets/featured/season-pink.jpg', bg: '#c9e8fb', light: true },
   { names: ['Kakaw Crunch'], title: 'Kakaw Crunch', img: '/assets/featured/season-kakaw.jpg', bg: '#e9c7a5', light: true },
+  { names: ['Carrot Cake'], title: 'Carrot Cake', img: '/assets/featured/season-carrot.jpg', bg: '#dc863e', light: true }, // owner's poster, 2026-10-22
 ]
 // Demo products from the owner's photos; prices are placeholders until Mars confirms (TODO B)
 /* Build Your Drink asks how (owner, 2026-09-27): from your mood (the mood game) or be the barista (the drink builder) */
@@ -108,8 +109,9 @@ const PREORDER_PHOTO = '/assets/featured/positive-hours-preorder.jpg'
 const LUNCH_PREORDER_PHOTO = '/assets/featured/lunch-preorder.jpg'
 // after both windows close (17:00-7:30): the owner's iced-coffee pour reel (portrait, 2026-09-28), every burned-in text,
 // the logo and the Instagram icons painted out frame by frame. Phones play it full screen; desktop centres it over a blurred copy
-const NIGHT_CLIPS_PHONE = ['/assets/featured/night.mp4']
-const NIGHT_CLIPS_WIDE = ['/assets/featured/night-wide.mp4']
+// since 2026-10-22 the owner's IMG_0068 (coffee poured over ice, 8.6 s); the wide cut = the portrait clip over a blurred copy
+const NIGHT_CLIPS_PHONE = ['/assets/featured/night-pour.mp4']
+const NIGHT_CLIPS_WIDE = ['/assets/featured/night-pour-wide.mp4']
 function HoursVideo({ poster, phone = HOURS_CLIPS_PHONE, wide = HOURS_CLIPS_WIDE }: { poster: string; phone?: string[]; wide?: string[] }) {
   const [list] = useState(() => (window.matchMedia('(max-width: 760px)').matches ? phone : wide))
   const [still] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
@@ -162,6 +164,9 @@ export function HomeDeck({ onOrder, onPick }: { onOrder: () => void; onPick: (it
   const cotdItems = cotd.items.map(item).filter((x): x is MenuItem => !!x)
   const count = useCountdown()
   const active = count.active && offerOn
+  // while Positive Hours runs, the menu's Order now (band + its header copy) is hidden: the slide's own Order now leads
+  // to the combo (owner, 2026-10-22); a body class so the header, outside this component, follows it too
+  useEffect(() => { document.body.classList.toggle('ph-on', active); return () => document.body.classList.remove('ph-on') }, [active])
   const text = count.text
   const offerText = t('offerText').replace(/5,500|٥٥٠٠/, iqd(offer?.price ?? 5500))
   const lunchClock = useCountdown(LUNCH_HOURS) // 12:00-17:00
@@ -211,7 +216,7 @@ export function HomeDeck({ onOrder, onPick }: { onOrder: () => void; onPick: (it
   )
   const nightSlide = (
     <section key="night" className="slide slide-photo slide-night" id="night" aria-label="Mars CoffeeHouse" style={{ background: '#2a120a' }}>
-      <HoursVideo poster={window.matchMedia('(max-width: 760px)').matches ? '/assets/featured/night.jpg' : '/assets/featured/night-wide.jpg'} phone={NIGHT_CLIPS_PHONE} wide={NIGHT_CLIPS_WIDE} />
+      <HoursVideo poster={window.matchMedia('(max-width: 760px)').matches ? '/assets/featured/night-pour.jpg' : '/assets/featured/night-pour-wide.jpg'} phone={NIGHT_CLIPS_PHONE} wide={NIGHT_CLIPS_WIDE} />
     </section>
   )
   // the top slide: Positive Hours (7:30-12:00), Lunch Hours (12:00-17:00), then the night reel until 7:30 (owner, 2026-09-27)
