@@ -164,14 +164,14 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
                   <textarea rows={2} maxLength={300} value={staffNote} onChange={(e) => setStaffNote(e.target.value)} placeholder={t('orderNotePh')} />
                 </label>
                 <button className="btn-pill wallet-pay" onClick={pickup}>
-                  {how === 'delivery' ? t('payOnDelivery') : t('payAtPickup')} · {iqd(total)} IQD
+                  {how === 'delivery' ? t('payOnDelivery') : t('payAtPickup')} · <span className="nowrap" dir="ltr">{iqd(total)} IQD</span>
                   <small>{how === 'delivery' ? t('payOnDeliveryHint') : t('payAtPickupHint')}</small>
                 </button>
               </>
             )}
             {canWallet && FEATURES.wallet && (
               <button className="btn-pill wallet-pay" onClick={payWallet} disabled={a!.balance < total}>
-                {t('payWallet')} · {iqd(total)} IQD
+                {t('payWallet')} · <span className="nowrap" dir="ltr">{iqd(total)} IQD</span>
                 <small>{t('walletBalance')} {iqd(a!.balance)}{a!.balance < total ? <> · <a href="#account" onClick={onClose} className="inline-link light">{t('topUpLink')}</a></> : null}</small>
               </button>
             )}

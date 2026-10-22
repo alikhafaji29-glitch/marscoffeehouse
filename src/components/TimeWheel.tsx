@@ -1,4 +1,6 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
+import { useLang } from '../i18n'
+import { hour12, periodOf } from '../orders'
 
 /*
  * The arrival time as two wheels, hour and minute, like the iPhone alarm (owner, 2026-10-22: "make it smooth like the
@@ -12,6 +14,7 @@ const ROW = 40 // px per row; five rows show, the middle one is the choice
 const MINUTES = Array.from({ length: 12 }, (_, i) => i * 5)
 
 export function TimeWheel({ slots, value, onChange, label }: { slots: number[]; value: number; onChange: (at: number) => void; label: string }) {
+  const { lang } = useLang()
   const at = slots.includes(value) ? value : slots[0] ?? 0
   useEffect(() => { if (at && at !== value) onChange(at) }, [at, value, onChange])
   if (!slots.length) return null
@@ -24,9 +27,11 @@ export function TimeWheel({ slots, value, onChange, label }: { slots: number[]; 
   const allowed = new Set(inHour(hourOf(at)).map((t) => Math.round(minOf(t) / 5)))
   return (
     <div className="time-wheel" dir="ltr" role="group" aria-label={label}>
-      <Wheel items={hours.map((h) => String(h).padStart(2, '0'))} index={hours.indexOf(hourOf(at))} onPick={(i) => onChange(nearest(hours[i], minOf(at)))} label={label} />
+      <Wheel items={hours.map((h) => String(hour12(h)))} index={hours.indexOf(hourOf(at))} onPick={(i) => onChange(nearest(hours[i], minOf(at)))} label={label} />
       <span className="tw-colon" aria-hidden="true">:</span>
       <Wheel items={MINUTES.map((m) => String(m).padStart(2, '0'))} index={Math.round(minOf(at) / 5)} off={(i) => !allowed.has(i)} onPick={(i) => onChange(nearest(hourOf(at), i * 5))} label={label} />
+      {/* 12-hour clock (owner, 2026-10-22): the chosen hour's AM / PM beside the minutes */}
+      <span className="tw-period" aria-live="polite">{periodOf(hourOf(at), lang)}</span>
     </div>
   )
 }

@@ -35,10 +35,23 @@ export async function ensureUser(sb: SupabaseClient): Promise<boolean> {
 /* A customer signed in with Clerk (owner, 2026-10-22) talks to the database with Clerk's session token instead of a
  * Supabase session: Supabase → Authentication → Third-party auth → Clerk accepts it, and the row rules know the order
  * by its `clerk_id` (migration 20261022000400). Guests and staff keep the client above. */
-type ClerkLike = { user?: { id: string } | null; session?: { getToken: () => Promise<string | null> } | null }
+export type Contact = { name?: string; phone?: string; address?: string }
+type ClerkUser = { id: string; unsafeMetadata?: Record<string, unknown>; update: (p: { unsafeMetadata: Record<string, unknown> }) => Promise<unknown> }
+type ClerkLike = { user?: ClerkUser | null; session?: { getToken: () => Promise<string | null> } | null }
 const clerk = (): ClerkLike | undefined => (globalThis as { Clerk?: ClerkLike }).Clerk
 /** the Clerk user signed in on this page, if any */
 export const clerkUserId = (): string | null => clerk()?.user?.id ?? null
+/* The checkout details of a customer signed in with Clerk (owner, 2026-10-22: "do they have to type their number
+ * again?"): kept on the Clerk account as profile data (`unsafeMetadata.contact`: the customer's own, writable from
+ * the page; never used to sign in, Clerk has no Iraqi numbers), so any device they sign in on fills the checkout */
+export const clerkContact = (): Contact | null => (clerk()?.user?.unsafeMetadata?.contact as Contact | undefined) ?? null
+export function saveClerkContact(c: Contact) {
+  const u = clerk()?.user
+  if (!u) return
+  const next = { ...clerkContact(), ...Object.fromEntries(Object.entries(c).filter(([, v]) => v)) }
+  if (JSON.stringify(next) === JSON.stringify(clerkContact() ?? {})) return
+  u.update({ unsafeMetadata: { ...u.unsafeMetadata, contact: next } }).catch((e) => console.warn('[clerk] details not saved to the account:', e))
+}
 let clerkClient: Promise<SupabaseClient | null> | null = null
 export function getClerkClient(): Promise<SupabaseClient | null> {
   if (!backendOn) return Promise.resolve(null)

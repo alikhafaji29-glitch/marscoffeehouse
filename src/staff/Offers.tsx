@@ -1,3 +1,4 @@
+import { hmText } from '../orders'
 import { useState } from 'react'
 import { useLang } from '../i18n'
 import { iqd } from '../account'
@@ -116,7 +117,7 @@ export function Offers() {
               <h3>
                 {o.name[lang] || o.name.en}
                 <em className={'d-pill ' + (o.active ? 'ok' : 'line')}>{o.active ? s('active') : s('inactive')}</em>
-                <em className="d-pill line" dir="ltr"><I.clock />{o.start} – {o.end}</em>
+                <em className="d-pill line" dir="ltr"><I.clock />{hmText(o.start, lang)} – {hmText(o.end, lang)}</em>
                 {o.freeDelivery && <em className="d-pill line"><I.bike />{s('freeDelivery')}</em>}
                 {o.feeOn && <em className="d-pill line"><I.money />{s('serviceFee')} <span dir="ltr">{iqd(o.fee)} IQD</span></em>}
               </h3>

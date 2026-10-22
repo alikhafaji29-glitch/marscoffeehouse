@@ -48,9 +48,17 @@ export function splitLine(line: string): { name: string; extra: string; qty: num
   return { name, extra: rest.join(', '), qty }
 }
 /** a chosen time in the reader's language: "Wed 08:30" */
-export const whenText = (at: number, lang: string) => new Intl.DateTimeFormat(lang === 'ku' ? 'ckb' : lang, { weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false }).format(at)
+/* times in 12-hour form (owner, 2026-10-22: "don't use the 24H format, use 12H"): "10:05 AM", "10:05 ص", "10:05 پ.ن" */
+const PERIOD: Record<string, [string, string]> = { en: ['AM', 'PM'], ar: ['ص', 'م'], ku: ['پ.ن', 'د.ن'] }
+/** the 12-hour clock of hour h (0-23): 12, 1, … 11 */
+export const hour12 = (h: number) => h % 12 || 12
+/** AM or PM of hour h, in the reader's language */
+export const periodOf = (h: number, lang = 'en') => (PERIOD[lang] ?? PERIOD.en)[h < 12 ? 0 : 1]
+/** "7:30 AM" from an "HH:MM" (the dashboard's hours) */
+export const hmText = (hm: string, lang = 'en') => { const [h, m] = hm.split(':').map(Number); return `${hour12(h || 0)}:${String(m || 0).padStart(2, '0')} ${periodOf(h || 0, lang)}` }
+export const whenText = (at: number, lang: string) => { const d = new Date(at); return `${new Intl.DateTimeFormat(lang === 'ku' ? 'ckb' : lang, { weekday: 'short' }).format(d)} ${timeText(at, lang)}` }
 /** a time of day, "14:30" (an arrival is always within the next hours) */
-export const timeText = (at: number) => { const d = new Date(at); return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}` }
+export const timeText = (at: number, lang = 'en') => { const d = new Date(at); return `${hour12(d.getHours())}:${String(d.getMinutes()).padStart(2, '0')} ${periodOf(d.getHours(), lang)}` }
 /** the times a pickup customer can say they will arrive (owner, 2026-10-22): every 5 minutes from 10 minutes on, to
  *  the end of the hour two hours ahead (whole hours, so the hour wheel never ends on an hour with one minute), and not
  *  after `until` (a Positive Hours order: the offer's end; right before the end, the end itself) */

@@ -107,7 +107,7 @@ function preorderSlots(start: string, end: string): { at: number; time: string; 
   const out: { at: number; time: string; today: boolean }[] = []
   const stop = new Date(day)
   stop.setHours(e.h, e.m, 0, 0)
-  for (const t = new Date(day); t < stop; t.setMinutes(t.getMinutes() + 15)) out.push({ at: t.getTime(), time: `${String(t.getHours()).padStart(2, '0')}:${String(t.getMinutes()).padStart(2, '0')}`, today })
+  for (const t = new Date(day); t < stop; t.setMinutes(t.getMinutes() + 15)) out.push({ at: t.getTime(), time: timeText(t.getTime()), today })
   return out
 }
 /** today's end of the offer's hours (ms), for the latest arrival time */
@@ -406,7 +406,7 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
                   <label><span>{s(delivery ? 'comboWhenDelivery' : 'comboWhenPickup')}</span>
                     <select value={wantAt || ''} onChange={(e) => { setWantAt(Number(e.target.value)); setNote('') }}>
                       <option value="" disabled>{s('comboPickTime')}</option>
-                      {preorderSlots(offer.start, offer.end).map((x) => <option key={x.at} value={x.at}>{x.today ? s('comboToday') : s('comboTomorrow')} · {x.time}</option>)}
+                      {preorderSlots(offer.start, offer.end).map((x) => <option key={x.at} value={x.at}>{x.today ? s('comboToday') : s('comboTomorrow')} · {timeText(x.at, lang)}</option>)}
                     </select>
                   </label>
                 )}

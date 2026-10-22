@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { useLang } from '../i18n'
 import { iqd } from '../account'
 import type { Order } from '../account'
-import { isActive, useNow } from '../orders'
+import { hmText, isActive, useNow } from '../orders'
 import { outCount, useMenuVersion } from '../menuAdmin'
 import { startOf } from './stats'
 import { OrderCard } from './Orders'
@@ -44,7 +44,7 @@ export function Overview({ orders, go, readOnly = false }: { orders: Order[]; go
             <li>
               <Fact to="offers">
                 <span>{offer?.name[lang] || 'Positive Hours'}</span>
-                <b className={offer?.active ? 'ok' : 'off'}>{offer?.active ? <span dir="ltr">{offer.start} – {offer.end}</span> : s('inactive')}</b>
+                <b className={offer?.active ? 'ok' : 'off'}>{offer?.active ? <span dir="ltr">{hmText(offer.start, lang)} – {hmText(offer.end, lang)}</span> : s('inactive')}</b>
               </Fact>
             </li>
             <li>

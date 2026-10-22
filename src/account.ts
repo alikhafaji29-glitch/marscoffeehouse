@@ -1,5 +1,5 @@
 import { customerBranch } from './staff/store'
-import { clerkUserId } from './backend'
+import { clerkUserId, saveClerkContact } from './backend'
 import { backendOn, newUid } from './backend'
 import { useEffect, useState } from 'react'
 import { pushNotice } from './notify'
@@ -224,7 +224,10 @@ export function placeOfferOrder(o: { total: number; items: string[]; name: strin
 }
 const CONTACT = 'mars-guest' // the name / number / address typed last time, for the next order (combo or cart)
 export const savedContact = (): { name?: string; phone?: string; address?: string } => { try { return JSON.parse(localStorage.getItem(CONTACT) || '{}') } catch { return {} } }
-export const saveContact = (c: { name?: string; phone?: string; address?: string }) => { try { localStorage.setItem(CONTACT, JSON.stringify({ ...savedContact(), ...c })) } catch { /* private mode */ } }
+export const saveContact = (c: { name?: string; phone?: string; address?: string }) => {
+  try { localStorage.setItem(CONTACT, JSON.stringify({ ...savedContact(), ...c })) } catch { /* private mode */ }
+  saveClerkContact(c) // signed in with Clerk: the account keeps them too, for the customer's other devices
+}
 /* ---- the shared backend (src/sync.ts): it is told when an order is placed, and it brings the stages back ---- */
 let onPlaced: (() => void) | null = null
 export const setOrderPlacedHook = (fn: () => void) => { onPlaced = fn }

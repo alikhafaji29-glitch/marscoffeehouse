@@ -338,6 +338,7 @@ const S = {
   cotdTitle: ['Coffee of the day', 'قهوة اليوم', 'قاوەی ئەمڕۆ'],
   cotdSub: ['Any of these, {price} IQD', 'أيٌّ منها بسعر {price} د.ع', 'هەر یەکێکیان بە {price} دینار'],
   cotdChoose: ['Choose your coffee', 'اختر قهوتك', 'قاوەکەت هەڵبژێرە'],
+  welcomeName: ['Welcome, {name}!', 'أهلاً بك، {name}!', 'بەخێربێیت، {name}!'],
   clerkWhy: ['Sign in to keep your details and orders. You can also order without an account.', 'سجّل الدخول لحفظ بياناتك وطلباتك. يمكنك أيضاً الطلب دون حساب.', 'بچۆ ژوورەوە بۆ پاراستنی زانیاری و داواکارییەکانت. دەتوانیت بەبێ هەژماریش داوا بکەیت.'],
   clerkSignUp: ['Create account', 'إنشاء حساب', 'دروستکردنی هەژمار'],
   guestNeed: ['Write your first name and phone number.', 'اكتب اسمك الأول ورقم هاتفك.', 'ناوی یەکەم و ژمارەی مۆبایلەکەت بنووسە.'],

@@ -63,7 +63,7 @@ export function OrderCard({ o, lead = LEAD_MIN }: { o: Order; lead?: number }) {
         {dueOf(o) && isActive(o) && (o.status ?? 'received') === 'received' && !isLater(o, now, lead) && <span className="staff-how now">{s('makeNow')}</span>}
       </p>
       {o.offer?.wantAt && <p className="staff-want">{t('scheduledFor').replace('{t}', whenText(o.offer.wantAt, lang))}{isActive(o) && o.offer.wantAt > now && <small> · {s('inTime', { t: untilText(o.offer.wantAt, now, s('hShort'), s('minShort')) })}</small>}</p>}
-      {o.arriveAt && <p className="staff-want">{s('arriveAt', { t: timeText(o.arriveAt) })}{isActive(o) && o.arriveAt > now && <small> · {s('inTime', { t: untilText(o.arriveAt, now, s('hShort'), s('minShort')) })}</small>}</p>}
+      {o.arriveAt && <p className="staff-want">{s('arriveAt', { t: timeText(o.arriveAt, lang) })}{isActive(o) && o.arriveAt > now && <small> · {s('inTime', { t: untilText(o.arriveAt, now, s('hShort'), s('minShort')) })}</small>}</p>}
       {/* top to bottom, as the cashier works through it (owner, 2026-10-19): who, how to reach them, what, where */}
       {o.customer && (
         <div className="staff-sec staff-who">
