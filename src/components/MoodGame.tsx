@@ -60,7 +60,7 @@ const GOING_LABEL: Record<Going, TKey> = {
   project: 'ansProject', waking: 'ansWaking', easy: 'ansEasy', relaxing: 'ansRelaxing', slump: 'ansSlump', lunch: 'ansLunch', work: 'ansWork',
   friends: 'ansFriends', winding: 'ansWinding', friendsnight: 'ansFriendsNight', studying: 'ansStudying', craving: 'ansCraving',
 }
-const GOING_TOKENS: Token[] = (Object.keys(GOING_ICON) as Going[]).map((g) => ({ id: g, group: 'going', label: GOING_LABEL[g], words: W[g], color: [0, 47, 109], icon: I(GOING_ICON[g]) }))
+const GOING_TOKENS: Token[] = (Object.keys(GOING_ICON) as Going[]).map((g) => ({ id: g, group: 'going', label: GOING_LABEL[g], words: W[g], color: [32, 52, 105], icon: I(GOING_ICON[g]) }))
 const TOKENS: Token[] = [
   ...GOING_TOKENS,
   { id: 'hot', group: 'temp', label: 'tempHot', words: W.hot, color: [255, 140, 80], icon: I('M7 10h10l-1.2 9.2a2 2 0 0 1-2 1.8H10.2a2 2 0 0 1-2-1.8L7 10ZM17 12h2a2 2 0 0 1 0 4h-2.5M9 4c0 1.5 1 1.5 1 3M12 4c0 1.5 1 1.5 1 3M15 4c0 1.5 1 1.5 1 3') },
@@ -91,10 +91,10 @@ const preloadThinkPhotos = () => {
 }
 // Mars logo shapes that pop in and out around the cup (brand colours)
 const POPS: { shape: 'dot' | 'diamond' | 'square' | 'pill'; x: number; y: number; c: string; d: number }[] = [
-  { shape: 'dot', x: 8, y: 14, c: '#002f6d', d: 0 }, { shape: 'diamond', x: 84, y: 10, c: '#397dc9', d: 0.5 },
-  { shape: 'square', x: 14, y: 58, c: '#73c3ff', d: 1.1 }, { shape: 'pill', x: 80, y: 52, c: '#002f6d', d: 1.6 },
-  { shape: 'dot', x: 46, y: 4, c: '#397dc9', d: 2.1 }, { shape: 'diamond', x: 6, y: 86, c: '#73c3ff', d: 2.6 },
-  { shape: 'square', x: 88, y: 82, c: '#002f6d', d: 0.8 }, { shape: 'dot', x: 60, y: 90, c: '#397dc9', d: 1.9 },
+  { shape: 'dot', x: 8, y: 14, c: '#203469', d: 0 }, { shape: 'diamond', x: 84, y: 10, c: '#4d97cf', d: 0.5 },
+  { shape: 'square', x: 14, y: 58, c: '#80bfe9', d: 1.1 }, { shape: 'pill', x: 80, y: 52, c: '#203469', d: 1.6 },
+  { shape: 'dot', x: 46, y: 4, c: '#4d97cf', d: 2.1 }, { shape: 'diamond', x: 6, y: 86, c: '#80bfe9', d: 2.6 },
+  { shape: 'square', x: 88, y: 82, c: '#203469', d: 0.8 }, { shape: 'dot', x: 60, y: 90, c: '#4d97cf', d: 1.9 },
 ]
 /* Bakery pairings after the reveal (brief: "suggest pairing items from bakery after revealing the mixed drink").
  * Picked by the drink's menu category; "no sugar" puts the savoury croissant first. Sold-out items are skipped. */
@@ -117,7 +117,7 @@ const PASTRY = I('M4 15c1-5 4-8 8-8s7 3 8 8c-2 1-4 1.5-8 1.5S6 16 4 15ZM8.5 9.5 
 const rgb = (c: RGB) => `rgb(${c[0]},${c[1]},${c[2]})`
 /* Art direction for Based On Your Mood (owner's brief, 2026-09-28): limited colour palette, sketch icons, 2D.
  * Everything is brand blue on white; the four layers are four blues, bottom (navy) to top (pale). */
-const LAYER_BLUES: RGB[] = [[0, 47, 109], [57, 125, 201], [115, 195, 255], [202, 232, 255]]
+const LAYER_BLUES: RGB[] = [[32, 52, 105], [77, 151, 207], [128, 191, 233], [204, 232, 249]]
 const blueFor = (i: number) => rgb(LAYER_BLUES[Math.min(i, LAYER_BLUES.length - 1)])
 
 /** The cup: up to four coloured layers, one per token, rising from the bottom in the order they were poured. */
@@ -135,9 +135,9 @@ function MoodCup({ layers, mixing, mixed, drawing }: { layers: Token[]; mixing: 
         {layers.length > 0 && <rect className="mood-foam" x="10" y={92 - slot * layers.length} width="70" height="3" fill="#ffffff" />}
       </g>
       {/* sketch marks on the wall (2D, hand-drawn look) */}
-      <path className="cup-marks" d="M25 30l2 52M66 30l-2 30" stroke="#002f6d" strokeWidth="1" strokeLinecap="round" strokeDasharray="2 5" opacity="0.5" />
-      <path className="cup-line" pathLength={1} d="M16 18h58l-6 78a5 5 0 0 1-5 4.5H27a5 5 0 0 1-5-4.5L16 18Z" fill="none" stroke="#002f6d" strokeWidth="2.2" strokeLinejoin="round" />
-      <path className="cup-line cup-rim" pathLength={1} d="M12 18h66" stroke="#002f6d" strokeWidth="3" strokeLinecap="round" />
+      <path className="cup-marks" d="M25 30l2 52M66 30l-2 30" stroke="#203469" strokeWidth="1" strokeLinecap="round" strokeDasharray="2 5" opacity="0.5" />
+      <path className="cup-line" pathLength={1} d="M16 18h58l-6 78a5 5 0 0 1-5 4.5H27a5 5 0 0 1-5-4.5L16 18Z" fill="none" stroke="#203469" strokeWidth="2.2" strokeLinejoin="round" />
+      <path className="cup-line cup-rim" pathLength={1} d="M12 18h66" stroke="#203469" strokeWidth="3" strokeLinecap="round" />
       {mixed && <path className="mood-straw" d="M56 4 50 70" stroke="#0b3fa8" strokeWidth="5" strokeLinecap="round" />}
     </svg>
   )
@@ -221,7 +221,7 @@ export function MoodGame({ onPick, onWords, onDone }: { onPick: (item: MenuItem)
     if (phase !== 'fill') return
     const already = layers.some((l) => l.id === tk.id)
     const layerBlue = blueFor(Math.max(0, layers.findIndex((l) => l.group === tk.group) < 0 ? layers.length : layers.findIndex((l) => l.group === tk.group)))
-    sketchFrom(from ?? cupRef.current, '#002f6d', 11, 1)
+    sketchFrom(from ?? cupRef.current, '#203469', 11, 1)
     if (!already) { setBall({ key: Date.now(), color: layerBlue }); setTimeout(() => setBounce(true), 260); setTimeout(() => { setBounce(false); setBall(null) }, 760) }
     setLayers((ls) => {
       if (ls.some((l) => l.id === tk.id)) return ls.filter((l) => l.id !== tk.id) // pour it back out
@@ -251,7 +251,7 @@ export function MoodGame({ onPick, onWords, onDone }: { onPick: (item: MenuItem)
   }
   const mix = async (e: MouseEvent<HTMLButtonElement>) => {
     if (layers.length < 1) return
-    sketchFrom(e.currentTarget, '#002f6d', 16, 1.3)
+    sketchFrom(e.currentTarget, '#203469', 16, 1.3)
     setPhase('mixing')
     const text = `It is ${period} (${hour}:00). ${layers.map((l) => l.words).join('. ')}.`
     abort.current?.abort()
@@ -279,7 +279,7 @@ export function MoodGame({ onPick, onWords, onDone }: { onPick: (item: MenuItem)
     setPhase('reveal')
   }
   // the reveal card splashes when it lands
-  useEffect(() => { if (phase === 'reveal') sketchFrom(cardRef.current, '#002f6d', 18, 2.4) }, [phase])
+  useEffect(() => { if (phase === 'reveal') sketchFrom(cardRef.current, '#203469', 18, 2.4) }, [phase])
   const empty = () => { abort.current?.abort(); setResult(null); setAlt(null); setPicked(null); setLayers([]); setStep(0); setAdded([]); setPhase('fill') }
 
   if (phase === 'reveal' && result) {
@@ -305,7 +305,7 @@ export function MoodGame({ onPick, onWords, onDone }: { onPick: (item: MenuItem)
                   const pr = typeof it.price === 'number' ? it.price : it.price[0]
                   const on = picked === it.name
                   // the whole card is the choice (owner, 2026-09-28: no "Choose this" button); chosen, it shows Order it
-                  const choose = (el: Element) => { setPicked(it.name); sketchFrom(el, '#002f6d', 12, 1.3) }
+                  const choose = (el: Element) => { setPicked(it.name); sketchFrom(el, '#203469', 12, 1.3) }
                   const tap = on ? {} : {
                     role: 'button', tabIndex: 0, 'aria-label': `${t('moodChoose')}: ${nameOf(it.name, lang)}`,
                     onClick: (e: MouseEvent<HTMLDivElement>) => choose(e.currentTarget),
@@ -352,7 +352,7 @@ export function MoodGame({ onPick, onWords, onDone }: { onPick: (item: MenuItem)
                     <span className="mood-pair-icon">{PASTRY}</span>
                     <span className="mood-pair-name">{nameOf(p.name, lang)}<small dir="ltr">{iqd(pr)} IQD</small></span>
                     <button type="button" className={'pill small ' + (on ? 'soft' : 'solid')} disabled={on}
-                      onClick={(e) => { add({ name: p.name, price: pr }, 1); setAdded((xs) => [...xs, p.name]); sketchFrom(e.currentTarget, '#002f6d', 10, 1) }}>
+                      onClick={(e) => { add({ name: p.name, price: pr }, 1); setAdded((xs) => [...xs, p.name]); sketchFrom(e.currentTarget, '#203469', 10, 1) }}>
                       {on ? t('shopAdded') : t('shopAdd')}
                     </button>
                   </div>

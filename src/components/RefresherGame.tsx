@@ -35,7 +35,7 @@ function Glass({ x, y, s = 1, syrup, pom = 0, juice = 0, tea = 0, ice = 0, straw
   return (
     <g transform={g(x, y, s)}>
       <defs><clipPath id={`rg${id}`}><path d={body} /></clipPath></defs>
-      {straw && <><path d="M40 -36 32 86" stroke={OUT} strokeWidth="9" strokeLinecap="round" /><path d="M40 -36 32 86" stroke="#397dc9" strokeWidth="5" strokeLinecap="round" /></>}
+      {straw && <><path d="M40 -36 32 86" stroke={OUT} strokeWidth="9" strokeLinecap="round" /><path d="M40 -36 32 86" stroke="#4d97cf" strokeWidth="5" strokeLinecap="round" /></>}
       <path d={body} fill="#eaf6ff" fillOpacity="0.8" />
       <g clipPath={`url(#rg${id})`}>
         {syrup && <path className="lg-settle" d={`M-2 ${bot - syH}c10-3 20 3 30 0s18-3 30 0V${bot + 4}H-2Z`} fill={syrup} />}
@@ -49,12 +49,12 @@ function Glass({ x, y, s = 1, syrup, pom = 0, juice = 0, tea = 0, ice = 0, straw
           const cx = 6 + (i % 3) * 15, cy = 16 + Math.floor(i / 3) * 16 + (i % 2) * 5
           return (
             <g key={i} className="lg-cube" transform={`rotate(${(i * 23) % 30 - 12} ${cx + 7} ${cy + 6})`}>
-              <rect x={cx} y={cy} width="15" height="14" rx="3.5" fill={C.ice} fillOpacity="0.8" stroke="#73c3ff" strokeWidth="1.6" />
+              <rect x={cx} y={cy} width="15" height="14" rx="3.5" fill={C.ice} fillOpacity="0.8" stroke="#80bfe9" strokeWidth="1.6" />
               <path d={`M${cx + 3} ${cy + 3}h5`} stroke="#fff" strokeWidth="2" strokeLinecap="round" />
             </g>
           )
         })}
-        <path d="M40 0h22v100H36Z" fill="#00244c" opacity="0.06" />
+        <path d="M40 0h22v100H36Z" fill="#11264b" opacity="0.06" />
       </g>
       <path d={body} fill="none" {...INK} />
       <ellipse cx="28" cy="0" rx="28" ry="4" fill="none" {...THIN} />
@@ -77,7 +77,7 @@ function Jug({ steep = 0, tea = 1, bag = true }: { steep?: number; tea?: number;
         <rect x="0" y={104 - 80 * tea} width="90" height={80 * tea + 4} fill="#e3f3ff" />
         <rect x="0" y={104 - 80 * tea} width="90" height={80 * tea + 4} fill={TEA} opacity={0.9 * steep} />
         {bag && steep > 0 && steep < 1 && <g className="lg-steam">{[0, 1, 2].map((i) => <path key={i} d={`M${34 + i * 8} 70c-4 8 4 12 0 20`} stroke={TEA} strokeWidth="3" fill="none" strokeLinecap="round" />)}</g>}
-        <path d="M54 10h26v100H50Z" fill="#00244c" opacity="0.06" />
+        <path d="M54 10h26v100H50Z" fill="#11264b" opacity="0.06" />
       </g>
       <path d={body} fill="none" {...INK} />
       <path d="M8 10-4 2" stroke={OUT} strokeWidth="4" strokeLinecap="round" />

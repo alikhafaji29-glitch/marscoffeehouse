@@ -88,7 +88,7 @@ export function ItemScreen({ item, gift = false, deal, onClose, onAdded }: { ite
     return at < 0 ? p : { ...p, [g.id]: [...cur.slice(0, at), ...cur.slice(at + 1)] }
   })
   const confirm = (e: MouseEvent<HTMLButtonElement>) => {
-    dropsFrom(e.currentTarget, '#73c3ff', 14, 1.1)
+    dropsFrom(e.currentTarget, '#80bfe9', 14, 1.1)
     add({ name: item.name, size, price: unit, opts }, qty)
     onClose()
     onAdded?.() // e.g. from New this season: straight on to checkout

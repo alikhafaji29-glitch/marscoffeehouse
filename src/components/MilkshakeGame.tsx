@@ -32,7 +32,7 @@ function Tub({ x, y }: { x: number; y: number }) {
   return (
     <g transform={g(x, y)}>
       <path d="M0 22h112l-10 84a8 8 0 0 1-8 7H18a8 8 0 0 1-8-7Z" fill="#ffffff" {...INK} />
-      <path d="M86 24h24l-10 82a8 8 0 0 1-8 7h-9Z" fill="#00244c" opacity="0.07" />
+      <path d="M86 24h24l-10 82a8 8 0 0 1-8 7h-9Z" fill="#11264b" opacity="0.07" />
       <rect x="4" y="50" width="104" height="26" fill={C.body} {...THIN} />
       <path d="M22 63c6-6 12-6 18 0s12 6 18 0 12-6 18 0 12 6 18 0" stroke="#ffffff" strokeWidth="2.5" fill="none" strokeLinecap="round" />
       <ellipse cx="56" cy="22" rx="56" ry="9" fill={CREAM} {...INK} />
@@ -74,7 +74,7 @@ function Jar({ x, y, f, label, row }: { x: number; y: number; f: Flavor; label: 
       {f === 'strawberry' && [[12, 44], [26, 50], [36, 42], [16, 62], [32, 64]].map(([sx, sy], i) => <ellipse key={i} cx={sx} cy={sy} rx="1.4" ry="2.2" fill="#fbe38e" />)}
       {f === 'pistachio' && [[12, 46], [28, 44], [20, 60], [34, 62]].map(([sx, sy], i) => <ellipse key={i} cx={sx} cy={sy} rx="5" ry="3.2" fill="#b7d98a" stroke="#5f8f33" strokeWidth="1" />)}
       {(f === 'lotus' || f === 'nutella' || f === 'rashi') && <path d="M4 38c8-5 14 3 20-1s12-4 18 1" stroke="#ffffff" strokeWidth="2.5" fill="none" opacity="0.45" />}
-      <path d="M34 22l8 9v42a6 6 0 0 1-6 6h-3Z" fill="#00244c" opacity="0.1" />
+      <path d="M34 22l8 9v42a6 6 0 0 1-6 6h-3Z" fill="#11264b" opacity="0.1" />
       <path d={body} fill="none" {...INK} />
       <rect x="4" y="2" width="38" height="13" rx="3" fill={C.dark} {...THIN} />
       <path d="M9 7h14" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" opacity="0.6" />
@@ -122,7 +122,7 @@ function Squeeze({ color, label }: { color: string; label?: string }) {
       <path d="M16 0h12l6 22H10Z" fill="#ffffff" {...INK} />
       <path d="M20 -12h4v12h-4Z" fill={OUT} />
       <rect x="4" y="22" width="36" height="78" rx="8" fill={color} {...INK} />
-      <path d="M32 26h6v70a6 6 0 0 1-6 4Z" fill="#00244c" opacity="0.15" />
+      <path d="M32 26h6v70a6 6 0 0 1-6 4Z" fill="#11264b" opacity="0.15" />
       <rect x="4" y="46" width="36" height="24" fill="#ffffff" {...THIN} />
       <path d="M12 58c4-5 8-5 10 0s8 5 10 0" stroke={color} strokeWidth="2.5" fill="none" strokeLinecap="round" />
       <path d="M10 30v62" {...SHINE} />
@@ -143,13 +143,13 @@ function ShakeCup({ x, y, s = 1, f, drizzle = false, drawing = false, fill = 0, 
   return (
     <g transform={g(x, y, s)}>
       <defs><clipPath id={`sc${id}`}><path d={body} /></clipPath></defs>
-      {straw && <><path d="M48 -48 40 96" stroke={OUT} strokeWidth="9" strokeLinecap="round" /><path d="M48 -48 40 96" stroke="#397dc9" strokeWidth="5" strokeLinecap="round" /></>}
+      {straw && <><path d="M48 -48 40 96" stroke={OUT} strokeWidth="9" strokeLinecap="round" /><path d="M48 -48 40 96" stroke="#4d97cf" strokeWidth="5" strokeLinecap="round" /></>}
       <path d={body} fill="#eaf6ff" fillOpacity="0.8" />
       <g clipPath={`url(#sc${id})`}>
         {fill > 0 && f && <rect x="-2" y={110 - 106 * fill} width="74" height={106 * fill + 4} fill={SHAKE[f]} />}
         {fill > 0 && f === 'oreo' && Array.from({ length: 14 }, (_, i) => <circle key={i} cx={8 + ((i * 23) % 56)} cy={104 - ((i * 37) % 96)} r="1.8" fill="#2f2622" opacity={110 - ((i * 37) % 96) - 6 > 110 - 104 * fill ? 0.8 : 0} />)}
         {drizzle && lines.map((d, i) => <path key={i} className={drawing ? 'mk-drizzle' : undefined} style={drawing ? { animationDelay: `${0.35 + i * 0.12}s` } : undefined} pathLength={1} d={d} stroke={sauce} strokeWidth="4.5" strokeLinecap="round" fill="none" opacity="0.92" />)}
-        <path d="M46 0h28v112H40Z" fill="#00244c" opacity="0.06" />
+        <path d="M46 0h28v112H40Z" fill="#11264b" opacity="0.06" />
       </g>
       <path d={body} fill="none" {...INK} />
       <ellipse cx="35" cy="0" rx="35" ry="4.5" fill="none" {...THIN} />

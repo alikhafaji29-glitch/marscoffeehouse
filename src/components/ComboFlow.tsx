@@ -12,6 +12,7 @@ import type { OfferGroup } from '../staff/store'
 import { useS } from '../staff/strings'
 import { ItemPic, catLabel, sectionPicOf } from './MenuSection'
 import { MiniCup } from './MiniCup'
+import { PositiveHoursMark } from './PositiveHoursMark'
 import { OrderTracker } from './OrderTracker'
 import { MissingBox, goToMissing } from './MissingBox'
 import type { Missing } from './MissingBox'
@@ -49,11 +50,11 @@ function choices(g: OfferGroup): { cat: string; items: MenuItem[] }[] {
 // food without a photo gets a drawn sandwich or pastry rather than the drink cup
 const FOOD = ['sweets', 'savory']
 const FoodIcon = ({ sweet }: { sweet: boolean }) => (
-  <svg viewBox="0 0 48 48" width="40" height="40" fill="none" stroke="#002f6d" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg viewBox="0 0 48 48" width="40" height="40" fill="none" stroke="#203469" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     {sweet ? (
-      <><circle cx="24" cy="24" r="14" fill="#f3d9b5" /><circle cx="19" cy="20" r="1.6" fill="#935a25" stroke="none" /><circle cx="28" cy="18.5" r="1.6" fill="#935a25" stroke="none" /><circle cx="30" cy="27" r="1.6" fill="#935a25" stroke="none" /><circle cx="21" cy="29" r="1.6" fill="#935a25" stroke="none" /><circle cx="25" cy="24" r="1.3" fill="#935a25" stroke="none" /></>
+      <><circle cx="24" cy="24" r="14" fill="#f3d9b5" /><circle cx="19" cy="20" r="1.6" fill="#935b25" stroke="none" /><circle cx="28" cy="18.5" r="1.6" fill="#935b25" stroke="none" /><circle cx="30" cy="27" r="1.6" fill="#935b25" stroke="none" /><circle cx="21" cy="29" r="1.6" fill="#935b25" stroke="none" /><circle cx="25" cy="24" r="1.3" fill="#935b25" stroke="none" /></>
     ) : (
-      <><path d="M8 20c0-6 7-10 16-10s16 4 16 10z" fill="#f3d9b5" /><path d="M7 25h34" stroke="#3f8f4f" strokeWidth="3" /><path d="M9 29.5h30" stroke="#db863a" strokeWidth="3" /><path d="M8 34h32v1.5a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4z" fill="#f3d9b5" /></>
+      <><path d="M8 20c0-6 7-10 16-10s16 4 16 10z" fill="#f3d9b5" /><path d="M7 25h34" stroke="#3f8f4f" strokeWidth="3" /><path d="M9 29.5h30" stroke="#dc8638" strokeWidth="3" /><path d="M8 34h32v1.5a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4z" fill="#f3d9b5" /></>
     )}
   </svg>
 )
@@ -289,7 +290,7 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
       <div className="combo" role="dialog" aria-modal="true" aria-labelledby="combo-title" onClick={(e) => e.stopPropagation()}>
         <header className="combo-head">
           <div>
-            <p className="combo-eyebrow">{title}{ps && count > 1 && !between && <span className="combo-of">{s('comboOf', { n: ps.k + 1, of: count })}</span>}{!live && step !== DONE && <em>{t('preOrder').replace(/\s*!$/, '')}</em>}</p>
+            <p className="combo-eyebrow">{offer.id === 'positive' ? <PositiveHoursMark /> : title}{ps && count > 1 && !between && <span className="combo-of">{s('comboOf', { n: ps.k + 1, of: count })}</span>}{!live && step !== DONE && <em>{t('preOrder').replace(/\s*!$/, '')}</em>}</p>
             <h2 id="combo-title">{between && ps ? s('comboReady', { n: ps.k + 1 }) : step === DONE ? (firstName ? t('thanksName').replace('{name}', firstName) : t('orderPlaced')) : step === DETAILS ? s('comboDetails') : step === ASK ? s('comboHowMany') : label(cur.g)}</h2>
           </div>
           <button type="button" className="combo-close" onClick={onClose} aria-label={t('close')}>

@@ -21,7 +21,7 @@ const STROKES = 8
 const ITEM: Record<Style, string> = { classic: 'Classic Matcha', berry: 'Berry Matcha', midnight: 'Mid-Night Matcha' }
 const SYRUP: Record<Exclude<Style, 'classic'>, string> = { berry: '#c2185b', midnight: '#26306e' }
 const STYLE_KEY: Record<Exclude<Style, 'classic'>, TKey> = { berry: 'mtBerry', midnight: 'mtMidnight' }
-const MILK_COLOR: Record<Milk, string> = { regular: '#002f6d', skimmed: '#73c3ff', lactose: '#db863a' }
+const MILK_COLOR: Record<Milk, string> = { regular: '#203469', skimmed: '#80bfe9', lactose: '#dc8638' }
 const MILK_KEY: Record<Milk, TKey> = { regular: 'lgMilkRegular', skimmed: 'lgMilkSkimmed', lactose: 'lgMilkLactose' }
 const POWDER = '#7aa33a', TEA = '#4f7a26', FROTH = '#9cc860', FOAM = '#c6e09a', BAMBOO = '#e5cdb5', BAMBOO_DARK = '#bb7833'
 
@@ -30,7 +30,7 @@ function Tin({ x, y, label }: { x: number; y: number; label: string }) {
   return (
     <g transform={g(x, y)}>
       <rect x="0" y="10" width="74" height="96" rx="8" fill={POWDER} {...INK} />
-      <path d="M54 12h18v92H54Z" fill="#00244c" opacity="0.14" />
+      <path d="M54 12h18v92H54Z" fill="#11264b" opacity="0.14" />
       <rect x="0" y="40" width="74" height="36" fill={C.counter} {...THIN} />
       <path d="M14 58c6-8 14-8 20 0s14 8 20 0" stroke={POWDER} strokeWidth="3" fill="none" strokeLinecap="round" />
       <rect x="-3" y="0" width="80" height="16" rx="4" fill={C.dark} {...INK} />
@@ -47,7 +47,7 @@ function Bowl({ x, y, s = 1, powder = 0, water = false, froth = 0 }: { x: number
       <path d="M38 58h44v10H38Z" fill="#dbc6b6" {...THIN} />
       <path d="M0 0h120c0 42-26 62-60 62S0 42 0 0Z" fill={C.counter} {...INK} />
       <path d="M1 2h118c-1 6-2 10-3 14-18 6-36-4-56 2s-38 4-56-2c-1-4-2-8-3-14Z" fill={C.body} />
-      <path d="M86 8c10 20 4 40-14 50" stroke="#00244c" strokeWidth="10" opacity="0.07" fill="none" strokeLinecap="round" />
+      <path d="M86 8c10 20 4 40-14 50" stroke="#11264b" strokeWidth="10" opacity="0.07" fill="none" strokeLinecap="round" />
       <ellipse cx="60" cy="0" rx="60" ry="8" fill="#ffffff" {...INK} />
       {water && <ellipse cx="60" cy="1" rx="54" ry="6" fill={TEA} />}
       {water && froth > 0 && <ellipse cx="60" cy="1" rx="54" ry="6" fill={FROTH} opacity={froth} />}
@@ -79,7 +79,7 @@ function Kettle({ tilt = 0 }: { tilt?: number }) {
       <path d="M14 44 -14 26" stroke={OUT} strokeWidth="11" strokeLinecap="round" />
       <path d="M14 44 -14 26" stroke={C.steel} strokeWidth="6" strokeLinecap="round" />
       <path d="M12 30h76l6 50a8 8 0 0 1-8 8H14a8 8 0 0 1-8-8Z" fill={C.steel} {...INK} />
-      <path d="M70 32h16l6 46a8 8 0 0 1-8 8h-8Z" fill="#00244c" opacity="0.12" />
+      <path d="M70 32h16l6 46a8 8 0 0 1-8 8h-8Z" fill="#11264b" opacity="0.12" />
       <rect x="30" y="22" width="40" height="10" rx="4" fill={C.steelDark} {...THIN} />
       <path d="M18 40l4 38" {...SHINE} />
     </g>
@@ -119,7 +119,7 @@ function MatchaCup({ x, y, s = 1, syrup, milk = 0, matcha = 0, dust = false }: {
         {matcha > 0 && <path d={`M-2 ${matchaTop}h70V${milkTop + 6}c-12 3-22-3-34 0s-24 3-36 0Z`} fill={FROTH} />}
         {matcha > 0 && <rect x="-2" y={milkTop - 2} width="70" height="8" fill={TEA} opacity="0.35" />}
         {full && <rect x="-2" y={matchaTop - 1} width="70" height="6" fill={FOAM} />}
-        <path d="M44 0h26v84H40Z" fill="#00244c" opacity="0.06" />
+        <path d="M44 0h26v84H40Z" fill="#11264b" opacity="0.06" />
       </g>
       <path d={body} fill="none" {...INK} />
       <ellipse cx="32" cy="0" rx="32" ry="4" fill="none" {...THIN} />

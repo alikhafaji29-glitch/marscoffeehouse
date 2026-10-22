@@ -7,6 +7,7 @@ import type { Deal, MenuItem } from '../menu'
 import { useCart } from '../cart'
 import { activeEvent, cotdFor, positiveOffer, useStaff } from '../staff/store'
 import { CoffeeOfTheDay } from './CoffeeOfTheDay'
+import { PositiveHoursMark } from './PositiveHoursMark'
 import { FEATURES } from '../features'
 import { useCountdown, LUNCH_HOURS } from './useCountdown'
 import { clockNow } from '../clock'
@@ -193,7 +194,7 @@ export function HomeDeck({ onOrder, onPick }: { onOrder: () => void; onPick: (it
       {active ? <HoursVideo poster={window.matchMedia('(max-width: 760px)').matches ? HOURS_POSTER_PHONE : HOURS_POSTER_WIDE} /> : <img className="bg" src={PREORDER_PHOTO} alt="" draggable={false} />}
       <div className="slide-text">
         <p className="eyebrow count" dir="auto">{active ? <>{t('offerEndsIn')} <b dir="ltr">{text}</b></> : <>{t('startsAgainAt')} <b dir="ltr">{text}</b></>}</p>
-        <h2 className="slide-title" id="hours-title">Positive Hours</h2>
+        <h2 className="slide-title" id="hours-title"><PositiveHoursMark /></h2>
         <p className="slide-sub">{active ? offerText : t('preOrderHint')}</p>
         {/* straight into the combo: sandwich, drink, then name / number / address (owner, 2026-10-12) */}
         <button type="button" className="pill soft" onClick={() => openCombo('positive')}>{active ? t('orderNow') : t('preOrder')}</button>

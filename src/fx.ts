@@ -44,7 +44,7 @@ const SKETCH_SHAPES: Record<string, string> = {
   plus: 'M0 -5v10M-5 0h10',
 }
 const EXTRAS = ['spark', 'ring', 'squiggle', 'plus']
-export function sketchBurst(x: number, y: number, color = '#002f6d', count = 12, spread = 1) {
+export function sketchBurst(x: number, y: number, color = '#203469', count = 12, spread = 1) {
   if (reducedMotion()) return
   const wrap = document.createElement('div')
   wrap.className = 'fx-sketch'
@@ -67,7 +67,7 @@ export function sketchBurst(x: number, y: number, color = '#002f6d', count = 12,
     const p = document.createElementNS('http://www.w3.org/2000/svg', 'path')
     p.setAttribute('d', SKETCH_SHAPES[kind])
     p.setAttribute('fill', 'none')
-    p.setAttribute('stroke', i % 3 === 2 ? '#397dc9' : color)
+    p.setAttribute('stroke', i % 3 === 2 ? '#4d97cf' : color)
     p.setAttribute('stroke-width', isLine ? '3' : '2.2')
     p.setAttribute('stroke-linecap', 'round')
     p.setAttribute('stroke-linejoin', 'round')

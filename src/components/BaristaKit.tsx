@@ -25,9 +25,9 @@ export const findItem = (name: string): MenuItem | undefined => MENU.flatMap((c)
 export const priceAt = (it: MenuItem, i: number) => (Array.isArray(it.price) ? it.price[i] : it.price)
 
 /* Mars brand palette (guideline PDF, owner 2026-09-29: "use mars colors") in the reference game's style */
-export const OUT = '#00244c'
+export const OUT = '#11264b'
 export const SW = 3
-export const C = { wall: '#cae8ff', counter: '#f8f2e9', steel: '#c5d6ea', steelDark: '#8fa9c9', body: '#73c3ff', dark: '#002f6d', wood: '#935a25', coffee: '#6b3f18', crema: '#bb7833', milk: '#fbf7f1', latte: '#e5cdb5', mug: '#ffffff', glass: '#e8f5ff', ice: '#e3f3ff', green: '#db863a', caramel: '#db863a' }
+export const C = { wall: '#cce8f9', counter: '#f8f2e9', steel: '#c5d6ea', steelDark: '#8fa9c9', body: '#80bfe9', dark: '#203469', wood: '#935b25', coffee: '#6b3f18', crema: '#bb7833', milk: '#fbf7f1', latte: '#e5cdb5', mug: '#ffffff', glass: '#e8f5ff', ice: '#e3f3ff', green: '#dc8638', caramel: '#dc8638' }
 export const CREAM = '#fbf1dc'
 export const ICE_KEYS = ['lgIceNone', 'lgIceLight', 'lgIceRegular', 'lgIceExtra'] as TKey[] // 0..3 ice scoops
 
@@ -104,7 +104,7 @@ export function Carton({ x, y, color, label, on }: { x: number; y: number; color
       <path d="M32 2v16" {...THIN} />
       <rect x="44" y="-12" width="10" height="8" rx="2" fill={color} {...THIN} />
       <path d="M0 18h64v74a6 6 0 0 1-6 6H6a6 6 0 0 1-6-6Z" fill="#ffffff" {...INK} />
-      <path d="M48 20h14v70a6 6 0 0 1-6 6h-8Z" fill="#00244c" opacity="0.07" />
+      <path d="M48 20h14v70a6 6 0 0 1-6 6h-8Z" fill="#11264b" opacity="0.07" />
       <rect x="0" y="40" width="64" height="30" fill={color} {...THIN} />
       <path d="M32 46c-5 7-7 10-7 13a7 7 0 0 0 14 0c0-3-2-6-7-13Z" fill="#ffffff" />
       <path d="M6 26h20" {...SHINE} opacity="0.6" />
@@ -119,8 +119,8 @@ export function Bottle({ x, y, color, label, tin }: { x: number; y: number; colo
       <rect x="0" y="40" width="50" height="56" rx="6" fill="#f8f2e9" {...INK} />
       <path d="M0 48h50M0 88h50" {...THIN} />
       <rect x="0" y="56" width="50" height="24" fill={C.dark} />
-      <path d="M8 68c5-6 12-6 17 0s12 6 17 0" fill="none" stroke="#73c3ff" strokeWidth="2.5" strokeLinecap="round" />
-      <path d="M38 44v48" stroke="#00244c" strokeWidth="6" opacity="0.08" />
+      <path d="M8 68c5-6 12-6 17 0s12 6 17 0" fill="none" stroke="#80bfe9" strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M38 44v48" stroke="#11264b" strokeWidth="6" opacity="0.08" />
       <ellipse cx="25" cy="40" rx="25" ry="6" fill="#dbc6b6" {...INK} />
       <ellipse cx="25" cy="40" rx="8" ry="2.5" fill="none" {...THIN} />
       <path d="M6 52v30" {...SHINE} />
@@ -136,7 +136,7 @@ export function Bottle({ x, y, color, label, tin }: { x: number; y: number; colo
       <path d="M22 2V-6h18" fill="none" stroke={C.dark} strokeWidth="2" strokeLinecap="round" />
       <rect x="15" y="10" width="20" height="8" rx="2" fill={C.steel} {...THIN} />
       <path d={body} fill={color} />
-      <path d="M32 30l8 9v51a6 6 0 0 1-6 6h-3Z" fill="#00244c" opacity="0.14" />
+      <path d="M32 30l8 9v51a6 6 0 0 1-6 6h-3Z" fill="#11264b" opacity="0.14" />
       <path d={body} fill="none" {...INK} />
       <rect x="8" y="52" width="34" height="24" rx="3" fill="#ffffff" {...THIN} />
       <circle cx="25" cy="64" r="6" fill={color} {...THIN} />
@@ -168,7 +168,7 @@ export function PumpOver({ color, tin, k }: { color: string; tin: boolean; k: nu
       </g>
       <rect x="15" y="10" width="20" height="8" rx="2" fill={C.steel} {...THIN} />
       <path d={body} fill={color} />
-      <path d="M32 30l8 9v51a6 6 0 0 1-6 6h-3Z" fill="#00244c" opacity="0.14" />
+      <path d="M32 30l8 9v51a6 6 0 0 1-6 6h-3Z" fill="#11264b" opacity="0.14" />
       <path d={body} fill="none" {...INK} />
       <rect x="8" y="52" width="34" height="24" rx="3" fill="#ffffff" {...THIN} />
       <circle cx="25" cy="64" r="6" fill={color} {...THIN} />
@@ -188,10 +188,10 @@ export function ScoopOver({ k }: { k: number }) {
           <path d="M140 150c-10 10-10 30 4 44l22 10c6 2 12-4 10-10l-10-22c-14-14-34-14-44-4Z" transform="rotate(-8 160 180)" fill={C.steel} stroke={OUT} strokeWidth={SW} strokeLinejoin="round" />
           <path d="M146 162c-4 8-2 18 6 26" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" fill="none" opacity="0.85" />
           <rect x="170" y="186" width="16" height="12" rx="3" transform="rotate(45 178 192)" fill={C.steelDark} stroke={OUT} strokeWidth="2" />
-          {[0, 1, 2].map((i) => <rect key={i} x={150 + i * 9} y={166 + (i % 2) * 6} width="12" height="11" rx="3" fill={C.ice} stroke="#73c3ff" strokeWidth="1.5" />)}
+          {[0, 1, 2].map((i) => <rect key={i} x={150 + i * 9} y={166 + (i % 2) * 6} width="12" height="11" rx="3" fill={C.ice} stroke="#80bfe9" strokeWidth="1.5" />)}
         </g>
       </g>
-      {[0, 1, 2].map((i) => <rect key={i} className="lg-icedrop" style={{ animationDelay: `${0.62 + i * 0.07}s` }} x={30 + i * 11} y={34 + (i % 2) * 5} width="13" height="12" rx="3.5" fill={C.ice} stroke="#73c3ff" strokeWidth="1.6" />)}
+      {[0, 1, 2].map((i) => <rect key={i} className="lg-icedrop" style={{ animationDelay: `${0.62 + i * 0.07}s` }} x={30 + i * 11} y={34 + (i % 2) * 5} width="13" height="12" rx="3.5" fill={C.ice} stroke="#80bfe9" strokeWidth="1.6" />)}
     </g>
   )
 }
@@ -235,7 +235,7 @@ export function Blender({ x, y, s = 1, tf, balls = 0, milk = 0, dollop, inside, 
         {mix > 0 && <rect x="-2" y={118 - h} width="90" height={h + 4} fill={shake} opacity={Math.min(1, mix * 1.4)} />}
         {mix > 0 && <path d={`M-2 ${118 - h}c14-6 28 6 44 0s30-6 46 0`} stroke="#ffffff" strokeWidth="3" fill="none" opacity={0.6 * mix} />}
         {spin && <g className="mk-swirl"><path d="M42 104c-18-4-22-26-6-34s30 6 22 20-26 8-22-4 16-10 18-2" stroke="#ffffff" strokeWidth="3.5" strokeLinecap="round" fill="none" opacity="0.7" /></g>}
-        <path d="M58 0h30v120H50Z" fill="#00244c" opacity="0.06" />
+        <path d="M58 0h30v120H50Z" fill="#11264b" opacity="0.06" />
       </g>
       {/* blades */}
       <path d="M30 112l12-4 12 4M42 108v6" stroke={OUT} strokeWidth="2.5" strokeLinecap="round" fill="none" />
@@ -247,10 +247,10 @@ export function Blender({ x, y, s = 1, tf, balls = 0, milk = 0, dollop, inside, 
         <g>
           <rect x="-2" y="116" width="88" height="14" rx="3" fill={C.steel} {...INK} />
           <path d="M-12 130h108l-8 56H-4Z" fill={C.dark} {...INK} />
-          <path d="M72 132h22l-7 52H66Z" fill="#00244c" opacity="0.25" />
+          <path d="M72 132h22l-7 52H66Z" fill="#11264b" opacity="0.25" />
           <circle cx="42" cy="158" r="12" fill={spin ? '#a7641a' : C.caramel} {...THIN} />
           <circle cx="42" cy="158" r="5" fill="#ffffff" opacity="0.8" />
-          <circle cx="12" cy="158" r="3.5" fill={spin ? '#73c3ff' : '#8fa9c9'} /><circle cx="72" cy="158" r="3.5" fill={spin ? '#73c3ff' : '#8fa9c9'} />
+          <circle cx="12" cy="158" r="3.5" fill={spin ? '#80bfe9' : '#8fa9c9'} /><circle cx="72" cy="158" r="3.5" fill={spin ? '#80bfe9' : '#8fa9c9'} />
         </g>
       )}
     </g>
@@ -268,7 +268,7 @@ export function IceBin({ scooping, busy, full, label, onScoop }: { scooping: boo
         const x = 50 + (i % 5) * 26 + (Math.floor(i / 5) % 2) * 10, y = 240 + Math.floor(i / 5) * 26
         return (
           <g key={i} transform={`rotate(${(i * 29) % 34 - 17} ${x + 10} ${y + 9})`}>
-            <rect x={x} y={y} width="21" height="19" rx="5" fill={C.ice} stroke="#73c3ff" strokeWidth="1.8" />
+            <rect x={x} y={y} width="21" height="19" rx="5" fill={C.ice} stroke="#80bfe9" strokeWidth="1.8" />
             <path d={`M${x + 4} ${y + 5}h7M${x + 4} ${y + 9}v3`} stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" />
           </g>
         )

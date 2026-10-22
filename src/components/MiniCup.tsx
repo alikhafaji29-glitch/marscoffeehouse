@@ -10,7 +10,7 @@ export function MiniCup({ color, ice, size = 64 }: { color: RGB; ice: 0 | 1 | 2;
       <defs>
         <clipPath id="mc-clip"><path d="M14 18h44l-5 70a4 4 0 0 1-4 3.6H23a4 4 0 0 1-4-3.6L14 18Z" /></clipPath>
       </defs>
-      <path d="M14 18h44l-5 70a4 4 0 0 1-4 3.6H23a4 4 0 0 1-4-3.6L14 18Z" fill="rgba(255,255,255,0.45)" stroke="rgba(0,47,109,0.35)" strokeWidth="1.6" />
+      <path d="M14 18h44l-5 70a4 4 0 0 1-4 3.6H23a4 4 0 0 1-4-3.6L14 18Z" fill="rgba(255,255,255,0.45)" stroke="rgba(32, 52, 105,0.35)" strokeWidth="1.6" />
       <g clipPath="url(#mc-clip)">
         <rect x="10" y="38" width="52" height="60" fill={c} />
         <rect x="10" y="38" width="52" height="8" fill={light} />
@@ -19,7 +19,7 @@ export function MiniCup({ color, ice, size = 64 }: { color: RGB; ice: 0 | 1 | 2;
         ))}
         <rect x="20" y="24" width="3" height="60" rx="1.5" fill="rgba(255,255,255,0.55)" />
       </g>
-      <path d="M10 18h52" stroke="rgba(0,47,109,0.5)" strokeWidth="2.4" strokeLinecap="round" />
+      <path d="M10 18h52" stroke="rgba(32, 52, 105,0.5)" strokeWidth="2.4" strokeLinecap="round" />
       <path d="M44 6 40 62" stroke="#0b3fa8" strokeWidth="4" strokeLinecap="round" />
     </svg>
   )

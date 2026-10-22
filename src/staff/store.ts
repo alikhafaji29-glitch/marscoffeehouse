@@ -62,9 +62,9 @@ export interface StaffData {
 
 export const THEMES = [
   { id: 'spring', name: 'Spring Bloom', color: '#e0336e' },
-  { id: 'summer', name: 'Summer Sun', color: '#db863a' },
-  { id: 'autumn', name: 'Autumn Spice', color: '#935a25' },
-  { id: 'winter', name: 'Winter Sky', color: '#397dc9' },
+  { id: 'summer', name: 'Summer Sun', color: '#dc8638' },
+  { id: 'autumn', name: 'Autumn Spice', color: '#935b25' },
+  { id: 'winter', name: 'Winter Sky', color: '#4d97cf' },
 ]
 
 const NO_SETTINGS: Settings = { reach: 'dashboard', whatsapp: '', delivery: true, pickup: true }

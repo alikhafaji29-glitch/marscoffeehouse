@@ -58,6 +58,8 @@ export const PHOTO: Record<string, string> = {
   'Orange Cream Cake': '/assets/menu/orange-cream-cake.webp',
   'Red Velvet Cake': '/assets/menu/red-velvet-cake.webp',
   'Carrot Cake': '/assets/menu/carrot-cake.webp',
+  'Mocha Dark': '/assets/menu/mocha-dark.webp', // hot, 45 degree (owner, 2026-10-23)
+  'Mocha White': '/assets/menu/mocha-white.webp',
   // the add-ons: the live site's own pictures (marscoffeehouse.com/erbil → Add-ons, 2026-10-23); both milks share one there
   'Espresso Shot': '/assets/menu/espresso-shot.webp',
   'Add Flavors': '/assets/menu/add-flavors.webp',

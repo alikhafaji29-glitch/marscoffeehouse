@@ -27,9 +27,9 @@ const ITEM: Record<Temp, Record<Flavor, string>> = {
   iced: { none: 'Iced Classic Latte', caramel: 'Ice Latte Caramel', spanish: 'Iced Spanish Latte', vanilla: 'Iced Latte with Flavor', hazelnut: 'Iced Latte with Flavor' },
 }
 
-const FLAVOR_COLOR: Record<Flavor, string> = { none: '#ffffff', caramel: '#db863a', vanilla: '#e5cdb5', hazelnut: '#935a25', spanish: '#f8f2e9' }
+const FLAVOR_COLOR: Record<Flavor, string> = { none: '#ffffff', caramel: '#dc8638', vanilla: '#e5cdb5', hazelnut: '#935b25', spanish: '#f8f2e9' }
 const FLAVOR_KEY: Record<Flavor, TKey> = { none: 'lgClassic', caramel: 'lgCaramel', vanilla: 'lgVanilla', hazelnut: 'lgHazelnut', spanish: 'lgSpanish' }
-const MILK_COLOR: Record<Milk, string> = { regular: '#002f6d', skimmed: '#73c3ff', lactose: '#db863a' }
+const MILK_COLOR: Record<Milk, string> = { regular: '#203469', skimmed: '#80bfe9', lactose: '#dc8638' }
 
 
 
@@ -55,7 +55,7 @@ function Mug({ x, y, s = 1, coffee = 0, milk = 0, heart = false, whip = false, s
         {level > 0 && <rect x="-4" y={bot - h * level} width="64" height={h * level + 6} fill={milk > 0.05 ? C.latte : C.coffee} />}
         {level > 0 && milk <= 0.05 && <rect x="-4" y={bot - h * level} width="64" height="3" fill={C.crema} />}
         {syrups.map((c, i) => <path key={i} className="lg-settle" d={`M-4 ${bot + 3 - 4 * (i + 1)}c10-3 20 3 32 0s22-3 32 0v4H-4Z`} fill={c} />)}
-        <path d="M40 0h20v70H36Z" fill="#00244c" opacity="0.08" />
+        <path d="M40 0h20v70H36Z" fill="#11264b" opacity="0.08" />
       </g>
       <path d={body} fill="none" {...INK} />
       <path d="M7 16l2 32" {...SHINE} />
@@ -90,10 +90,10 @@ function Glass({ x, y, s = 1, coffee = 0, milk = 0, ice = 0, foam = false, straw
     <g transform={g(x, y, s)}>
       <defs>
         <clipPath id={`g${id}`}><path d={body} /></clipPath>
-        <pattern id={`gd${id}`} width="7" height="7" patternUnits="userSpaceOnUse"><circle cx="3.5" cy="3.5" r="1.1" fill="#73c3ff" /></pattern>
+        <pattern id={`gd${id}`} width="7" height="7" patternUnits="userSpaceOnUse"><circle cx="3.5" cy="3.5" r="1.1" fill="#80bfe9" /></pattern>
       </defs>
       {straw && <path d="M34 -30 26 70" stroke={OUT} strokeWidth="9" strokeLinecap="round" />}
-      {straw && <path d="M34 -30 26 70" stroke="#397dc9" strokeWidth="5" strokeLinecap="round" />}
+      {straw && <path d="M34 -30 26 70" stroke="#4d97cf" strokeWidth="5" strokeLinecap="round" />}
       <path d={body} fill={C.glass} fillOpacity="0.8" />
       <g clipPath={`url(#g${id})`}>
         {cLevel > 0 && <rect x="-2" y={bot - h * cLevel} width="56" height={h * cLevel + 8} fill={C.coffee} />}
@@ -104,7 +104,7 @@ function Glass({ x, y, s = 1, coffee = 0, milk = 0, ice = 0, foam = false, straw
           const cx = 6 + (i % 3) * 14, cy = bot - 34 - Math.floor(i / 3) * 16 - (i % 2) * 5
           return (
             <g key={i} className="lg-cube" transform={`rotate(${(i * 23) % 30 - 12} ${cx + 7} ${cy + 6})`}>
-              <rect x={cx} y={cy} width="14" height="13" rx="3.5" fill={C.ice} fillOpacity="0.9" stroke="#73c3ff" strokeWidth="1.6" />
+              <rect x={cx} y={cy} width="14" height="13" rx="3.5" fill={C.ice} fillOpacity="0.9" stroke="#80bfe9" strokeWidth="1.6" />
               <path d={`M${cx + 3} ${cy + 3}h5`} stroke="#fff" strokeWidth="2" strokeLinecap="round" />
             </g>
           )
@@ -112,7 +112,7 @@ function Glass({ x, y, s = 1, coffee = 0, milk = 0, ice = 0, foam = false, straw
         {foam && <><rect x="-2" y="2" width="56" height="13" fill="#ffffff" /><path d="M-2 15c8 3 14-3 22 0s16 3 34 0" fill="none" stroke="#dbc6b6" strokeWidth="1.5" /></>}
         {/* Mars dot grid print (cold drinks) and the side in shade */}
         <rect x="10" y="44" width="32" height="18" fill={`url(#gd${id})`} opacity="0.7" />
-        <path d="M38 0h20v90H34Z" fill="#00244c" opacity="0.07" />
+        <path d="M38 0h20v90H34Z" fill="#11264b" opacity="0.07" />
       </g>
       <path d="M5 80a6 6 0 0 0 6 5h30a6 6 0 0 0 6-5l.6-7H4.4Z" fill="#cfe8fb" opacity="0.8" />
       <path d={body} fill="none" {...INK} />
@@ -141,7 +141,7 @@ function Portafilter({ x, y, s = 1, grounds = 0, pressed = false }: { x: number;
         ? <g><ellipse cx="0" cy="-1" rx="20" ry="8.8" fill={C.coffee} /><path d="M-10 -4c6-2 14-2 18 1" stroke="#a7641a" strokeWidth="2" strokeLinecap="round" fill="none" /></g>
         : <g>
             <path d={`M-20 -1a20 9 0 0 0 40 0c-4 ${-15 * grounds}-36 ${-15 * grounds}-40 0Z`} fill={C.coffee} />
-            {grounds > 0.4 && <g fill="#935a25"><circle cx="-6" cy={-4 - 6 * grounds} r="1.4" /><circle cx="4" cy={-2 - 7 * grounds} r="1.4" /><circle cx="-1" cy={-1 - 4 * grounds} r="1.2" /><circle cx="9" cy={-1 - 3 * grounds} r="1.1" /></g>}
+            {grounds > 0.4 && <g fill="#935b25"><circle cx="-6" cy={-4 - 6 * grounds} r="1.4" /><circle cx="4" cy={-2 - 7 * grounds} r="1.4" /><circle cx="-1" cy={-1 - 4 * grounds} r="1.2" /><circle cx="9" cy={-1 - 3 * grounds} r="1.1" /></g>}
           </g>)}
       <path d="M-18 6c8 5 28 5 36 0" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" opacity="0.7" />
     </g>
@@ -174,16 +174,16 @@ function Grinder({ x, y, grinding }: { x: number; y: number; grinding: boolean }
       {/* body */}
       <rect x="10" y="62" width="80" height="14" rx="4" fill="#c5d6ea" {...INK} />
       <path d="M8 76h84l-6 96H14Z" fill={C.dark} {...INK} />
-      <path d="M70 78h20l-5 92H66Z" fill="#00244c" />
+      <path d="M70 78h20l-5 92H66Z" fill="#11264b" />
       <circle cx="50" cy="100" r="13" fill="#c5d6ea" {...INK} />
       <path d="M50 100l6-7" stroke={OUT} strokeWidth="3" strokeLinecap="round" />
-      <path d="M30 128h40" stroke="#73c3ff" strokeWidth="4" strokeLinecap="round" />
+      <path d="M30 128h40" stroke="#80bfe9" strokeWidth="4" strokeLinecap="round" />
       {/* chute + portafilter fork + base */}
       <path d="M40 172h20l-4 12h-12Z" fill={C.steelDark} {...INK} />
       <path d="M26 188h16M58 188h16" stroke={OUT} strokeWidth="5" strokeLinecap="round" />
       <rect x="12" y="170" width="16" height="84" rx="4" fill={C.dark} {...INK} />
       <rect x="4" y="250" width="92" height="12" rx="4" fill={C.dark} {...INK} />
-      <path d="M18 180v60" stroke="#397dc9" strokeWidth="2" opacity="0.6" />
+      <path d="M18 180v60" stroke="#4d97cf" strokeWidth="2" opacity="0.6" />
       {grinding && <g className="lg-grind"><circle cx="46" cy="194" r="2.6" fill={C.coffee} /><circle cx="53" cy="200" r="2.6" fill={C.coffee} /><circle cx="49" cy="208" r="2.6" fill={C.coffee} /></g>}
     </g>
   )
@@ -203,8 +203,8 @@ function Machine({ pfIn, pouring, shots }: { pfIn: boolean; pouring: boolean; sh
       ))}
       {/* body + side shade + top panel */}
       <rect x="96" y="126" width="168" height="208" rx="12" fill={C.body} {...INK} />
-      <path d="M232 128h20a10 10 0 0 1 10 10v184a10 10 0 0 1-10 10h-20Z" fill="#397dc9" opacity="0.35" />
-      <rect x="96" y="126" width="168" height="46" rx="12" fill="#cae8ff" {...INK} />
+      <path d="M232 128h20a10 10 0 0 1 10 10v184a10 10 0 0 1-10 10h-20Z" fill="#4d97cf" opacity="0.35" />
+      <rect x="96" y="126" width="168" height="46" rx="12" fill="#cce8f9" {...INK} />
       <path d="M108 140h20" {...SHINE} />
       {/* pressure gauge + the brew button */}
       <circle cx="226" cy="149" r="13" fill="#ffffff" {...INK} />
@@ -261,7 +261,7 @@ function Pitcher({ x, y, s = 1, tilt = 0, foam = 0, fill = 0 }: { x: number; y: 
           <g clipPath={`url(#p${id})`}>
             <rect className="lg-settle" x="-8" y={71 - 66 * fill} width="70" height={66 * fill + 4} fill={C.milk} />
             <ellipse cx="25" cy={71 - 66 * fill} rx="30" ry="3.5" fill="#ffffff" />
-            <path d="M36 0h20v75H32Z" fill="#00244c" opacity="0.06" />
+            <path d="M36 0h20v75H32Z" fill="#11264b" opacity="0.06" />
           </g>
         </g>
       )}
@@ -304,8 +304,8 @@ function Thermo({ x, y, t }: { x: number; y: number; t: number }) {
       <rect x="0" y="0" width="22" height={h} rx="11" fill="#ffffff" {...INK} />
       <rect x="4" y={h * 0.2} width="14" height={h * 0.25} rx="3" fill={C.green} opacity="0.85" />
       {[0.2, 0.4, 0.6, 0.8].map((k) => <path key={k} d={`M22 ${h * k}h6`} {...THIN} />)}
-      <rect x="7" y={h - 6 - (h - 12) * t} width="8" height={(h - 12) * t + 6} rx="4" fill={t > 0.8 ? '#a7641a' : '#397dc9'} />
-      <circle cx="11" cy={h + 8} r="15" fill={t > 0.8 ? '#a7641a' : '#397dc9'} {...INK} />
+      <rect x="7" y={h - 6 - (h - 12) * t} width="8" height={(h - 12) * t + 6} rx="4" fill={t > 0.8 ? '#a7641a' : '#4d97cf'} />
+      <circle cx="11" cy={h + 8} r="15" fill={t > 0.8 ? '#a7641a' : '#4d97cf'} {...INK} />
       <path d="M6 104a7 7 0 0 1 4-6" {...SHINE} />
     </g>
   )

@@ -82,7 +82,7 @@ export function CartModal({
           className="add-btn"
           disabled={lines.length === 0}
           onClick={(e) => {
-            dropsFrom(e.currentTarget, '#73c3ff', 22, 1.3)
+            dropsFrom(e.currentTarget, '#80bfe9', 22, 1.3)
             onCheckout()
           }}
         >

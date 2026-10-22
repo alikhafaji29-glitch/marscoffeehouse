@@ -83,7 +83,7 @@ function inJar(fruits: Fruit[], chopped: boolean, ice: number) {
       {pieces.map((f, i) => <g key={i} className="lg-cube"><Piece f={f} x={14 + ((i * 17) % 58)} y={108 - Math.floor(i / 4) * 11} r={(i * 47) % 90} /></g>)}
       {Array.from({ length: ice * 3 }, (_, i) => {
         const cx = 8 + (i % 4) * 17, cy = 72 - Math.floor(i / 4) * 15 - (i % 2) * 4
-        return <rect key={`i${i}`} className="lg-cube" x={cx} y={cy} width="15" height="14" rx="3.5" fill={C.ice} fillOpacity="0.9" stroke="#73c3ff" strokeWidth="1.6" transform={`rotate(${(i * 23) % 30 - 12} ${cx + 7} ${cy + 7})`} />
+        return <rect key={`i${i}`} className="lg-cube" x={cx} y={cy} width="15" height="14" rx="3.5" fill={C.ice} fillOpacity="0.9" stroke="#80bfe9" strokeWidth="1.6" transform={`rotate(${(i * 23) % 30 - 12} ${cx + 7} ${cy + 7})`} />
       })}
     </g>
   )
@@ -96,14 +96,14 @@ function SmoothieGlass({ x, y, s = 1, r, fill = 0, garnish = false, straw = fals
   return (
     <g transform={g(x, y, s)}>
       <defs><clipPath id={`sg${id}`}><path d={body} /></clipPath></defs>
-      {straw && <><path d="M44 -46 38 96" stroke={OUT} strokeWidth="9" strokeLinecap="round" /><path d="M44 -46 38 96" stroke="#397dc9" strokeWidth="5" strokeLinecap="round" /></>}
+      {straw && <><path d="M44 -46 38 96" stroke={OUT} strokeWidth="9" strokeLinecap="round" /><path d="M44 -46 38 96" stroke="#4d97cf" strokeWidth="5" strokeLinecap="round" /></>}
       <path d={body} fill="#eaf6ff" fillOpacity="0.8" />
       <g clipPath={`url(#sg${id})`}>
         {fill > 0 && r && <rect x="-2" y={108 - 108 * fill} width="68" height={108 * fill + 4} fill={SMOOTHIE[r]} />}
         {fill > 0 && r === 'mango' && <rect x="-2" y={108 - 108 * fill} width="68" height={Math.min(30, 108 * fill)} fill={ORANGE} opacity="0.55" />}
         {fill > 0 && r === 'passion' && Array.from({ length: 16 }, (_, i) => <circle key={i} cx={8 + ((i * 23) % 50)} cy={104 - ((i * 37) % 100)} r="1.6" fill={OUT} opacity={104 - ((i * 37) % 100) > 108 - 108 * fill + 3 ? 0.75 : 0} />)}
         {fill > 0 && r === 'strawberry' && Array.from({ length: 10 }, (_, i) => <ellipse key={i} cx={10 + ((i * 29) % 46)} cy={100 - ((i * 41) % 96)} rx="1" ry="1.6" fill="#fbe38e" opacity={100 - ((i * 41) % 96) > 108 - 108 * fill + 3 ? 0.8 : 0} />)}
-        <path d="M44 0h26v112H40Z" fill="#00244c" opacity="0.06" />
+        <path d="M44 0h26v112H40Z" fill="#11264b" opacity="0.06" />
       </g>
       <path d={body} fill="none" {...INK} />
       <ellipse cx="32" cy="0" rx="30" ry="4" fill="none" {...THIN} />

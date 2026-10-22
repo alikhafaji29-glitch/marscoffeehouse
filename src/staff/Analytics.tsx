@@ -14,7 +14,7 @@ import { Bars, Card, Columns, I, Stat, Switch } from './ui'
 /* Analytics, after the live panel: a range, then Sales (orders, revenue, what sells, when) and Traffic (visits and
  * where they come from). Real numbers are this browser's orders and visits; "Sample data" shows made-up ones. */
 const RANGE_LABEL: Record<Range, SKey> = { today: 'rToday', '7': 'r7', '30': 'r30', '90': 'r90', all: 'rAll' }
-const SOURCE_COLOR: Record<string, string> = { Instagram: '#e0336e', Direct: '#8a94a6', Referral: '#db863a', Google: '#397dc9', Facebook: '#002f6d' }
+const SOURCE_COLOR: Record<string, string> = { Instagram: '#e0336e', Direct: '#8a94a6', Referral: '#dc8638', Google: '#4d97cf', Facebook: '#203469' }
 const shortDay = (t: number) => new Date(t).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 
 export function Analytics({ orders }: { orders: Order[] }) {

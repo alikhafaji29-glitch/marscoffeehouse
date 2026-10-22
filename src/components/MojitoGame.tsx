@@ -32,7 +32,7 @@ function MojitoGlass({ x, y, s = 1, lime = 0, mint = false, crushed = false, syr
   return (
     <g transform={g(x, y, s)}>
       <defs><clipPath id={`mj${id}`}><path d={body} /></clipPath></defs>
-      {straw && <><path d="M38 -34 30 78" stroke={OUT} strokeWidth="9" strokeLinecap="round" /><path d="M38 -34 30 78" stroke="#397dc9" strokeWidth="5" strokeLinecap="round" /></>}
+      {straw && <><path d="M38 -34 30 78" stroke={OUT} strokeWidth="9" strokeLinecap="round" /><path d="M38 -34 30 78" stroke="#4d97cf" strokeWidth="5" strokeLinecap="round" /></>}
       <path d={body} fill="#eaf6ff" fillOpacity="0.8" />
       <g clipPath={`url(#mj${id})`}>
         {soda > 0 && (
@@ -54,12 +54,12 @@ function MojitoGlass({ x, y, s = 1, lime = 0, mint = false, crushed = false, syr
           const cx = 6 + (i % 3) * 15, cy = bot - 38 - Math.floor(i / 3) * 17 - (i % 2) * 5
           return (
             <g key={`i${i}`} className="lg-cube" transform={`rotate(${(i * 23) % 30 - 12} ${cx + 7} ${cy + 6})`}>
-              <rect x={cx} y={cy} width="15" height="14" rx="3.5" fill="#e3f3ff" fillOpacity="0.85" stroke="#73c3ff" strokeWidth="1.6" />
+              <rect x={cx} y={cy} width="15" height="14" rx="3.5" fill="#e3f3ff" fillOpacity="0.85" stroke="#80bfe9" strokeWidth="1.6" />
               <path d={`M${cx + 3} ${cy + 3}h5`} stroke="#fff" strokeWidth="2" strokeLinecap="round" />
             </g>
           )
         })}
-        <path d="M40 0h22v100H36Z" fill="#00244c" opacity="0.06" />
+        <path d="M40 0h22v100H36Z" fill="#11264b" opacity="0.06" />
       </g>
       <path d={body} fill="none" {...INK} />
       <ellipse cx="28" cy="0" rx="28" ry="4" fill="none" {...THIN} />
@@ -92,7 +92,7 @@ function SodaBottle({ x, y, tilt }: { x: number; y: number; tilt: number }) {
       <path d="M14 0h12v16l8 14v70a6 6 0 0 1-6 6H12a6 6 0 0 1-6-6V30l8-14Z" fill="#bfe6c9" fillOpacity="0.9" {...INK} />
       <rect x="12" y="-6" width="16" height="8" rx="2" fill={C.caramel} {...THIN} />
       <rect x="6" y="52" width="28" height="26" fill="#ffffff" {...THIN} />
-      <circle cx="14" cy="60" r="2" fill="#73c3ff" /><circle cx="22" cy="68" r="2.4" fill="#73c3ff" /><circle cx="27" cy="58" r="1.6" fill="#73c3ff" />
+      <circle cx="14" cy="60" r="2" fill="#80bfe9" /><circle cx="22" cy="68" r="2.4" fill="#80bfe9" /><circle cx="27" cy="58" r="1.6" fill="#80bfe9" />
       <path d="M11 34v50" {...SHINE} />
     </g>
   )
@@ -234,7 +234,7 @@ export function MojitoGame({ onDone }: { onDone: () => void }) {
         {glass(128, 210, 1.9)}
         <SodaBottle x={210} y={70} tilt={pouring ? -118 : -20} />
         {pouring && <path className="lg-stream" d="M190 128q-4 40 -8 90" stroke="#bfe6c9" strokeWidth="6" strokeLinecap="round" fill="none" />}
-        {pouring && [0, 1, 2].map((i) => <circle key={i} className="mj-bubble" style={{ animationDelay: `${i * 0.2}s` }} cx={180 + i * 6} cy={240} r="3" fill="#ffffff" stroke="#73c3ff" strokeWidth="1" />)}
+        {pouring && [0, 1, 2].map((i) => <circle key={i} className="mj-bubble" style={{ animationDelay: `${i * 0.2}s` }} cx={180 + i * 6} cy={240} r="3" fill="#ffffff" stroke="#80bfe9" strokeWidth="1" />)}
       </g>
     )
   } else if (step === 'garnish' || step === 'serve') {
