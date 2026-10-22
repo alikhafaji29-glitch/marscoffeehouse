@@ -1,4 +1,5 @@
 import { customerBranch } from './staff/store'
+import { clerkUserId } from './backend'
 import { backendOn, newUid } from './backend'
 import { useEffect, useState } from 'react'
 import { pushNotice } from './notify'
@@ -42,6 +43,7 @@ export interface Order {
   offer?: { name: string; price: number; count?: number; fee?: number; pre?: boolean; wantAt?: number } // a combo from the dashboard's Offers (Positive Hours); count = how many combos (1 when missing); pre = placed outside its hours; wantAt = the time the customer chose for a pre-order (ms)
   uid?: string // the order's identity in the shared backend (src/sync.ts); `id` is the short code people see
   synced?: boolean // the backend has it
+  clerk?: string // the Clerk user it was placed under (sent with that session, seen on any device signed in to it)
   gone?: boolean // this device only: the database no longer has it (deleted by the café or the owner): not followed, not shown
   held?: 'limit' // this device only: the backend refused it for now (10 orders an hour from one device); retried
 }
@@ -207,18 +209,22 @@ const saveGuest = () => {
   try { localStorage.setItem(GUEST, JSON.stringify(guest)) } catch { /* private mode */ }
   listeners.forEach((l) => l())
 }
-/** A combo order: on the signed-in account when there is one (points are earned), otherwise as a guest order. Cash on delivery / at pickup. */
-export function placeOfferOrder(o: { total: number; items: string[]; name: string; phone: string; address?: string; location?: GeoPoint; offer: NonNullable<Order['offer']>; note?: string; arriveAt?: number }): PayResult {
+/** A combo order, or the cart's order from a customer who is not signed in (owner, 2026-10-22): on the signed-in account when
+ *  there is one (points are earned), otherwise as a guest order (name + phone). Cash on delivery / at pickup. */
+export function placeOfferOrder(o: { total: number; items: string[]; name: string; phone: string; address?: string; location?: GeoPoint; offer?: NonNullable<Order['offer']>; note?: string; arriveAt?: number }): PayResult {
   // address undefined = pickup; a delivery may carry a typed address, a shared pin, or both
   const delivery: Delivery | undefined = o.address !== undefined ? { phone: o.phone, address: o.address, location: o.location } : undefined
   const customer = { name: o.name, phone: o.phone }
-  if (account && session) return placeOrder(o.total, o.items, 'pickup', delivery, undefined, { offer: o.offer, customer, ...(o.note && { note: o.note }), ...(o.arriveAt && { arriveAt: o.arriveAt }) })
+  if (account && session) return placeOrder(o.total, o.items, 'pickup', delivery, undefined, { ...(o.offer && { offer: o.offer }), customer, ...(o.note && { note: o.note }), ...(o.arriveAt && { arriveAt: o.arriveAt }) })
   const orderId = 'M' + Date.now().toString().slice(-6)
-  guest = [{ id: orderId, at: Date.now(), total: o.total, items: o.items, points: 0, pay: 'pickup', status: 'received', history: [{ stage: 'received', at: Date.now() }], customer, fulfil: delivery ? 'delivery' : 'pickup', delivery, branch: customerBranch(), offer: o.offer, uid: newUid(), ...(o.note && { note: o.note }), ...(o.arriveAt && { arriveAt: o.arriveAt }) }, ...guest]
+  guest = [{ id: orderId, at: Date.now(), total: o.total, items: o.items, points: 0, pay: 'pickup', status: 'received', history: [{ stage: 'received', at: Date.now() }], customer, fulfil: delivery ? 'delivery' : 'pickup', delivery, branch: customerBranch(), ...(o.offer && { offer: o.offer }), ...(clerkUserId() && { clerk: clerkUserId()! }), uid: newUid(), ...(o.note && { note: o.note }), ...(o.arriveAt && { arriveAt: o.arriveAt }) }, ...guest]
   saveGuest()
   onPlaced?.()
   return { ok: true, points: 0, reward: false, orderId }
 }
+const CONTACT = 'mars-guest' // the name / number / address typed last time, for the next order (combo or cart)
+export const savedContact = (): { name?: string; phone?: string; address?: string } => { try { return JSON.parse(localStorage.getItem(CONTACT) || '{}') } catch { return {} } }
+export const saveContact = (c: { name?: string; phone?: string; address?: string }) => { try { localStorage.setItem(CONTACT, JSON.stringify({ ...savedContact(), ...c })) } catch { /* private mode */ } }
 /* ---- the shared backend (src/sync.ts): it is told when an order is placed, and it brings the stages back ---- */
 let onPlaced: (() => void) | null = null
 export const setOrderPlacedHook = (fn: () => void) => { onPlaced = fn }
@@ -242,6 +248,21 @@ export function markGone(uid: string) {
   if (!o || o.gone) return
   o.gone = true
   commit(mine)
+}
+/** the database does not take this Clerk session (Supabase's Clerk connection is off): send it as this device's own */
+export function dropClerk(uid: string) {
+  const { mine, o } = findByUid(uid)
+  if (!o || !o.clerk || o.synced) return
+  delete o.clerk
+  commit(mine)
+}
+/** orders of this Clerk account placed on another device: kept here as guest orders, already in the database */
+export function importOrders(list: Order[]) {
+  const have = new Set(myOrders().map((o) => o.uid))
+  const fresh = list.filter((o) => o.uid && !have.has(o.uid))
+  if (!fresh.length) return
+  guest = [...fresh, ...guest].sort((x, y) => y.at - x.at)
+  saveGuest()
 }
 /** the backend refused the order for now (the hourly limit); it is sent again on the next check */
 export function markHeld(uid: string, why: NonNullable<Order['held']>) {

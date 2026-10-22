@@ -7,6 +7,8 @@
 // only a last resort.
 export type Badge = 'top' | 'premium' | 'signature'
 
+/** a fixed price for an item's smallest size, from a Home slide such as Coffee of the day; `label` goes on the order line */
+export type Deal = { price: number; label: string }
 export interface MenuItem {
   name: string
   price: number | number[] // one price, or one per size (up to three)

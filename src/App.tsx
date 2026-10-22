@@ -18,7 +18,7 @@ import { FEATURES } from './features'
 import { CartProvider } from './cart'
 import { BranchPicker } from './components/BranchPicker'
 import { useMenuVersion } from './menuAdmin'
-import type { MenuItem } from './menu'
+import type { Deal, MenuItem } from './menu'
 
 /*
  * One page on desktop; on phones the same sections behave like app screens:
@@ -48,6 +48,7 @@ export default function App() {
   const [orderOpen, setOrderOpen] = useState(false)
   const [cartOpen, setCartOpen] = useState(false)
   const [sheetItem, setSheetItem] = useState<MenuItem | null>(null)
+  const [sheetDeal, setSheetDeal] = useState<Deal | undefined>() // opened from Coffee of the day: its fixed price
   const [sheetToCheckout, setSheetToCheckout] = useState(false) // opened from New this season: Add to order goes on to checkout
   const [view, setView] = useState<View>(viewFromHash)
   const [gift, setGift] = useState(() => FEATURES.gifts && location.hash === '#' + GIFT)
@@ -123,10 +124,10 @@ export default function App() {
       <TimeChanger />
       <main data-view={view}>
         <div className="screen screen-home">
-          <HomeDeck onOrder={openOrder} onPick={(it, o) => { setSheetToCheckout(!!o?.checkout); setSheetItem(it) }} />
+          <HomeDeck onOrder={openOrder} onPick={(it, o) => { setSheetToCheckout(!!o?.checkout); setSheetDeal(o?.deal); setSheetItem(it) }} />
         </div>
         <div className="screen screen-menu">
-          <MenuSection onPick={setSheetItem} gift={gift} />
+          <MenuSection onPick={(it) => { setSheetDeal(undefined); setSheetItem(it) }} gift={gift} />
         </div>
         {FEATURES.community && (
           <div className="screen screen-community">
@@ -140,7 +141,7 @@ export default function App() {
       {FEATURES.gifts && <GiftLanding />}
       <TrackBar />
       <CartBar onOpen={() => setCartOpen(true)} />
-      {sheetItem && <ItemScreen item={sheetItem} gift={gift} onClose={() => setSheetItem(null)} onAdded={sheetToCheckout ? () => { setSheetToCheckout(false); setCartOpen(true) } : undefined} />}
+      {sheetItem && <ItemScreen item={sheetItem} gift={gift} deal={sheetDeal} onClose={() => setSheetItem(null)} onAdded={sheetToCheckout ? () => { setSheetToCheckout(false); setCartOpen(true) } : undefined} />}
       {cartOpen && (
         <CartModal
           onClose={() => setCartOpen(false)}

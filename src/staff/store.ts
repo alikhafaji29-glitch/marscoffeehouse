@@ -31,7 +31,10 @@ export const branchName = (id?: string) => BRANCHES.find((b) => b.id === id)?.na
 /** a branch's name in the customer's language */
 export const branchLabel = (id: string, lang: keyof L3) => { const b = BRANCHES.find((x) => x.id === id); return b?.names[lang] || b?.name || id }
 
-export interface Settings { reach: 'dashboard' | 'whatsapp'; whatsapp: string; delivery: boolean; pickup: boolean; lead?: number } // lead: minutes before a timed order's time that it moves from Later to Active (LEAD_MIN when missing)
+/** Coffee of the day (owner, 2026-10-22): a Home slide; any of `items` at one price for its smallest size */
+export interface Cotd { on: boolean; price: number; items: string[] }
+export const COTD_DEFAULT: Cotd = { on: true, price: 3500, items: ['Americano', 'Filter Coffee', 'Espresso', 'Turkish Coffee'] } // the price is to be decided: 3,500 for now
+export interface Settings { reach: 'dashboard' | 'whatsapp'; whatsapp: string; delivery: boolean; pickup: boolean; lead?: number; cotd?: Cotd } // lead: minutes before a timed order's time that it moves from Later to Active (LEAD_MIN when missing)
 export interface EventX { id: string; name: L3; theme: string; desc: L3; promo: L3; items: string[]; active: boolean }
 export interface OfferGroup { id: string; label: L3; pick: number; mode: 'cats' | 'items'; cats: string[]; items: string[] }
 export interface Offer {
@@ -222,6 +225,7 @@ export const uid = () => Math.random().toString(36).slice(2, 9)
 export const customerBranch = () => state.customerBranch
 export const setCustomerBranch = (b: BranchId) => update(() => ({ customerBranch: b, branchChosen: true }))
 export const settingsFor = (b: BranchId = state.customerBranch): Settings => state.settings[b] ?? NO_SETTINGS
+export const cotdFor = (b: BranchId = state.customerBranch): Cotd => settingsFor(b).cotd ?? COTD_DEFAULT
 /** the list of branches changed: put it in place, and move whoever is looking at a branch that is gone or hidden */
 export function setBranches(list: Branch[]) {
   if (!list.length) return

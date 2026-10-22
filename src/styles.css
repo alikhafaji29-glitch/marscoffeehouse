@@ -2095,3 +2095,32 @@ body:has(.modal-overlay) .time-changer { display: none; }
   .header-signin span { display: none; }
   .header-signin .signin-icon { display: block; width: 17px; height: 17px; }
 }
+/* Coffee of the day: a card the size of Based On Your Mood; a tap opens the coffees as a list (owner, 2026-10-22) */
+.duo-cotd { background: linear-gradient(160deg, #8a5a3b, #4a2f1f); }
+.cotd-art { position: absolute; inset: 0; display: grid; place-items: center; padding-bottom: 28%; }
+.cotd-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.cotd-art svg { width: 58%; height: auto; filter: drop-shadow(0 14px 24px rgba(0, 0, 0, 0.35)); }
+.cotd-card-sub { margin: 0; font-size: 0.95rem; font-weight: 600; text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35); }
+.cotd-list { width: min(30rem, calc(100vw - 2rem)); max-width: none; text-align: start; }
+.cotd-list h3 { text-align: center; }
+.cotd-list .modal-line { text-align: center; margin-bottom: 0.4rem; }
+.cotd-list .ocards { gap: 0.5rem; margin-bottom: 0.4rem; grid-template-columns: 1fr !important; } /* one column on every screen: the menu goes two-wide on a computer */
+/* compact rows (owner's phone screenshot, 2026-10-22): a small picture, the name, the size under it, the price at the end */
+.cotd-list .ocard { grid-template-columns: 3.6rem 1fr; gap: 0.75rem; align-items: center; padding: 0.5rem 0.7rem 0.5rem 0.5rem; border-radius: 1rem; }
+.cotd-list .ocard-tile { width: 3.6rem; height: 3.6rem; border-radius: 0.7rem; }
+.cotd-list .ocard-tile svg { width: 2.6rem; height: 2.6rem; }
+.cotd-list .ocard-sold { font-size: 0.5rem; padding: 0.25rem 0.4rem; }
+.cotd-list .ocard-main { padding-top: 0; gap: 0.1rem; }
+.cotd-list .ocard-head { align-items: center; }
+.cotd-list .ocard-name { font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cotd-list .ocard-price { white-space: nowrap; font-size: 0.95rem; }
+.cotd-list .ocard-line { font-size: 0.8rem; }
+.cotd-list .ocard:disabled { cursor: default; }
+.item-deal { margin: 0.6rem 0 0; padding: 0.55rem 0.8rem; border-radius: 0.7rem; background: rgba(0, 47, 109, 0.06); font-weight: 600; font-size: 0.88rem; }
+/* Clerk on the Account page (owner, 2026-10-22) */
+.clerk-signin { display: grid; gap: 0.8rem; }
+.clerk-btns { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.clerk-me { display: flex; align-items: center; gap: 0.9rem; }
+.clerk-me div { display: grid; gap: 0.15rem; }
+.clerk-me small { opacity: 0.7; }
+.acct-loading { min-height: 18rem; }

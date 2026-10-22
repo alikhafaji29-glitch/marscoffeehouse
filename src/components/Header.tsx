@@ -8,6 +8,7 @@ import { FEATURES } from '../features'
 import { useAccount } from '../account'
 import { SectionsMenu } from './SectionsMenu'
 import { HeaderBranch } from './BranchPicker'
+import { ClerkHeaderUser, clerkOn } from './ClerkAccount'
 import { useS } from '../staff/strings'
 import { useNotices } from '../notify'
 
@@ -92,7 +93,11 @@ export function Header() {
         {/* on Home the band's Order now lands here once the band has scrolled away (owner, 2026-09-27) */}
         {hero.bandGone && <a className="header-order header-order-in" href="#menu" aria-label={t('headerOrder')}><span className="lbl-long">{t('headerOrder')}</span><span className="lbl-short" aria-hidden="true">{s('orderShort')}</span></a>}
         {/* always a way in: "Sign in" when signed out, the customer's initial once signed in (owner, 2026-09-14) */}
-        {a ? (
+        {clerkOn ? <ClerkHeaderUser signIn={<a className="header-signin" href="#account" aria-label={t('signInTitle')}>
+            {/* on a phone a round person icon, to leave room for the branch (owner, 2026-10-22) */}
+            <svg className="signin-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.6" /><path d="M5 20c1.2-3.6 3.9-5.4 7-5.4s5.8 1.8 7 5.4" /></svg>
+            <span>{t('signInTitle')}</span>
+          </a>} /> : a ? (
           <a className="header-user" href="#account" aria-label={a.name} title={a.name}>{a.name.slice(0, 1).toUpperCase()}</a>
         ) : (
           <a className="header-signin" href="#account" aria-label={t('signInTitle')}>

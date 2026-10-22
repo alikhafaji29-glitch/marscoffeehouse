@@ -39,9 +39,15 @@ export const catLabel = (id: string, lang: Lang) => categoryName(id, lang) ?? CA
 const BADGE_LABELS = { top: 'TOP SELLER', premium: 'PREMIUM', signature: 'SIGNATURE' }
 
 
+/** an item's picture as the menu shows it: staff's (or the site's) photo, else the cup drawn in its category's colour.
+ *  Shared with Home's Coffee of the day (owner, 2026-10-22: "why not use the menu's photo") */
+export function ItemPic({ name, cat = categoryOf(name), size = 64 }: { name: string; cat?: string; size?: number }) {
+  const photo = photoOf(name)
+  return photo ? <img src={photo} alt="" loading="lazy" /> : <MiniCup color={TINT[cat] || [200, 200, 200]} ice={cat === 'coldCoffee' || cat === 'refreshers' || cat === 'mojito' ? 1 : 0} size={size} />
+}
+
 function Card({ item, cat, onPick }: { item: MenuItem; cat: string; onPick: (i: MenuItem) => void }) {
   const { t, lang } = useLang()
-  const photo = photoOf(item.name)
   // the menu's own description for this branch (dashboard → Edit Item) comes first, in its own language only
   const line = itemState(item.name)?.desc[lang] || (DESC[item.name] ? t(DESC[item.name]) : '')
   const iqd = (n: number) => n.toLocaleString('en-US')
@@ -49,7 +55,7 @@ function Card({ item, cat, onPick }: { item: MenuItem; cat: string; onPick: (i: 
     <li>
       <button type="button" className={'ocard' + (item.soldOut ? ' sold' : '')} data-item={item.name} onClick={() => onPick(item)}>
         <span className="ocard-tile" aria-hidden="true">
-          {photo ? <img src={photo} alt="" loading="lazy" /> : <MiniCup color={TINT[cat] || [200, 200, 200]} ice={cat === 'coldCoffee' || cat === 'refreshers' || cat === 'mojito' ? 1 : 0} size={64} />}
+          <ItemPic name={item.name} cat={cat} />
           {item.soldOut && <span className="ocard-sold">{t('soldOut')}</span>}
         </span>
         <span className="ocard-main">

@@ -318,3 +318,5 @@ button.d-chip.ghost svg { width: 14px; height: 14px; }
   .d-card { padding: 1.1rem; }
 }
 @media (prefers-reduced-motion: reduce) { .d-side, .d-chev { transition: none; } }
+button.d-chip { border: 1.5px solid transparent; cursor: pointer; font: inherit; font-size: 0.84rem; }
+button.d-chip.on { background: var(--d-ink); color: #fff; }

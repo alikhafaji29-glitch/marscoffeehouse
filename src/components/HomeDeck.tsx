@@ -3,9 +3,10 @@ import { onOpenBarista, onOpenBuild, openCombo } from '../bus'
 import { useLang } from '../i18n'
 import type { TKey } from '../i18n'
 import { MENU } from '../menu'
-import type { MenuItem } from '../menu'
+import type { Deal, MenuItem } from '../menu'
 import { useCart } from '../cart'
-import { activeEvent, positiveOffer, useStaff } from '../staff/store'
+import { activeEvent, cotdFor, positiveOffer, useStaff } from '../staff/store'
+import { CoffeeOfTheDay } from './CoffeeOfTheDay'
 import { FEATURES } from '../features'
 import { useCountdown, LUNCH_HOURS } from './useCountdown'
 import { clockNow } from '../clock'
@@ -147,11 +148,13 @@ function Track({ children }: { children: React.ReactNode }) {
 }
 
 
-export function HomeDeck({ onOrder, onPick }: { onOrder: () => void; onPick: (item: MenuItem, o?: { checkout?: boolean }) => void }) {
+export function HomeDeck({ onOrder, onPick }: { onOrder: () => void; onPick: (item: MenuItem, o?: { checkout?: boolean; deal?: Deal }) => void }) {
   const { t } = useLang()
   useStaff()
   const offer = positiveOffer() // staff dashboard → Offers: its hours (useCountdown reads them), price and switch
   const offerOn = offer?.active !== false
+  const cotd = cotdFor()
+  const cotdItems = cotd.items.map(item).filter((x): x is MenuItem => !!x)
   const count = useCountdown()
   const active = count.active && offerOn
   const text = count.text
@@ -264,6 +267,9 @@ export function HomeDeck({ onOrder, onPick }: { onOrder: () => void; onPick: (it
           <h2 className="slide-title" id="fav-title">{t('seasonEyebrow')}</h2>
         </div>
       </section>}
+
+      {/* Coffee of the day (owner, 2026-10-22): a button that opens the day's coffees as a list (CoffeeOfTheDay.tsx) */}
+      <CoffeeOfTheDay items={cotdItems} onPick={onPick} />
 
       {/* 4. Your Mood Drink */}
       {/* 4. Build Your Drink + Based On Your Mood: two 16:9 photo cards framed by white strokes (owner, 2026-09-25) */}

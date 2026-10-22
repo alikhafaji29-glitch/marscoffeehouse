@@ -2,7 +2,7 @@ import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useLang } from '../i18n'
 import { unlockAudio } from '../chime'
-import { iqd, normPhone, placeOfferOrder, useAccount, useMyOrders } from '../account'
+import { iqd, normPhone, placeOfferOrder, saveContact, savedContact, useAccount, useMyOrders } from '../account'
 import type { GeoPoint } from '../account'
 import { ALL_ITEMS as ALL, MENU } from '../menu'
 import type { MenuItem } from '../menu'
@@ -39,8 +39,6 @@ import { clockNow } from '../clock'
  * A step with several menu categories (the drinks) has a row of category chips on top that stays in view: it lights
  * the category being looked at and a tap jumps to one (owner, 2026-10-19).
  */
-const GUEST = 'mars-guest' // the name / number / address typed last time, for the next order
-const saved = (): { name?: string; phone?: string; address?: string } => { try { return JSON.parse(localStorage.getItem(GUEST) || '{}') } catch { return {} } }
 /** what the customer may pick in a group, grouped by menu category; out-of-stock items are left out */
 function choices(g: OfferGroup): { cat: string; items: MenuItem[] }[] {
   const ok = (i: MenuItem) => !i.soldOut && (g.mode === 'items' ? g.items.includes(i.name) : true)
@@ -136,9 +134,9 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
   const [picks, setPicks] = useState<Record<string, string[]>>({}) // 'combo:group' → item names
   const [sizes, setSizes] = useState<Record<string, number>>({}) // 'combo:item' → size index (only when the offer lets customers choose)
   const [custom, setCustom] = useState<Record<string, Picks>>({}) // 'combo:item' → its choices (flavour, milk, pumps, add-ons)
-  const [name, setName] = useState(() => a?.name ?? saved().name ?? '')
-  const [phone, setPhone] = useState(() => a?.phone ?? saved().phone ?? '')
-  const [address, setAddress] = useState(() => a?.address ?? saved().address ?? '')
+  const [name, setName] = useState(() => a?.name ?? savedContact().name ?? '')
+  const [phone, setPhone] = useState(() => a?.phone ?? savedContact().phone ?? '')
+  const [address, setAddress] = useState(() => a?.address ?? savedContact().address ?? '')
   const [location, setLocation] = useState<GeoPoint | null>(null) // "Share my location": asked fresh for each order, never remembered
   const [note, setNote] = useState('')
   const [staffNote, setStaffNote] = useState('') // the customer's note for the café
@@ -289,7 +287,7 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
     if (live && !delivery && arriveAt < clockNow().getTime()) { setNote(s('arriveNeed')); return }
     const res = placeOfferOrder({ total, items: lines, name: nm, phone: phone.trim(), address: delivery ? address.trim() : undefined, location: delivery && location ? location : undefined, offer: { name: offer.name.en, price: offer.price, count: count > 1 ? count : undefined, fee: fee || undefined, pre: !live || undefined, wantAt: !live ? wantAt : undefined }, note: staffNote.trim() || undefined, arriveAt: arrive || undefined })
     if (!res.ok) return
-    try { localStorage.setItem(GUEST, JSON.stringify({ name: nm, phone: phone.trim(), address: address.trim() })) } catch { /* ignore */ }
+    saveContact({ name: nm, phone: phone.trim(), address: address.trim() })
     setPlacedId(res.orderId)
     setStep(DONE)
   }

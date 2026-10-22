@@ -32,6 +32,22 @@ export async function ensureUser(sb: SupabaseClient): Promise<boolean> {
   return !error
 }
 
+/* A customer signed in with Clerk (owner, 2026-10-22) talks to the database with Clerk's session token instead of a
+ * Supabase session: Supabase → Authentication → Third-party auth → Clerk accepts it, and the row rules know the order
+ * by its `clerk_id` (migration 20261022000400). Guests and staff keep the client above. */
+type ClerkLike = { user?: { id: string } | null; session?: { getToken: () => Promise<string | null> } | null }
+const clerk = (): ClerkLike | undefined => (globalThis as { Clerk?: ClerkLike }).Clerk
+/** the Clerk user signed in on this page, if any */
+export const clerkUserId = (): string | null => clerk()?.user?.id ?? null
+let clerkClient: Promise<SupabaseClient | null> | null = null
+export function getClerkClient(): Promise<SupabaseClient | null> {
+  if (!backendOn) return Promise.resolve(null)
+  clerkClient ??= import('@supabase/supabase-js')
+    .then(({ createClient }) => createClient(url!, key!, { accessToken: async () => (await clerk()?.session?.getToken()) ?? null }))
+    .catch((e) => { console.warn('[backend] could not load', e); clerkClient = null; return null })
+  return clerkClient
+}
+
 /** a v4 id made on the device; crypto.randomUUID only exists on secure pages, so plain http gets the long form */
 export function newUid(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID()

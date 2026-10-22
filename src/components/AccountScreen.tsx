@@ -1,3 +1,4 @@
+import { ClerkAccount, clerkOn } from './ClerkAccount'
 import { FEATURES } from '../features'
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
@@ -306,7 +307,7 @@ function Profile({ a }: { a: Account }) {
 }
 
 /** Track order: always a button (owner, 2026-09-12) that opens the small tracker window; finished orders listed below. */
-function TrackCard({ orders }: { orders: Order[] }) {
+export function TrackCard({ orders }: { orders: Order[] }) {
   const { t } = useLang()
   const now = useNow()
   const active = orders.filter((o) => isActive(o, now)).length
@@ -335,6 +336,8 @@ function TrackCard({ orders }: { orders: Order[] }) {
 export function AccountScreen() {
   const { t } = useLang()
   const a = useAccount()
+  // with Clerk on, customers sign in with Clerk; the demo sign-in below is for builds without it
+  if (clerkOn) return <section className="account" id="account"><SectionHead eyebrow={t('accountEyebrow')} title={t('navAccount')} /><ClerkAccount /></section>
   return (
     <section className="account" id="account">
       <SectionHead eyebrow={t('accountEyebrow')} title={a ? t('helloName').replace('{name}', a.name) : t('signInTitle')} sub={a ? undefined : t(FEATURES.wallet || FEATURES.gifts ? 'signInSub' : 'signInSubLaunch')} />

@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLang } from '../i18n'
 import { unlockAudio } from '../chime'
 import { useCart } from '../cart'
-import { iqd, normPhone, payAtPickup, payFromWallet, sendDrinkGift, useAccount } from '../account'
+import { iqd, normPhone, payAtPickup, payFromWallet, placeOfferOrder, saveContact, savedContact, sendDrinkGift, useAccount, useMyOrders } from '../account'
 import { SendToFriend } from './SendToFriend'
 import type { Delivery, GeoPoint } from '../account'
 import { ShareLocation, mapsLink } from './ShareLocation'
@@ -29,12 +29,20 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
   const [staffNote, setStaffNote] = useState('') // the customer's note for the café
   const [paid, setPaid] = useState<{ orderId: string; points: number; reward: boolean } | null>(null)
   const [how, setHow] = useState<'pickup' | 'delivery'>(set.pickup ? 'pickup' : 'delivery')
-  const [phone, setPhone] = useState(a?.phone ?? '')
-  const [address, setAddress] = useState(a?.address ?? '')
+  const [phone, setPhone] = useState(() => a?.phone ?? savedContact().phone ?? '')
+  const [address, setAddress] = useState(() => a?.address ?? savedContact().address ?? '')
+  // no sign-in needed to order (owner, 2026-10-22): a customer who is not signed in gives a name and a number, as in
+  // the Positive Hours order; the device remembers them for next time and follows the order live
+  const [name, setName] = useState(() => a?.name ?? savedContact().name ?? '')
+  const guestMode = !a && total > 0
+  const mine = useMyOrders()
   const [location, setLocation] = useState<GeoPoint | null>(null)
   const [arriveAt, setArriveAt] = useState(0) // a pickup: when the customer will arrive (ms; owner, 2026-10-22)
+  // Coffee of the day is for pickup only (owner, 2026-10-22): an order holding one is picked up, at a time on the wheel
+  const pickupOnly = lines.some((l) => l.opts?.includes('Coffee of the day'))
+  useEffect(() => { if (pickupOnly && how !== 'pickup') setHow('pickup') }, [pickupOnly, how])
   const canWallet = !!a && total > 0
-  const placed = paid ? a?.orders.find((o) => o.id === paid.orderId) : undefined
+  const placed = paid ? mine.find((o) => o.id === paid.orderId) : undefined
   // orders by WhatsApp: the order written out, for the customer to send to the branch
   const waLink = placed && set.reach === 'whatsapp'
     ? `https://wa.me/${set.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent([`Mars CoffeeHouse · #${placed.id}`, ...placed.items, `${iqd(placed.total)} IQD`, ...(placed.delivery ? [`${t('getDelivery')}: ${placed.delivery.address} · ${placed.delivery.phone}`, placed.delivery.location ? mapsLink(placed.delivery.location) : ''].filter(Boolean) : [t('getPickup'), ...(placed.arriveAt ? [s('arriveAt', { t: timeText(placed.arriveAt) })] : [])]), ...(placed.note ? [`${t('orderNote')}: ${placed.note}`] : [])].join('\n'))}`
@@ -57,7 +65,16 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
   }
   const pickup = () => {
     unlockAudio()
+    if (guestMode && (name.trim().length < 2 || normPhone(phone).length < 10)) { setNote(s('guestNeed')); return }
     const d = details(); if (d === null) return
+    if (guestMode) {
+      saveContact({ name: name.trim(), phone: phone.trim(), ...(d && { address: d.address }) })
+      const res = placeOfferOrder({ total, items: itemLines(), name: name.trim(), phone: phone.trim(), address: d ? d.address : undefined, location: d?.location, note: staffNote.trim() || undefined, arriveAt: d ? undefined : arriveAt })
+      if (!res.ok) return
+      clear()
+      setPaid(res)
+      return
+    }
     const res = payAtPickup(total, itemLines(), d, staffNote.trim() || undefined, d ? undefined : arriveAt)
     if (!res.ok) return
     clear()
@@ -98,29 +115,36 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         {paid ? (
           <>
-            <h3>{a?.name ? t('thanksName').replace('{name}', a.name.trim().split(/\s+/)[0]) : t('orderPlaced')}</h3>
+            <h3>{(a?.name || name.trim()) ? t('thanksName').replace('{name}', (a?.name || name).trim().split(/\s+/)[0]) : t('orderPlaced')}</h3>
             {placed && <p className="modal-line">{t('thanksReady')}</p>}
             {placed && <OrderTracker order={placed} dark />}
             {waLink && <><a className="btn-pill" href={waLink} target="_blank" rel="noreferrer">{s('siteSendWhatsapp')}</a><p className="modal-line small">{s('siteWhatsappHint')}</p></>}
-            <p className="modal-line">{t('pointsEarned').replace('{n}', String(paid.points))}</p>
+            {a && <p className="modal-line">{t('pointsEarned').replace('{n}', String(paid.points))}</p>}
             {paid.reward && <p className="modal-line"><b>{t('rewardUnlocked')}</b></p>}
             <button className="btn-pill" onClick={onClose}>{t('close')}</button>
           </>
         ) : (
           <>
             <h3>{t('howPay')}</h3>
-            {canWallet && (
+            {(canWallet || guestMode) && (
               <>
-                {set.pickup && set.delivery && <div className="get-toggle" role="radiogroup" aria-label={t('getHow')}>
+                {guestMode && (
+                  <div className="deliv-form guest-form">
+                    <label><span>{t('nameLabel')}</span><input value={name} onChange={(e) => { setName(e.target.value); setNote('') }} autoComplete="given-name" /></label>
+                    <label><span>{t('deliveryPhone')}</span><input type="tel" inputMode="tel" dir="ltr" value={phone} onChange={(e) => { setPhone(e.target.value); setNote('') }} autoComplete="tel" placeholder="0750 000 0000" /></label>
+                  </div>
+                )}
+                {pickupOnly && <p className="modal-line small cotd-pickup-note">{s('cotdPickupOnly')}</p>}
+                {!pickupOnly && set.pickup && set.delivery && <div className="get-toggle" role="radiogroup" aria-label={t('getHow')}>
                   <button type="button" role="radio" aria-checked={how === 'pickup'} className={how === 'pickup' ? 'on' : ''} onClick={() => { setHow('pickup'); setNote('') }}>{t('getPickup')}</button>
                   <button type="button" role="radio" aria-checked={how === 'delivery'} className={how === 'delivery' ? 'on' : ''} onClick={() => setHow('delivery')}>{t('getDelivery')}</button>
                 </div>}
                 {how === 'delivery' && (
                   <div className="deliv-form">
-                    <label>
+                    {!guestMode && <label>
                       <span>{t('deliveryPhone')}</span>
                       <input type="tel" inputMode="tel" dir="ltr" value={phone} onChange={(e) => { setPhone(e.target.value); setNote('') }} autoComplete="tel" />
-                    </label>
+                    </label>}
                     <label>
                       <span>{t('deliveryAddress')}</span>
                       <textarea rows={2} value={address} onChange={(e) => { setAddress(e.target.value); setNote('') }} placeholder={t('addressHint')} autoComplete="street-address" />
@@ -151,8 +175,8 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
                 <small>{t('walletBalance')} {iqd(a!.balance)}{a!.balance < total ? <> · <a href="#account" onClick={onClose} className="inline-link light">{t('topUpLink')}</a></> : null}</small>
               </button>
             )}
-            {!a && total > 0 && (
-              <a className="btn-pill ghost" href="#account" onClick={onClose}>{t(FEATURES.wallet ? 'signInToPay' : 'signInToOrder')}</a>
+            {!a && total > 0 && FEATURES.wallet && (
+              <a className="btn-pill ghost" href="#account" onClick={onClose}>{t('signInToPay')}</a>
             )}
             {note && <div className="note" role="status">{note}</div>}
           </>

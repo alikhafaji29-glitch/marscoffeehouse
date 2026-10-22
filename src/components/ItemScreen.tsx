@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom'
 import { useCart } from '../cart'
 import { dropsFrom } from '../fx'
 import { useLang } from '../i18n'
-import type { MenuItem } from '../menu'
+import type { Deal, MenuItem } from '../menu'
 import { iqd } from '../account'
 import { DESC, TINT, categoryOf, isIced } from '../menuMeta'
 import { groupsFor, defaultPicks, extras, summary, timesPicked } from '../customize'
@@ -34,7 +34,7 @@ const Back = () => (
   </svg>
 )
 
-export function ItemScreen({ item, gift = false, onClose, onAdded }: { item: MenuItem; gift?: boolean; onClose: () => void; onAdded?: () => void }) {
+export function ItemScreen({ item, gift = false, deal, onClose, onAdded }: { item: MenuItem; gift?: boolean; deal?: Deal; onClose: () => void; onAdded?: () => void }) {
   const { t, lang } = useLang()
   const s = useS()
   const { add } = useCart()
@@ -51,10 +51,11 @@ export function ItemScreen({ item, gift = false, onClose, onAdded }: { item: Men
 
   const cat = categoryOf(item.name)
   const photo = photoOf(item.name)
-  const base = dual ? (item.price as number[])[sizeIdx] : (item.price as number)
+  // a deal (Coffee of the day): its price, for the smallest size only; the add-ons still cost what they cost
+  const base = deal ? deal.price : dual ? (item.price as number[])[sizeIdx] : (item.price as number)
   const size = dual && item.sizes ? item.sizes[sizeIdx] : undefined
   const unit = base + extras(picks, groups)
-  const opts = summary(picks, groups)
+  const opts = deal ? [deal.label, ...summary(picks, groups)] : summary(picks, groups) // the staff read "Coffee of the day" on the line
   // the menu's own words for this branch: its description, and the nutrition of the chosen size and flavour
   const meta = itemState(item.name)
   const flavor = picks.flavor?.[0] ?? ''
@@ -112,7 +113,8 @@ export function ItemScreen({ item, gift = false, onClose, onAdded }: { item: Men
           <h1 id="item-title">{nameOf(item.name, lang)}</h1>
           <p className="item-desc">{meta?.desc[lang] || (DESC[item.name] ? t(DESC[item.name]) : t('descDefault'))}</p>
           <p className="item-desc">{t('allergenNote')}</p>
-          {dual && item.sizes && (
+          {deal && <p className="item-deal">{s('cotdSizeNote', { size: size ?? '' }).replace(/[،,]\s*$/, '')}</p>}
+          {!deal && dual && item.sizes && (
             <>
               <p className="item-label">{t('size')}</p>
               <div className="size-cards" role="radiogroup" aria-label={t('size')}>
