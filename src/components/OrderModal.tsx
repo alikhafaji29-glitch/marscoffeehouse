@@ -8,6 +8,8 @@ import type { Delivery, GeoPoint } from '../account'
 import { ShareLocation, mapsLink } from './ShareLocation'
 import { OrderTracker } from './OrderTracker'
 import { TimeWheel } from './TimeWheel'
+import { MissingBox, goToMissing } from './MissingBox'
+import type { Missing } from './MissingBox'
 import { settingsFor } from '../staff/store'
 import { arrivalSlots, timeText } from '../orders'
 import { clockNow } from '../clock'
@@ -40,6 +42,19 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
   const [arriveAt, setArriveAt] = useState(0) // a pickup: when the customer will arrive (ms; owner, 2026-10-22)
   // Coffee of the day is for pickup only (owner, 2026-10-22): an order holding one is picked up, at a time on the wheel
   const pickupOnly = lines.some((l) => l.opts?.includes('Coffee of the day'))
+  const [missing, setMissing] = useState<Missing[]>([]) // what kept the order from being placed (owner, 2026-10-22)
+  const [missOpen, setMissOpen] = useState(false)
+  const filled = (m: Missing) => setMissing((x) => x.filter((y) => y !== m))
+  /** everything missing at once; a shared pin stands in for the address */
+  const check = (): boolean => {
+    const miss: Missing[] = []
+    if (how !== 'delivery' && arriveAt < clockNow().getTime()) miss.push('arrive')
+    if (guestMode && name.trim().length < 2) miss.push('name')
+    if ((guestMode || how === 'delivery') && normPhone(phone).length < 10) miss.push('phone')
+    if (how === 'delivery' && address.trim().length < 6 && !location) miss.push('place')
+    if (miss.length) { setMissing(miss); setMissOpen(true); return false }
+    return true
+  }
   useEffect(() => { if (pickupOnly && how !== 'pickup') setHow('pickup') }, [pickupOnly, how])
   const canWallet = !!a && total > 0
   const placed = paid ? mine.find((o) => o.id === paid.orderId) : undefined
@@ -51,8 +66,8 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
   const itemLines = () => lines.map((l) => `${l.name}${l.size ? ` (${l.size})` : ''}${l.opts?.length ? ` · ${l.opts.join(', ')}` : ''} ×${l.qty}`)
   /** the delivery details when delivering; null when something is missing (a note is shown) */
   const details = (): Delivery | undefined | null => {
-    if (how !== 'delivery') { if (arriveAt < clockNow().getTime()) { setNote(s('arriveNeed')); return null } return undefined }
-    if (normPhone(phone).length < 10 || (address.trim().length < 6 && !location)) { setNote(t('needAddress')); return null }
+    if (!check()) return null
+    if (how !== 'delivery') return undefined
     return { phone: phone.trim(), address: address.trim(), location: location ?? undefined }
   }
   const payWallet = () => {
@@ -65,7 +80,6 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
   }
   const pickup = () => {
     unlockAudio()
-    if (guestMode && (name.trim().length < 2 || normPhone(phone).length < 10)) { setNote(s('guestNeed')); return }
     const d = details(); if (d === null) return
     if (guestMode) {
       saveContact({ name: name.trim(), phone: phone.trim(), ...(d && { address: d.address }) })
@@ -130,8 +144,8 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
               <>
                 {guestMode && (
                   <div className="deliv-form guest-form">
-                    <label><span>{t('nameLabel')}</span><input value={name} onChange={(e) => { setName(e.target.value); setNote('') }} autoComplete="given-name" /></label>
-                    <label><span>{t('deliveryPhone')}</span><input type="tel" inputMode="tel" dir="ltr" value={phone} onChange={(e) => { setPhone(e.target.value); setNote('') }} autoComplete="tel" placeholder="0750 000 0000" /></label>
+                    <label data-field="name" className={missing.includes('name') ? 'missing' : ''}><span>{t('nameLabel')}</span><input value={name} onChange={(e) => { setName(e.target.value); setNote(''); filled('name') }} autoComplete="given-name" /></label>
+                    <label data-field="phone" className={missing.includes('phone') ? 'missing' : ''}><span>{t('deliveryPhone')}</span><input type="tel" inputMode="tel" dir="ltr" value={phone} onChange={(e) => { setPhone(e.target.value); setNote(''); filled('phone') }} autoComplete="tel" placeholder="0750 000 0000" /></label>
                   </div>
                 )}
                 {pickupOnly && <p className="modal-line small cotd-pickup-note">{s('cotdPickupOnly')}</p>}
@@ -141,21 +155,23 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
                 </div>}
                 {how === 'delivery' && (
                   <div className="deliv-form">
-                    {!guestMode && <label>
+                    {!guestMode && <label data-field="phone" className={missing.includes('phone') ? 'missing' : ''}>
                       <span>{t('deliveryPhone')}</span>
-                      <input type="tel" inputMode="tel" dir="ltr" value={phone} onChange={(e) => { setPhone(e.target.value); setNote('') }} autoComplete="tel" />
+                      <input type="tel" inputMode="tel" dir="ltr" value={phone} onChange={(e) => { setPhone(e.target.value); setNote(''); filled('phone') }} autoComplete="tel" />
                     </label>}
+                    <div data-field="place" className={'place-fields' + (missing.includes('place') ? ' missing' : '')}>
                     <label>
                       <span>{t('deliveryAddress')}</span>
-                      <textarea rows={2} value={address} onChange={(e) => { setAddress(e.target.value); setNote('') }} placeholder={t('addressHint')} autoComplete="street-address" />
+                      <textarea rows={2} value={address} onChange={(e) => { setAddress(e.target.value); setNote(''); filled('place') }} placeholder={t('addressHint')} autoComplete="street-address" />
                     </label>
-                    <ShareLocation value={location} onChange={(p) => { setLocation(p); setNote('') }} />
+                    <ShareLocation value={location} onChange={(p) => { setLocation(p); setNote(''); if (p) filled('place') }} />
+                    </div>
                   </div>
                 )}
                 {how === 'pickup' && (() => { const now = clockNow().getTime(); return (
-                  <div className="arrive">
+                  <div className={'arrive' + (missing.includes('arrive') ? ' missing' : '')} data-field="arrive">
                     <span className="arrive-title">{s('arriveWhen')}</span>
-                    <TimeWheel slots={arrivalSlots(now)} value={arriveAt} onChange={(at) => { setArriveAt(at); setNote('') }} label={s('arriveWhen')} />
+                    <TimeWheel slots={arrivalSlots(now)} value={arriveAt} onChange={(at) => { setArriveAt(at); setNote(''); filled('arrive') }} label={s('arriveWhen')} />
                     {arriveAt > 0 && <small className="arrive-in">{s('arriveIn', { n: Math.max(1, Math.round((arriveAt - now) / 60_000)) })}</small>}
                   </div>
                 ) })()}
@@ -181,6 +197,7 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
             {note && <div className="note" role="status">{note}</div>}
           </>
         )}
+        {missOpen && <MissingBox missing={missing} onOk={() => { setMissOpen(false); goToMissing(missing[0]) }} />}
       </div>
     </div>
   )

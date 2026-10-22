@@ -8,12 +8,17 @@ import { startOf } from './stats'
 import { OrderCard } from './Orders'
 import { activeEvent, branchName, positiveOffer, settingsFor, useStaff } from './store'
 import { useS } from './strings'
+import type { SKey } from './strings'
+import { useRemote } from './remote'
+import { backendOn } from '../backend'
+import { localFeedback } from '../feedback'
+import { ago } from './Orders'
 import { Card, I, Stat } from './ui'
 
 /* Dashboard: today at a glance for the chosen branch, the orders waiting for a hand, and what is running on the site. */
 export function Overview({ orders, go, readOnly = false }: { orders: Order[]; go: (page: string) => void; readOnly?: boolean }) {
   const s = useS()
-  const { lang } = useLang()
+  const { lang, t } = useLang()
   const data = useStaff()
   useMenuVersion()
   const now = useNow(30000)
@@ -22,6 +27,9 @@ export function Overview({ orders, go, readOnly = false }: { orders: Order[]; go
   const offer = positiveOffer(data.branch)
   const ev = activeEvent()
   const set = settingsFor(data.branch)
+  // customer feedback for this branch: the database's (signed-in staff) or this browser's (the demo build)
+  const remote = useRemote()
+  const feedback = (backendOn ? remote.feedback : localFeedback()).filter((f) => f.branch === data.branch).slice(0, 8)
   // a barista sees what is running but has no Offers, Events or Tools pages to go to (owner, 2026-10-22)
   const Fact = ({ to, children }: { to: string; children: ReactNode }) => (readOnly ? <div className="d-fact">{children}</div> : <button type="button" className="d-fact" onClick={() => go(to)}>{children}</button>)
   return (
@@ -68,6 +76,22 @@ export function Overview({ orders, go, readOnly = false }: { orders: Order[]; go
           </ul>
         </Card>
       </div>
+      <Card title={s('fbCardTitle')}>
+        {feedback.length ? (
+          <ul className="d-feedback">
+            {feedback.map((f) => (
+              <li key={f.order + f.kind}>
+                <div className="d-fb-head">
+                  {f.kind === 'received' && f.rating ? <b className="d-fb-stars" aria-label={`${f.rating} / 5`}>{'★'.repeat(f.rating)}<span>{'★'.repeat(5 - f.rating)}</span></b> : <b className="d-fb-cancel">{s('fbCancelledTag')}</b>}
+                  <small dir="ltr">#{f.code} · {ago(f.at, now, lang, t('justNow'))}</small>
+                </div>
+                {f.tags.length > 0 && <p className="d-fb-tags">{f.tags.map((id) => <span key={id}>{s(('fb_' + id) as SKey)}</span>)}</p>}
+                {f.comment && <p className="d-fb-comment">“{f.comment}”</p>}
+              </li>
+            ))}
+          </ul>
+        ) : <p className="d-empty">{s('fbNone')}</p>}
+      </Card>
     </>
   )
 }

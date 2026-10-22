@@ -4,6 +4,7 @@ import { useLang } from '../i18n'
 import type { Order } from '../account'
 import { isActive, isCancelled, markCancelSeen, recentlyCancelled, useNow } from '../orders'
 import { OrderTracker } from './OrderTracker'
+import { askFeedback } from './FeedbackPrompt'
 
 /** Small window opened by the "Track order" button: one live tracker per order still on its way. */
 export function TrackModal({ orders, onClose }: { orders: Order[]; onClose: () => void }) {
@@ -20,7 +21,7 @@ export function TrackModal({ orders, onClose }: { orders: Order[]; onClose: () =
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal track-modal" role="dialog" aria-labelledby="track-title" onClick={(e) => e.stopPropagation()}>
         <h3 id="track-title">{t('trackOrder')}</h3>
-        {active.length ? active.map((o) => <OrderTracker key={o.id} order={o} dark onOk={isCancelled(o) ? () => { markCancelSeen(o); setSeen((n) => n + 1); if (active.length === 1) onClose() } : undefined} />) : <p className="modal-line">{t('noActiveOrder')}</p>}
+        {active.length ? active.map((o) => <OrderTracker key={o.id} order={o} dark onOk={isCancelled(o) ? () => { markCancelSeen(o); setSeen((n) => n + 1); if (active.length === 1) onClose(); askFeedback(o, 'cancelled') } : undefined} />) : <p className="modal-line">{t('noActiveOrder')}</p>}
         <button className="btn-pill" onClick={onClose}>{t('close')}</button>
       </div>
     </div>,

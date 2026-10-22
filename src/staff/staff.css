@@ -320,3 +320,15 @@ button.d-chip.ghost svg { width: 14px; height: 14px; }
 @media (prefers-reduced-motion: reduce) { .d-side, .d-chev { transition: none; } }
 button.d-chip { border: 1.5px solid transparent; cursor: pointer; font: inherit; font-size: 0.84rem; }
 button.d-chip.on { background: var(--d-ink); color: #fff; }
+/* Dashboard: customer feedback (owner, 2026-10-22) */
+.d-feedback { list-style: none; margin: 0; padding: 0; display: grid; }
+.d-feedback li { padding: 0.75rem 0.2rem; border-top: 1px solid var(--d-line); display: grid; gap: 0.35rem; }
+.d-feedback li:first-child { border-top: none; }
+.d-fb-head { display: flex; justify-content: space-between; align-items: baseline; gap: 0.6rem; }
+.d-fb-stars { color: #e0a100; letter-spacing: 0.08em; }
+.d-fb-stars span { color: rgba(16, 32, 58, 0.18); }
+.d-fb-cancel { color: #b3261e; font-size: 0.85rem; }
+.d-fb-head small { color: var(--d-mute); }
+.d-fb-tags { margin: 0; display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.d-fb-tags span { font-size: 0.78rem; padding: 0.2rem 0.55rem; border-radius: 999px; background: #e8ecf2; }
+.d-fb-comment { margin: 0; font-size: 0.9rem; font-style: italic; }

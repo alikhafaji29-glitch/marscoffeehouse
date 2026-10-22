@@ -6,6 +6,7 @@ import { backendOn, getClient } from '../backend'
 import type { Stage } from '../orders'
 import { fromRow } from '../sync'
 import { seedConfig } from './store'
+import type { Feedback } from '../feedback'
 import type { OrderRow } from '../sync'
 
 /*
@@ -18,9 +19,10 @@ export interface Remote {
   ready: boolean // the first check of who is signed in has finished
   staff: { branch: string | null; name: string; email: string; role: 'barista' | 'manager' } | null // barista: the orders only (owner, 2026-10-22)
   orders: Order[]
+  feedback: Feedback[] // the branch's customer feedback, newest first (owner, 2026-10-22)
   error: '' | 'load' | 'move'
 }
-let state: Remote = { ready: !backendOn, staff: null, orders: [], error: '' }
+let state: Remote = { ready: !backendOn, staff: null, orders: [], feedback: [], error: '' }
 const listeners = new Set<() => void>()
 const set = (patch: Partial<Remote>) => { state = { ...state, ...patch }; listeners.forEach((l) => l()) }
 export function useRemote(): Remote {
@@ -34,6 +36,12 @@ async function load(sb: SupabaseClient) {
   const { data, error } = await sb.from('orders').select('*').order('created_at', { ascending: false }).limit(300)
   if (error) { console.warn('[backend] could not load orders:', error.message); set({ error: 'load' }); return }
   set({ orders: (data as OrderRow[]).map(fromRow), error: '' })
+  // the customers' feedback with the order's number (the rules show staff their branch's only)
+  const fb = await sb.from('order_feedback').select('order_uid,branch,kind,rating,tags,comment,created_at,orders(code)').order('created_at', { ascending: false }).limit(60)
+  if (!fb.error) {
+    type Row = { order_uid: string; branch: string; kind: Feedback['kind']; rating: number | null; tags: string[]; comment: string | null; created_at: string; orders: { code: string } | null }
+    set({ feedback: (fb.data as unknown as Row[]).map((r) => ({ order: r.order_uid, code: r.orders?.code ?? '', branch: r.branch, kind: r.kind, rating: r.rating ?? undefined, tags: r.tags ?? [], comment: r.comment ?? undefined, at: Date.parse(r.created_at) })) })
+  }
 }
 
 /** who is signed in, and are they staff? then the orders and the live channel */
@@ -84,7 +92,7 @@ export async function staffSignIn(email: string, password: string): Promise<'ok'
 export async function staffSignOut() {
   channel?.unsubscribe()
   channel = null
-  set({ staff: null, orders: [] })
+  set({ staff: null, orders: [], feedback: [] })
   const sb = await getClient()
   await sb?.auth.signOut()
 }

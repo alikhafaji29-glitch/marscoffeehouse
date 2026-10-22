@@ -17,6 +17,7 @@ import { offersFor, useStaff } from './staff/store'
 import { FEATURES } from './features'
 import { CartProvider } from './cart'
 import { BranchPicker } from './components/BranchPicker'
+import { FeedbackPrompt } from './components/FeedbackPrompt'
 import { useMenuVersion } from './menuAdmin'
 import type { Deal, MenuItem } from './menu'
 
@@ -154,6 +155,7 @@ export default function App() {
       {orderOpen && <OrderModal onClose={() => setOrderOpen(false)} />}
       {combo && <ComboFlow offerId={combo} onClose={() => setCombo('')} />}
       <BranchPicker />
+      <FeedbackPrompt />
     </CartProvider>
   )
 }

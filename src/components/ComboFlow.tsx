@@ -13,6 +13,8 @@ import { useS } from '../staff/strings'
 import { catLabel } from './MenuSection'
 import { MiniCup } from './MiniCup'
 import { OrderTracker } from './OrderTracker'
+import { MissingBox, goToMissing } from './MissingBox'
+import type { Missing } from './MissingBox'
 import { TimeWheel } from './TimeWheel'
 import { nameOf, photoOf } from '../menuAdmin'
 import { defaultPicks, extras, groupsFor, summary, timesPicked } from '../customize'
@@ -55,7 +57,7 @@ const FoodIcon = ({ sweet }: { sweet: boolean }) => (
     )}
   </svg>
 )
-const MAX_COMBOS = 10 // in one order
+const MAX_COMBOS = 50 // in one order (owner, 2026-10-22: was 10; the database takes up to 200 lines)
 /** a combo drink's choices, compact, under its card: one row of chips per group (flavour, milk, add-ons) and − n +
  *  for pumps; the same groups and prices as the item's menu page (customize.ts) */
 function ComboChoices({ groups, picks: given, onChange }: { groups: CustGroup[]; picks?: Picks; onChange: (p: Picks) => void }) {
@@ -140,6 +142,9 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
   const [location, setLocation] = useState<GeoPoint | null>(null) // "Share my location": asked fresh for each order, never remembered
   const [note, setNote] = useState('')
   const [staffNote, setStaffNote] = useState('') // the customer's note for the café
+  const [missing, setMissing] = useState<Missing[]>([]) // what kept the order from being placed: outlined, listed in a window
+  const [missOpen, setMissOpen] = useState(false)
+  const filled = (m: Missing) => setMissing((x) => x.filter((y) => y !== m))
   const [placedId, setPlacedId] = useState('')
   // between two combos (owner, 2026-10-21): after a combo's last step a short screen offers the next combo or skipping it
   const [between, setBetween] = useState(false)
@@ -258,10 +263,15 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
   const place = () => {
     unlockAudio() // this tap lets the order's status sounds play later
     const nm = name.trim()
-    if (nm.length < 2 || normPhone(phone).length < 10 || (delivery && address.trim().length < 6 && !location)) { setNote(delivery ? s('comboNeed') : s('comboNeedPickup')); return }
-    if (!live && !wantAt) { setNote(s('comboNeedTime')); return }
+    // everything missing at once, said plainly in a window (owner, 2026-10-22); a shared pin stands in for the address
+    const miss: Missing[] = []
+    if (!live && !wantAt) miss.push('when')
+    if (live && !delivery && arriveAt < clockNow().getTime()) miss.push('arrive')
+    if (nm.length < 2) miss.push('name')
+    if (normPhone(phone).length < 10) miss.push('phone')
+    if (delivery && address.trim().length < 6 && !location) miss.push('place')
+    if (miss.length) { setMissing(miss); setMissOpen(true); return }
     const arrive = live && !delivery ? arriveAt : 0 // a pre-order's pickup time is its chosen time
-    if (live && !delivery && arriveAt < clockNow().getTime()) { setNote(s('arriveNeed')); return }
     const res = placeOfferOrder({ total, items: lines, name: nm, phone: phone.trim(), address: delivery ? address.trim() : undefined, location: delivery && location ? location : undefined, offer: { name: offer.name.en, price: offer.price, count: count > 1 ? count : undefined, fee: fee || undefined, pre: !live || undefined, wantAt: !live ? wantAt : undefined }, note: staffNote.trim() || undefined, arriveAt: arrive || undefined })
     if (!res.ok) return
     saveContact({ name: nm, phone: phone.trim(), address: address.trim() })
@@ -393,26 +403,28 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
                   </div>
                 )}
                 {!live && (
-                  <label><span>{s(delivery ? 'comboWhenDelivery' : 'comboWhenPickup')}</span>
-                    <select value={wantAt || ''} onChange={(e) => { setWantAt(Number(e.target.value)); setNote('') }}>
+                  <label data-field="when" className={missing.includes('when') ? 'missing' : ''}><span>{s(delivery ? 'comboWhenDelivery' : 'comboWhenPickup')}</span>
+                    <select value={wantAt || ''} onChange={(e) => { setWantAt(Number(e.target.value)); setNote(''); filled('when') }}>
                       <option value="" disabled>{s('comboPickTime')}</option>
                       {preorderSlots(offer.start, offer.end).map((x) => <option key={x.at} value={x.at}>{x.today ? s('comboToday') : s('comboTomorrow')} · {timeText(x.at, lang)}</option>)}
                     </select>
                   </label>
                 )}
                 {live && !delivery && (() => { const now = clockNow().getTime(); return (
-                  <div className="arrive">
+                  <div className={'arrive' + (missing.includes('arrive') ? ' missing' : '')} data-field="arrive">
                     <span className="arrive-title">{s('arriveWhen')}</span>
-                    <TimeWheel slots={arrivalSlots(now, endOfOffer(offer.end, now))} value={arriveAt} onChange={(at) => { setArriveAt(at); setNote('') }} label={s('arriveWhen')} />
+                    <TimeWheel slots={arrivalSlots(now, endOfOffer(offer.end, now))} value={arriveAt} onChange={(at) => { setArriveAt(at); setNote(''); filled('arrive') }} label={s('arriveWhen')} />
                     {arriveAt > 0 && <small className="arrive-in">{s('arriveIn', { n: Math.max(1, Math.round((arriveAt - now) / 60_000)) })}</small>}
                   </div>
                 ) })()}
-                <label><span>{t('nameLabel')}</span><input value={name} onChange={(e) => { setName(e.target.value); setNote('') }} autoComplete="given-name" /></label>
-                <label><span>{t('deliveryPhone')}</span><input type="tel" inputMode="tel" dir="ltr" value={phone} onChange={(e) => { setPhone(e.target.value); setNote('') }} autoComplete="tel" placeholder="0750 000 0000" /></label>
+                <label data-field="name" className={missing.includes('name') ? 'missing' : ''}><span>{t('nameLabel')}</span><input value={name} onChange={(e) => { setName(e.target.value); setNote(''); filled('name') }} autoComplete="given-name" /></label>
+                <label data-field="phone" className={missing.includes('phone') ? 'missing' : ''}><span>{t('deliveryPhone')}</span><input type="tel" inputMode="tel" dir="ltr" value={phone} onChange={(e) => { setPhone(e.target.value); setNote(''); filled('phone') }} autoComplete="tel" placeholder="0750 000 0000" /></label>
                 {delivery
                   ? <>
-                    <label><span>{t('deliveryAddress')}</span><textarea rows={2} value={address} onChange={(e) => { setAddress(e.target.value); setNote('') }} placeholder={t('addressHint')} autoComplete="street-address" /></label>
-                    <ShareLocation value={location} onChange={(p) => { setLocation(p); setNote('') }} />
+                    <div data-field="place" className={'place-fields' + (missing.includes('place') ? ' missing' : '')}>
+                      <label><span>{t('deliveryAddress')}</span><textarea rows={2} value={address} onChange={(e) => { setAddress(e.target.value); setNote(''); filled('place') }} placeholder={t('addressHint')} autoComplete="street-address" /></label>
+                      <ShareLocation value={location} onChange={(p) => { setLocation(p); setNote(''); if (p) filled('place') }} />
+                    </div>
                   </>
                   : <p className="combo-hint">{s('comboPickupNote')}</p>}
                 <label><span>{t('orderNoteLabel')}</span><textarea rows={2} maxLength={300} value={staffNote} onChange={(e) => setStaffNote(e.target.value)} placeholder={t('orderNotePh')} /></label>
@@ -451,6 +463,7 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
           )}
         </footer>}
       </div>
+      {missOpen && <MissingBox missing={missing} onOk={() => { setMissOpen(false); goToMissing(missing[0]) }} />}
     </div>,
     document.body,
   )
