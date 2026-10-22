@@ -7,3 +7,6 @@ supabase/.temp/
 dashboard/
 # private notes with passwords: never committed
 passwords.md
+
+# the owner's original product photos (36 MB); the cropped copies live in public/assets/menu/
+/items images/

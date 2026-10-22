@@ -41,10 +41,11 @@ const DESC: Record<string, TKey> = {
 /* "New this season": the cards that drift right-to-left (owner's photos). */
 // New this season: the first three only (owner, 2026-09-28). One look (owner, 2026-09-28): every card is the owner's cup-on-white-table photo with the drink
 // recoloured per item (the reference photo docs/reference/season/cup-reference.webp is in git history before commit 2026-09-30 "Delete unused files"; recolour script in that session's scratchpad season/make.py)
-const SEASON: { names: string[]; title: string; img: string; bg: string; cropTop?: boolean }[] = [
-  { names: ['Lemon-Mint Mojito'], title: 'Lemon-Mint Mojito', img: '/assets/featured/season-mojito.jpg', bg: '#2b2420' },
-  { names: ['Mango with Orange Smoothie'], title: 'Mango & Orange Smoothie', img: '/assets/featured/season-smoothie.jpg', bg: '#2b2420' },
-  { names: ['Nutella Milkshake'], title: 'Nutella Milkshake', img: '/assets/featured/season-nutella.jpg', bg: '#2b2420' },
+// 2026-10-22 (owner's two campaign photos): Pink + and Kakaw Crunch replace the mojito / smoothie / milkshake;
+// `light` = a bright photo with its own title on top, so the card skips the dark top shade
+const SEASON: { names: string[]; title: string; img: string; bg: string; cropTop?: boolean; light?: boolean }[] = [
+  { names: ['Pink +'], title: 'Pink +', img: '/assets/featured/season-pink.jpg', bg: '#c9e8fb', light: true },
+  { names: ['Kakaw Crunch'], title: 'Kakaw Crunch', img: '/assets/featured/season-kakaw.jpg', bg: '#e9c7a5', light: true },
 ]
 // Demo products from the owner's photos; prices are placeholders until Mars confirms (TODO B)
 /* Build Your Drink asks how (owner, 2026-09-27): from your mood (the mood game) or be the barista (the drink builder) */
@@ -228,6 +229,11 @@ export function HomeDeck({ onOrder, onPick }: { onOrder: () => void; onPick: (it
 
       {/* 3. New this season: full-bleed photos drifting right-to-left under a fixed title; a tap orders */}
       {activeEvent() && <section className="slide slide-fav" id="seasonal" aria-labelledby="fav-title">
+        {/* the title sits above the photos since 2026-10-22: the season photos are bright and carry their own lettering */}
+        <div className="slide-text fav-head">
+          <p className="eyebrow">{t('coffeeEyebrow')}</p>
+          <h2 className="slide-title" id="fav-title">{t('seasonEyebrow')}</h2>
+        </div>
         <Track>
           <div className="fav-set">
               {SEASON.map((f) => {
@@ -237,7 +243,7 @@ export function HomeDeck({ onOrder, onPick }: { onOrder: () => void; onPick: (it
                 if (items.length === 1) {
                   const open = () => openItem(items[0], f.img, f.title)
                   return (
-                    <article className={'fav-card season-card' + (f.cropTop ? ' crop-top' : '')} key={f.title} style={{ background: f.bg }} onClick={open}>
+                    <article className={'fav-card season-card' + (f.cropTop ? ' crop-top' : '') + (f.light ? ' light' : '')} key={f.title} style={{ background: f.bg }} onClick={open}>
                       <img src={f.img} alt="" draggable={false} />
                       <div className="fav-card-text season-text">
                         <h3>{f.title}</h3>
@@ -266,10 +272,6 @@ export function HomeDeck({ onOrder, onPick }: { onOrder: () => void; onPick: (it
               })}
           </div>
         </Track>
-        <div className="slide-text fav-head">
-          <p className="eyebrow">{t('coffeeEyebrow')}</p>
-          <h2 className="slide-title" id="fav-title">{t('seasonEyebrow')}</h2>
-        </div>
       </section>}
 
       {/* Coffee of the day (owner, 2026-10-22): a button that opens the day's coffees as a list (CoffeeOfTheDay.tsx) */}

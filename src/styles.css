@@ -1765,6 +1765,7 @@ body.sections-open .time-changer, body.build-ask-open .time-changer { display: n
    three cards fill the width edge to edge, 4:5, a thin white gap between them */
 #seasonal .season-card { cursor: pointer; }
 #seasonal .season-card::after { background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0) 26%, rgba(0, 0, 0, 0) 62%, rgba(0, 0, 0, 0.45)); }
+#seasonal .season-card.light::after { background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 62%, rgba(0, 0, 0, 0.45)); }
 #seasonal .season-text { flex-direction: row; align-items: flex-end; justify-content: space-between; gap: 0.8rem; width: 100%; padding: 1rem 1.1rem 1.1rem; }
 #seasonal .season-text h3 { font: 700 1.2rem/1.2 var(--font-display); letter-spacing: -0.01em; text-shadow: 0 1px 8px rgba(0, 0, 0, 0.3); }
 #seasonal .season-plus { flex: none; display: grid; place-items: center; width: 40px; height: 40px; margin: -8px -8px -8px 0; border: 0; border-radius: 50%; background: transparent; color: #fff; cursor: pointer; filter: drop-shadow(0 1px 6px rgba(0, 0, 0, 0.35)); }
@@ -2204,3 +2205,7 @@ label.missing input, label.missing textarea, label.missing select, .place-fields
 .place-fields { display: grid; gap: 0.6rem; }
 .place-fields.missing { padding: 0.5rem; margin: -0.5rem; border-radius: 1rem; box-shadow: inset 0 0 0 2px #b3261e; }
 .arrive.missing .time-wheel { box-shadow: 0 0 0 2px #b3261e; }
+/* New this season (2026-10-22): the title above the photos, navy on the white page, not over them */
+#seasonal .fav-head, body[data-view='home'] #seasonal .fav-head { position: static; color: var(--navy); text-shadow: none; padding: 1.2rem 1.2rem 0.5rem; }
+#seasonal .fav-head .eyebrow { color: var(--sky-deep); }
+@media (min-width: 761px) { #seasonal .fav-head, body[data-view='home'] #seasonal .fav-head { padding: 1.6rem 4vw 0.6rem; } }
