@@ -88,7 +88,7 @@ const PICKUP_STAGES: readonly Stage[] = ['received', 'preparing', 'done', 'deliv
 export const stagesFor = (order: Order): readonly Stage[] => (order.fulfil === 'delivery' ? STAGES : PICKUP_STAGES)
 export const stageIndex = (order: Order, _now?: number): number => Math.max(0, stagesFor(order).indexOf((order.status ?? 'received') as Stage))
 export const stageOf = (order: Order, now?: number): Stage => stagesFor(order)[stageIndex(order, now)]
-export const isActive = (order: Order, now?: number) => !isCancelled(order) && stageIndex(order, now) < stagesFor(order).length - 1
+export const isActive = (order: Order, now?: number) => !order.gone && !isCancelled(order) && stageIndex(order, now) < stagesFor(order).length - 1
 export const nextStage = (order: Order): Stage | null => (isActive(order) ? stagesFor(order)[stageIndex(order) + 1] : null)
 
 /** re-renders every `ms` (for "3 min ago" style times) */

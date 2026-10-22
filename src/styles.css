@@ -2073,3 +2073,25 @@ body:has(.modal-overlay) .time-changer { display: none; }
 @media (prefers-reduced-motion: reduce) { .lg-scooping, .lg-icedrop { animation: none; } .lg-icedrop { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .lg-pumping, .lg-pumphead, .lg-settle, .lg-count { animation: none; } .lg-syrup { animation: none; stroke-dashoffset: 0; } }
 @media (prefers-reduced-motion: reduce) { .lg-hand, .lg-stream, .lg-grind circle, .lg-shake, .lg-steam, .lg-scoop, .lg-cube, .lg-heart, .lg-btn.live, .lg-tip { animation: none; } }
+
+/* the first visit's branch question (owner, 2026-10-22) */
+.branch-pick { text-align: center; }
+.branch-pick-list { display: grid; gap: 0.6rem; margin-top: 0.4rem; }
+.branch-pick-btn { font: 600 1.15rem/1 var(--font-sans); min-height: 56px; border-radius: 999px; border: 2px solid #fff; background: #fff; color: var(--navy); cursor: pointer; }
+.branch-pick-btn:hover, .branch-pick-btn:focus-visible { background: var(--navy); border-color: var(--navy); color: #fff; outline: none; }
+.branch-pick-btn.on { background: var(--navy); border-color: var(--navy); color: #fff; }
+.branch-pick-close { justify-self: center; margin-top: 0.3rem; font: 600 0.9rem/1 var(--font-sans); background: none; border: none; color: inherit; text-decoration: underline; cursor: pointer; padding: 0.5rem; }
+/* the header's branch button: where the customer is ordering from, a tap to change it (owner, 2026-10-22) */
+.header-branch { display: inline-flex; align-items: center; gap: 0.25rem; min-height: 34px; padding: 0 0.7rem 0 0.55rem; border-radius: 999px; border: 1.5px solid rgba(0, 47, 109, 0.3); background: transparent; color: var(--navy); font: 700 0.72rem/1 var(--font-display); letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; cursor: pointer; }
+.header-branch svg { width: 14px; height: 14px; flex: none; }
+.header.over .header-branch { color: #fff; border-color: rgba(255, 255, 255, 0.6); }
+@media (max-width: 480px) { .header-branch { min-height: 30px; padding: 0 0.5rem 0 0.4rem; font-size: 0.66rem; letter-spacing: 0.04em; } }
+/* phones: room for the branch name (owner, 2026-10-22: "shorter buttons"): Order now → Order, Sign in → a person icon */
+.header-order .lbl-short, .header-signin .signin-icon { display: none; }
+@media (max-width: 480px) {
+  .header-order .lbl-long { display: none; }
+  .header-order .lbl-short { display: inline; }
+  .header-signin { width: 30px; padding: 0; justify-content: center; border-radius: 50%; }
+  .header-signin span { display: none; }
+  .header-signin .signin-icon { display: block; width: 17px; height: 17px; }
+}

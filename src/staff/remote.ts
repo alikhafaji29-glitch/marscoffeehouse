@@ -5,6 +5,7 @@ import type { Order } from '../account'
 import { backendOn, getClient } from '../backend'
 import type { Stage } from '../orders'
 import { fromRow } from '../sync'
+import { seedConfig } from './store'
 import type { OrderRow } from '../sync'
 
 /*
@@ -15,7 +16,7 @@ import type { OrderRow } from '../sync'
  */
 export interface Remote {
   ready: boolean // the first check of who is signed in has finished
-  staff: { branch: string | null; name: string; email: string } | null
+  staff: { branch: string | null; name: string; email: string; role: 'barista' | 'manager' } | null // barista: the orders only (owner, 2026-10-22)
   orders: Order[]
   error: '' | 'load' | 'move'
 }
@@ -40,10 +41,12 @@ async function enter(sb: SupabaseClient): Promise<'ok' | 'notstaff' | 'error'> {
   const { data: u } = await sb.auth.getUser()
   const user = u.user
   if (!user || user.is_anonymous) { set({ ready: true, staff: null }); return 'notstaff' }
-  const { data, error } = await sb.from('staff').select('branch,name').eq('user_id', user.id).maybeSingle()
+  const { data, error } = await sb.from('staff').select('branch,name,role').eq('user_id', user.id).maybeSingle()
   if (error) { console.warn('[backend] could not check staff:', error.message); set({ ready: true, staff: null }); return 'error' }
   if (!data) { set({ ready: true, staff: null }); return 'notstaff' }
-  set({ ready: true, staff: { branch: data.branch, name: data.name ?? '', email: user.email ?? '' } })
+  const role = data.role === 'barista' ? 'barista' : 'manager'
+  set({ ready: true, staff: { branch: data.branch, name: data.name ?? '', email: user.email ?? '', role } })
+  if (role === 'manager') void seedConfig(data.branch) // the first manager sign-in puts this device's branch settings and offers in the database
   await load(sb)
   channel?.unsubscribe()
   channel = sb.channel('staff-orders')

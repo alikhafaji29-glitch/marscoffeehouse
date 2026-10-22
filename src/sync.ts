@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { applyRemoteStatus, markHeld, markSynced, myOrders, setOrderPlacedHook } from './account'
+import { applyRemoteStatus, markGone, markHeld, markSynced, myOrders, setOrderPlacedHook } from './account'
 import type { Order } from './account'
 import { backendOn, ensureUser, getClient } from './backend'
 import { isActive, recentlyCancelled } from './orders'
@@ -56,7 +56,13 @@ async function pull(sb: SupabaseClient) {
   if (!uids.length) return
   const { data, error } = await sb.from('orders').select('uid,status,history,cancel_reason').in('uid', uids)
   if (error) { console.warn('[backend] could not read order stages:', error.message); return }
-  for (const r of data as Pick<OrderRow, 'uid' | 'status' | 'history' | 'cancel_reason'>[]) applyRemoteStatus(r.uid, r.status, r.history, r.cancel_reason)
+  const rows = data as Pick<OrderRow, 'uid' | 'status' | 'history' | 'cancel_reason'>[]
+  for (const r of rows) applyRemoteStatus(r.uid, r.status, r.history, r.cancel_reason)
+  // an order the database no longer has was deleted there (owner, 2026-10-22: test orders cleared but still tracked on
+  // the phone): stop following it. (The read is as this device's identity, the one that placed it; staff signed in on
+  // the same browser read their branch's orders, so only another branch's would be missed there.)
+  const found = new Set(rows.map((r) => r.uid))
+  for (const uid of uids) if (!found.has(uid)) markGone(uid)
 }
 
 async function run() {

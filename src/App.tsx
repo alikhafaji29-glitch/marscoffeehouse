@@ -13,9 +13,10 @@ import { TrackBar } from './components/TrackBar'
 import { AccountScreen } from './components/AccountScreen'
 import { GiftLanding } from './components/GiftLanding'
 import { StaffScreen } from './staff/StaffScreen'
-import { staffData, useStaff } from './staff/store'
+import { offersFor, useStaff } from './staff/store'
 import { FEATURES } from './features'
 import { CartProvider } from './cart'
+import { BranchPicker } from './components/BranchPicker'
 import { useMenuVersion } from './menuAdmin'
 import type { MenuItem } from './menu'
 
@@ -57,7 +58,7 @@ export default function App() {
   const [combo, setCombo] = useState('')
   useEffect(() => onOpenCombo(setCombo), [])
   useEffect(() => {
-    const fromLink = () => { const o = staffData().offers.find((x) => x.active && x.slug && '#' + x.slug === location.hash); if (o) setCombo(o.id) }
+    const fromLink = () => { const o = offersFor().find((x) => x.active && x.slug && '#' + x.slug === location.hash); if (o) setCombo(o.id) }
     fromLink()
     window.addEventListener('hashchange', fromLink)
     return () => window.removeEventListener('hashchange', fromLink)
@@ -151,6 +152,7 @@ export default function App() {
       )}
       {orderOpen && <OrderModal onClose={() => setOrderOpen(false)} />}
       {combo && <ComboFlow offerId={combo} onClose={() => setCombo('')} />}
+      <BranchPicker />
     </CartProvider>
   )
 }

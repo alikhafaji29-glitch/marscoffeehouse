@@ -2,6 +2,7 @@ import { useSyncExternalStore } from 'react'
 import { ALL_ITEMS as ITEMS, ORDER_MENU, SEASON_PICKS } from '../menu'
 import type { MenuItem } from '../menu'
 import { POSITIVE_HOURS } from '../components/useCountdown'
+import { backendOn, getClient } from '../backend'
 
 /*
  * Everything the staff dashboard sets apart from the menu itself (prices, stock, tags, descriptions, nutrition are
@@ -10,6 +11,9 @@ import { POSITIVE_HOURS } from '../components/useCountdown'
  * through the `storage` event. The real version keeps the same shapes in backend tables.
  * The website follows: the branch list, Delivery / Pickup at checkout, the Positive Hours window and price,
  * and the New Season section (the active event).
+ * Each branch's settings and offers also live in the database (`branch_config`, owner 2026-10-22: "each branch
+ * unique"): staff changes are sent there, and every page reads them with the menu (menuAdmin.ts), so customers get
+ * the branch's own Positive Hours, delivery / pickup and WhatsApp number. This device's copy is the cache.
  */
 export type L3 = { en: string; ar: string; ku: string }
 export const l3 = (en = '', ar = '', ku = ''): L3 => ({ en, ar, ku })
@@ -43,9 +47,10 @@ export type Nutrition = Partial<Record<Nutrient, number>>
 export interface StaffData {
   branch: BranchId // the branch the dashboard is looking at
   customerBranch: BranchId // the branch picked on the Order screen
+  branchChosen?: boolean // the customer chose it (the first-visit question, a /kirkuk link, or the Order screen's list)
   settings: Record<BranchId, Settings> // a branch without an entry has NO_SETTINGS
   events: EventX[]
-  offers: Offer[]
+  offers: Record<BranchId, Offer[]> // per branch (owner, 2026-10-22); a branch without an entry has none
   ingredients: Ingredient[]
   recipes: Record<string, Recipe>
   visits: Record<string, Record<string, number>> // day (YYYY-MM-DD) → source → visits
@@ -75,7 +80,13 @@ const defaults = (): StaffData => ({
     desc: l3('The drinks of the season, for a short time.', 'مشروبات الموسم، لفترة محدودة.', 'خواردنەوەکانی ئەم وەرزە، بۆ ماوەیەکی کورت.'),
     promo: l3(), items: [...SEASON_PICKS], active: true,
   }],
-  offers: [{
+  offers: Object.fromEntries(['erbil', 'kirkuk'].map((b) => [b, [positiveDefault()]])),
+  ingredients: [],
+  recipes: {},
+  visits: {},
+})
+/** the Positive Hours offer a branch starts with, until staff change it */
+const positiveDefault = (): Offer => ({
     id: 'positive', name: l3('Positive Hours', 'ساعات إيجابية', 'کاتژمێرە ئەرێنییەکان'), slug: 'positive-hours', price: 5500,
     start: '07:30', end: '12:00', freeDelivery: true, feeOn: false, fee: 1000, sizes: false,
     sub: l3('One sandwich + one drink, free delivery', 'ساندويتش واحد + مشروب واحد، مع توصيل مجاني', 'یەک ساندویچ + یەک خواردنەوە، بە گەیاندنی بەخۆڕایی'),
@@ -84,17 +95,17 @@ const defaults = (): StaffData => ({
       { id: 'g1', label: l3('Sandwich', 'ساندويتش', 'ساندویچ'), pick: 1, mode: 'items', cats: [], items: SANDWICHES },
       { id: 'g2', label: l3('Drink', 'مشروب', 'خواردنەوە'), pick: 1, mode: 'cats', cats: DRINK_CATS, items: [] },
     ],
-  }],
-  ingredients: [],
-  recipes: {},
-  visits: {},
 })
 
 function load(): StaffData {
   const d = defaults()
   try {
     const raw = JSON.parse(localStorage.getItem(KEY) ?? 'null') as Partial<StaffData> | null
-    if (raw && typeof raw === 'object') return { ...d, ...raw, settings: { ...d.settings, ...raw.settings } }
+    if (raw && typeof raw === 'object') {
+      // offers were one list for every branch until 2026-10-22: each branch starts from that list
+      const offers = Array.isArray(raw.offers) ? Object.fromEntries(Object.keys(d.offers).map((b) => [b, raw.offers as unknown as Offer[]])) : { ...d.offers, ...raw.offers }
+      return { ...d, ...raw, settings: { ...d.settings, ...raw.settings }, offers }
+    }
   } catch { /* no storage or bad data: the defaults */ }
   return d
 }
@@ -107,7 +118,8 @@ const season = ORDER_MENU.find((c) => c.id === 'season')
 
 /** writes the dashboard's choices onto what the website reads */
 function apply() {
-  const offer = state.offers.find((o) => o.id === 'positive') ?? state.offers[0]
+  const list = offersFor()
+  const offer = list.find((o) => o.id === 'positive') ?? list[0]
   if (offer) { POSITIVE_HOURS[0] = hm(offer.start); POSITIVE_HOURS[1] = hm(offer.end) }
   refreshSeason()
   version++
@@ -123,6 +135,17 @@ function save() {
   apply()
 }
 apply()
+// the old site's addresses (marscoffeehouse.com/erbil, /kirkuk) open that branch: the choice is made and the address
+// becomes the site's own (owner, 2026-10-22)
+if (typeof location !== 'undefined') {
+  const path = location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase()
+  const b = BRANCHES.find((x) => x.id === path && x.active)
+  if (b) {
+    state = { ...state, customerBranch: b.id, branchChosen: true }
+    save()
+    history.replaceState(null, '', '/' + location.search + location.hash)
+  }
+}
 if (typeof window !== 'undefined') {
   window.addEventListener('storage', (e) => { if (e.key === KEY || e.key === null) { state = load(); apply() } })
 }
@@ -135,12 +158,69 @@ export function useStaff(): StaffData {
 export const staffData = () => state
 /** told after every change (menuAdmin.ts: the branch being looked at may have changed) */
 export function subscribeStaff(fn: () => void) { listeners.add(fn); return () => { listeners.delete(fn) } }
-export function update(fn: (s: StaffData) => Partial<StaffData>) { state = { ...state, ...fn(state) }; save() }
+export function update(fn: (s: StaffData) => Partial<StaffData>) {
+  const before = state
+  state = { ...state, ...fn(state) }
+  save()
+  // a branch's settings or offers changed here: send them to the database (only staff of that branch may)
+  if (backendOn) for (const b of new Set([...Object.keys(before.settings), ...Object.keys(state.settings), ...Object.keys(before.offers), ...Object.keys(state.offers)])) {
+    if (JSON.stringify(before.settings[b]) !== JSON.stringify(state.settings[b]) || JSON.stringify(before.offers[b]) !== JSON.stringify(state.offers[b])) sendConfig(b)
+  }
+}
+
+/* ---- the branches' settings and offers in the database ---- */
+const pending = new Map<BranchId, number>() // branch → timer of a change still to send; the database's copy waits
+const toRow = (b: BranchId) => ({ branch: b, settings: state.settings[b] ?? NO_SETTINGS, offers: state.offers[b] ?? [] })
+function sendConfig(b: BranchId) {
+  clearTimeout(pending.get(b))
+  pending.set(b, window.setTimeout(() => {
+    void (async () => {
+      const sb = await getClient()
+      const { data } = (await sb?.auth.getSession()) ?? { data: null }
+      if (!sb || !data?.session || data.session.user.is_anonymous) { pending.delete(b); return } // not staff: this device only
+      const { error } = await sb.from('branch_config').upsert(toRow(b), { onConflict: 'branch' })
+      if (error) console.warn('[backend] branch settings not saved:', error.message)
+      pending.delete(b)
+    })()
+  }, 600))
+}
+let remoteBranches = new Set<BranchId>()
+/** the database's settings and offers (read with the menu): they replace this device's copy, except a branch whose
+ *  change from here is still on its way */
+export function applyRemoteConfig(rows: { branch: BranchId; settings: Partial<Settings>; offers: Offer[] }[]) {
+  remoteBranches = new Set(rows.map((r) => r.branch))
+  const settings = { ...state.settings }
+  const offers = { ...state.offers }
+  for (const r of rows) {
+    if (pending.has(r.branch)) continue
+    settings[r.branch] = { ...NO_SETTINGS, ...r.settings }
+    if (Array.isArray(r.offers)) offers[r.branch] = r.offers
+  }
+  if (JSON.stringify(settings) === JSON.stringify(state.settings) && JSON.stringify(offers) === JSON.stringify(state.offers)) return
+  state = { ...state, settings, offers }
+  save()
+}
+/** staff signed in: a branch they run that has no settings in the database yet gets this device's (the first time) */
+export async function seedConfig(branch: BranchId | null) {
+  const sb = await getClient()
+  if (!sb) return
+  const { data, error } = await sb.from('branch_config').select('branch')
+  if (error) return
+  const have = new Set((data as { branch: string }[]).map((r) => r.branch))
+  remoteBranches = have
+  const mine = branch ? [branch] : BRANCHES.map((b) => b.id)
+  const missing = mine.filter((b) => !have.has(b))
+  if (missing.length) {
+    const { error: e } = await sb.from('branch_config').upsert(missing.map(toRow), { onConflict: 'branch', ignoreDuplicates: true })
+    if (e) console.warn('[backend] branch settings not set up:', e.message)
+  }
+}
+export const configInDatabase = (b: BranchId) => remoteBranches.has(b)
 export const uid = () => Math.random().toString(36).slice(2, 9)
 
 /* ---- what the website asks ---- */
 export const customerBranch = () => state.customerBranch
-export const setCustomerBranch = (b: BranchId) => update(() => ({ customerBranch: b }))
+export const setCustomerBranch = (b: BranchId) => update(() => ({ customerBranch: b, branchChosen: true }))
 export const settingsFor = (b: BranchId = state.customerBranch): Settings => state.settings[b] ?? NO_SETTINGS
 /** the list of branches changed: put it in place, and move whoever is looking at a branch that is gone or hidden */
 export function setBranches(list: Branch[]) {
@@ -153,7 +233,9 @@ export function setBranches(list: Branch[]) {
   if (Object.keys(patch).length) update(() => patch)
 }
 export function activeEvent(): EventX | undefined { return state.events.find((e) => e.active && e.items.length) } // a declaration: apply() runs before this line
-export const positiveOffer = (): Offer | undefined => state.offers.find((o) => o.id === 'positive')
+/** a branch's offers: the customer's branch on the website, the dashboard's branch when it passes `data.branch` */
+export function offersFor(b: BranchId = state.customerBranch): Offer[] { return state.offers[b] ?? [] } // a declaration: apply() runs before this line
+export const positiveOffer = (b?: BranchId): Offer | undefined => offersFor(b).find((o) => o.id === 'positive')
 
 /* ---- warehouse ---- */
 export const costOf = (name: string, s: StaffData = state): number | null => {

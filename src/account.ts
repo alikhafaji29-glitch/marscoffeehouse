@@ -42,6 +42,7 @@ export interface Order {
   offer?: { name: string; price: number; count?: number; fee?: number; pre?: boolean; wantAt?: number } // a combo from the dashboard's Offers (Positive Hours); count = how many combos (1 when missing); pre = placed outside its hours; wantAt = the time the customer chose for a pre-order (ms)
   uid?: string // the order's identity in the shared backend (src/sync.ts); `id` is the short code people see
   synced?: boolean // the backend has it
+  gone?: boolean // this device only: the database no longer has it (deleted by the café or the owner): not followed, not shown
   held?: 'limit' // this device only: the backend refused it for now (10 orders an hour from one device); retried
 }
 export interface GeoPoint { lat: number; lng: number; acc?: number } // acc: the phone's own accuracy estimate, metres
@@ -235,6 +236,13 @@ export function markSynced(uid: string) {
   delete o.held
   commit(mine)
 }
+/** the database no longer has this order (it was deleted there): this device stops following and showing it */
+export function markGone(uid: string) {
+  const { mine, o } = findByUid(uid)
+  if (!o || o.gone) return
+  o.gone = true
+  commit(mine)
+}
 /** the backend refused the order for now (the hourly limit); it is sent again on the next check */
 export function markHeld(uid: string, why: NonNullable<Order['held']>) {
   const { mine, o } = findByUid(uid)
@@ -256,7 +264,7 @@ export function useMyOrders(): Order[] {
   const a = useAccount()
   // with the shared backend on, an order with no `uid` is a leftover from before it (placed before 2026-10-13, kept only
   // on this device): it can never reach the café nor move, so it is not followed (it stuck at "Request received")
-  return [...(a?.orders ?? []), ...guest].filter((o) => !backendOn || !!o.uid).sort((x, y) => y.at - x.at)
+  return [...(a?.orders ?? []), ...guest].filter((o) => (!backendOn || !!o.uid) && !o.gone).sort((x, y) => y.at - x.at)
 }
 /** Every order stored on this device (DEMO: the one account's orders and the guest orders), newest first. */
 export function useAllOrders(): Order[] {

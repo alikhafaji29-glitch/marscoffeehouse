@@ -7,6 +7,8 @@ import { openBuild } from '../bus'
 import { FEATURES } from '../features'
 import { useAccount } from '../account'
 import { SectionsMenu } from './SectionsMenu'
+import { HeaderBranch } from './BranchPicker'
+import { useS } from '../staff/strings'
 import { useNotices } from '../notify'
 
 /* The real Mars logo (owner's PNG, white background removed → public/assets/logo.png). */
@@ -55,6 +57,7 @@ function useHash() {
 
 export function Header() {
   const { lang, setLang, t } = useLang()
+  const s = useS()
   const hash = useHash()
   const onOrder = hash === '#menu' || hash === '#gift'
   const a = useAccount()
@@ -77,6 +80,7 @@ export function Header() {
           <a href="#hours">{t('navHours')}</a>
           <a href="#account">{t('navAccount')}</a>
         </nav>
+        <HeaderBranch />
         <label className="lang-group">
           <span className="sr-only">{t('language')}</span>
           <select className="lang-select" value={lang} onChange={(e) => setLang(e.target.value as Lang)}>
@@ -86,12 +90,16 @@ export function Header() {
         {/* Order now in the header (replaces the bottom tab bar, owner 2026-09-14); on the Order page it turns into Home */}
         {onOrder && <a className="header-order" href="#top">{t('tabHome')}</a>}
         {/* on Home the band's Order now lands here once the band has scrolled away (owner, 2026-09-27) */}
-        {hero.bandGone && <a className="header-order header-order-in" href="#menu">{t('headerOrder')}</a>}
+        {hero.bandGone && <a className="header-order header-order-in" href="#menu" aria-label={t('headerOrder')}><span className="lbl-long">{t('headerOrder')}</span><span className="lbl-short" aria-hidden="true">{s('orderShort')}</span></a>}
         {/* always a way in: "Sign in" when signed out, the customer's initial once signed in (owner, 2026-09-14) */}
         {a ? (
           <a className="header-user" href="#account" aria-label={a.name} title={a.name}>{a.name.slice(0, 1).toUpperCase()}</a>
         ) : (
-          <a className="header-signin" href="#account">{t('signInTitle')}</a>
+          <a className="header-signin" href="#account" aria-label={t('signInTitle')}>
+            {/* on a phone a round person icon, to leave room for the branch (owner, 2026-10-22) */}
+            <svg className="signin-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.6" /><path d="M5 20c1.2-3.6 3.9-5.4 7-5.4s5.8 1.8 7 5.4" /></svg>
+            <span>{t('signInTitle')}</span>
+          </a>
         )}
         {/* the sections icon turns into an X while the menu is open (Blank Street) and closes it */}
         <button type="button" className={'sections-btn' + (open ? ' is-open' : '')} aria-label={(open ? t('close') : t('sections')) + (unread && !open ? ` (${unread})` : '')} aria-expanded={open} onClick={() => setOpen((v) => !v)}>

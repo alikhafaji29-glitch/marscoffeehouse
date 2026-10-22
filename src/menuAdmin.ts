@@ -4,7 +4,7 @@ import type { Badge, MenuCategory, MenuItem } from './menu'
 import seed from './menuData.json'
 import { backendKey, backendOn, backendUrl, getClient } from './backend'
 import { PHOTO } from './menuMeta'
-import { BRANCHES, refreshSeason, setBranches, staffData, subscribeStaff } from './staff/store'
+import { BRANCHES, applyRemoteConfig, refreshSeason, setBranches, staffData, subscribeStaff } from './staff/store'
 import type { Branch, BranchId, L3, Nutrition } from './staff/store'
 import type { Lang } from './i18n'
 
@@ -212,10 +212,11 @@ async function pull(): Promise<boolean> {
   if (!backendOn) return false
   try {
     const get = (path: string) => fetch(`${backendUrl}/rest/v1/${path}`, { headers: { apikey: backendKey! } })
-    const [res, cres, bres] = await Promise.all([
+    const [res, cres, bres, gres] = await Promise.all([
       get('menu_items?select=branch,name,category,names,sort,available,in_stock,prices,sizes,tag,description,flavors,nutrition,photo,flavor_extras'),
       get('menu_categories?select=branch,id,kind,names,sort').catch(() => null),
       get('branches?select=id,names,active,sort&order=sort.asc,id.asc').catch(() => null),
+      get('branch_config?select=branch,settings,offers').catch(() => null), // each branch's settings and offers
     ])
     if (!res.ok) throw new Error(String(res.status))
     const rows = (await res.json()) as DbRow[]
@@ -232,6 +233,7 @@ async function pull(): Promise<boolean> {
       const list = ((await bres.json()) as DbBranch[]).map(toBranch)
       if (list.length && JSON.stringify(list) !== JSON.stringify(BRANCHES)) { sameBranches = false; write(BRANCH_CACHE, list); setBranches(list) }
     }
+    if (gres?.ok) applyRemoteConfig(await gres.json())
     const same = sameBranches && JSON.stringify(next) === JSON.stringify(remote) && JSON.stringify(nextCats) === JSON.stringify(remoteCats)
     remote = next
     remoteCats = nextCats
@@ -245,7 +247,7 @@ async function pull(): Promise<boolean> {
  * "last changed" mark (menu_version, a few hundred bytes) and reads the whole menu (about 44 kB) only when that mark
  * moved since this device last read it, or when this device has no copy yet. If the mark cannot be read, the menu is
  * read as before. */
-const VERSION = 'mars-menu-version'
+const VERSION = 'mars-menu-version-2' // -2: read once more on every device when the branch settings joined (2026-10-22)
 let checking = false
 async function check() {
   if (!backendOn || checking) return

@@ -3,7 +3,7 @@ import { useLang } from '../i18n'
 import { iqd } from '../account'
 import { MENU } from '../menu'
 import { CatPicker, ItemPicker, L3Fields } from './Events'
-import { l3, uid, update, useStaff } from './store'
+import { l3, offersFor, uid, update, useStaff } from './store'
 import type { Offer, OfferGroup } from './store'
 import { useS } from './strings'
 import { Field, I, Modal, Switch } from './ui'
@@ -28,7 +28,7 @@ function OfferEditor({ offer, isNew, onClose }: { offer: Offer; isNew: boolean; 
     if (!(d.price > 0)) { setBad(s('priceNeeded')); return }
     if (d.start >= d.end) { setBad(s('hoursNeeded')); return }
     const next = { ...d, slug }
-    update((st) => ({ offers: isNew ? [...st.offers, next] : st.offers.map((o) => (o.id === d.id ? next : o)) }))
+    update((st) => { const list = st.offers[st.branch] ?? []; return { offers: { ...st.offers, [st.branch]: isNew ? [...list, next] : list.map((o) => (o.id === d.id ? next : o)) } } })
     onClose()
   }
   return (
@@ -101,14 +101,14 @@ export function Offers() {
   const [copied, setCopied] = useState('')
   const [sure, setSure] = useState('')
   const copy = (o: Offer) => { navigator.clipboard?.writeText(`${location.origin}${location.pathname}#${o.slug}`).then(() => { setCopied(o.id); setTimeout(() => setCopied(''), 2000) }).catch(() => {}) }
-  const remove = (id: string) => { if (sure !== id) { setSure(id); return } update((st) => ({ offers: st.offers.filter((o) => o.id !== id) })); setSure('') }
+  const remove = (id: string) => { if (sure !== id) { setSure(id); return } update((st) => ({ offers: { ...st.offers, [st.branch]: (st.offers[st.branch] ?? []).filter((o) => o.id !== id) } })); setSure('') }
   return (
     <>
       <div className="d-toolbar">
         <p className="d-lead">{s('offersLead')}</p>
         <button type="button" className="d-btn solid" onClick={() => setEdit({ offer: blank(), isNew: true })}><I.plus />{s('newOffer')}</button>
       </div>
-      {data.offers.length ? data.offers.map((o) => (
+      {offersFor(data.branch).length ? offersFor(data.branch).map((o) => (
         <section key={o.id} className={'d-card d-row-card' + (o.active ? ' active' : '')}>
           <div className="d-row-main">
             <span className="d-row-icon"><I.offers /></span>
@@ -123,7 +123,7 @@ export function Offers() {
               <p><span dir="ltr">{iqd(o.price)} IQD</span> · {s('nGroups', { n: o.groups.length })} · {s('nItems', { n: o.groups.reduce((n, g) => n + itemsIn(g), 0) })}</p>
               <p className="d-slug"><code dir="ltr">#{o.slug}</code><button type="button" className="d-icon-btn" aria-label={s('copyLink')} onClick={() => copy(o)}><I.copy /></button>{copied === o.id && <small>{s('copied')}</small>}</p>
             </div>
-            <Switch on={o.active} onChange={(v) => update((st) => ({ offers: st.offers.map((x) => (x.id === o.id ? { ...x, active: v } : x)) }))} label={`${o.name.en}: ${s('active')}`} />
+            <Switch on={o.active} onChange={(v) => update((st) => ({ offers: { ...st.offers, [st.branch]: (st.offers[st.branch] ?? []).map((x) => (x.id === o.id ? { ...x, active: v } : x)) } }))} label={`${o.name.en}: ${s('active')}`} />
             <button type="button" className="d-icon-btn" aria-label={s('edit')} onClick={() => setEdit({ offer: o, isNew: false })}><I.edit /></button>
             {o.id !== 'positive' && <button type="button" className={'d-icon-btn' + (sure === o.id ? ' warn' : '')} aria-label={s('delete')} onClick={() => remove(o.id)} onBlur={() => setSure('')}><I.trash /></button>}
           </div>

@@ -7,7 +7,7 @@ import type { GeoPoint } from '../account'
 import { ALL_ITEMS as ALL, MENU } from '../menu'
 import type { MenuItem } from '../menu'
 import { TINT, categoryOf, isIced } from '../menuMeta'
-import { settingsFor, useStaff } from '../staff/store'
+import { offersFor, settingsFor, useStaff } from '../staff/store'
 import type { OfferGroup } from '../staff/store'
 import { useS } from '../staff/strings'
 import { catLabel } from './MenuSection'
@@ -122,7 +122,7 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
   const data = useStaff()
   const a = useAccount()
   const orders = useMyOrders()
-  const offer = data.offers.find((o) => o.id === offerId && o.active)
+  const offer = offersFor().find((o) => o.id === offerId && o.active) // the customer's branch's offer
   const groups = useMemo(() => (offer?.groups ?? []).map((g) => ({ g, cats: choices(g) })).filter((x) => x.cats.length), [offer, data])
   const live = useCountdown(offer ? [hm(offer.start), hm(offer.end)] : undefined).active
   const set = settingsFor()

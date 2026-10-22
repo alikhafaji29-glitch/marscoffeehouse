@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react'
+import { useStaff } from './staff/store'
 import type { ReactNode } from 'react'
 
 export interface CartLine {
@@ -7,6 +8,7 @@ export interface CartLine {
   price: number // unit price including the chosen options
   qty: number
   opts?: string[] // customization words, e.g. ["Almond milk", "Half sweet"]
+  branch?: string // the branch it was added in: its price is that branch's (a line without one counts as any branch's)
 }
 
 export const lineKey = (l: { name: string; size?: string; opts?: string[] }) =>
@@ -30,8 +32,12 @@ const load = (k: string): CartLine[] => { try { return JSON.parse(localStorage.g
  * `basket` = 'order' on the normal screens, 'gift' while the menu is in "Surprise your friend" mode. */
 export function CartProvider({ basket = 'order', children }: { basket?: Basket; children: ReactNode }) {
   const [baskets, setBaskets] = useState<Record<Basket, CartLine[]>>(() => ({ order: load(KEYS.order), gift: load(KEYS.gift) }))
-  const lines = baskets[basket]
-  const setLines = (fn: (ls: CartLine[]) => CartLine[]) => setBaskets((b) => ({ ...b, [basket]: fn(b[basket]) }))
+  // each branch has its own basket inside the same list (owner, 2026-10-22: prices differ between branches): the
+  // screens see and change only the lines of the branch the customer is ordering from; the others wait for a switch back
+  const branch = useStaff().customerBranch
+  const mine = (l: CartLine) => !l.branch || l.branch === branch
+  const lines = baskets[basket].filter(mine)
+  const setLines = (fn: (ls: CartLine[]) => CartLine[]) => setBaskets((b) => ({ ...b, [basket]: [...b[basket].filter((l) => !mine(l)), ...fn(b[basket].filter(mine))] }))
 
   useEffect(() => {
     localStorage.setItem(KEYS.order, JSON.stringify(baskets.order))
@@ -44,7 +50,7 @@ export function CartProvider({ basket = 'order', children }: { basket?: Basket; 
       const existing = ls.find((l) => lineKey(l) === key)
       if (existing)
         return ls.map((l) => (lineKey(l) === key ? { ...l, qty: l.qty + qty } : l))
-      return [...ls, { ...line, qty }]
+      return [...ls, { ...line, qty, branch }]
     })
   }
 

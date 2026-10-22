@@ -18,7 +18,7 @@ export function Overview({ orders, go }: { orders: Order[]; go: (page: string) =
   const now = useNow(30000)
   const today = orders.filter((o) => o.at >= startOf(now))
   const active = orders.filter((o) => isActive(o))
-  const offer = positiveOffer()
+  const offer = positiveOffer(data.branch)
   const ev = activeEvent()
   const set = settingsFor(data.branch)
   return (
