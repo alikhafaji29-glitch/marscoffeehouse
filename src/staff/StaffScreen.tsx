@@ -68,8 +68,9 @@ export function StaffScreen() {
   // the owner's sign-in is for every branch: it may switch between them and add one (the demo's PIN counts as the owner)
   const owner = backendOn ? !!remote.staff && remote.staff.branch === null : true
   useEffect(() => { if (fixedBranch && fixedBranch !== data.branch) update(() => ({ branch: fixedBranch as BranchId })) }, [fixedBranch, data.branch])
-  // a barista's sign-in has the orders only; a manager (and the owner) the whole dashboard (owner, 2026-10-22)
+  // a barista's sign-in has the Dashboard and the Orders only; a manager (and the owner) everything (owner, 2026-10-22)
   const barista = backendOn && remote.staff?.role === 'barista'
+  const BARISTA_PAGES = ['dashboard', 'orders']
   const [page, setPage] = useState(() => read('mars-staff-page', 'dashboard'))
   const [mini, setMini] = useState(false) // the side menu folded to its icons (desktop)
   const [drawer, setDrawer] = useState(false) // the side menu slid in (phones)
@@ -159,7 +160,7 @@ export function StaffScreen() {
     )
   }
 
-  const kind = barista ? 'orders' : page.startsWith('cat:') ? 'cat' : page.startsWith('item:') ? 'item' : page.startsWith('new:') ? 'new' : page.startsWith('newcat:') ? 'newcat' : page.startsWith('editcat:') ? 'editcat' : page
+  const kind = barista && !BARISTA_PAGES.includes(page) ? 'orders' : page.startsWith('cat:') ? 'cat' : page.startsWith('item:') ? 'item' : page.startsWith('new:') ? 'new' : page.startsWith('newcat:') ? 'newcat' : page.startsWith('editcat:') ? 'editcat' : page
   const DRINK_CATS = branchCats('drink')
   const FOOD_CATS = branchCats('food')
   const asked = page.slice(page.indexOf(':') + 1)
@@ -195,7 +196,7 @@ export function StaffScreen() {
           </select>
         </label>
         <nav className="d-nav">
-          {MAIN.filter((m) => !barista || m.id === 'orders').map((m) => (
+          {MAIN.filter((m) => !barista || BARISTA_PAGES.includes(m.id)).map((m) => (
             <button key={m.id} type="button" className={kind === m.id ? 'on' : ''} aria-current={kind === m.id ? 'page' : undefined} onClick={() => go(m.id)} title={s(m.key)}>
               <m.icon /><span>{s(m.key)}</span>{m.id === 'orders' && active > 0 && <b className="d-count">{active}</b>}
             </button>
@@ -257,7 +258,7 @@ export function StaffScreen() {
                         : kind === 'new' ? <NewItem cat={arg} go={go} key={arg + data.branch} />
                           : kind === 'newcat' ? <NewCategory kind={arg === 'food' ? 'food' : 'drink'} go={go} key={arg} />
                             : kind === 'editcat' && arg !== 'all' ? <NewCategory kind="drink" edit={arg} go={go} key={'edit' + arg + data.branch} />
-                        : <Overview orders={orders} go={go} />}
+                        : <Overview orders={orders} go={go} readOnly={barista} />}
       </div>
     </div>
   )

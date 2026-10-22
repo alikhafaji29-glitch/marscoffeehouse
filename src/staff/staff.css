@@ -165,9 +165,9 @@
 .d-grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); gap: 1rem; margin-top: 1rem; }
 .d-grid2 .staff-list { grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); }
 .d-facts { list-style: none; margin: 0; padding: 0; }
-.d-facts button { display: flex; align-items: center; justify-content: space-between; gap: 1rem; width: 100%; border: none; border-top: 1px solid var(--d-line); background: transparent; padding: 0.8rem 0.2rem; text-align: start; }
-.d-facts li:first-child button { border-top: none; }
-.d-facts button:hover { background: var(--d-soft); }
+.d-facts .d-fact { display: flex; align-items: center; justify-content: space-between; gap: 1rem; width: 100%; border: none; border-top: 1px solid var(--d-line); background: transparent; padding: 0.8rem 0.2rem; text-align: start; }
+.d-facts li:first-child .d-fact { border-top: none; }
+.d-facts button.d-fact:hover { background: var(--d-soft); }
 .d-facts b { font-weight: 600; text-align: end; }
 .d-facts b.ok { color: var(--d-green); }
 .d-facts b.off { color: var(--d-mute); }
