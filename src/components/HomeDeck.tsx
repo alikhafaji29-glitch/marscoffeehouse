@@ -279,8 +279,8 @@ export function HomeDeck({ onOrder, onPick }: { onOrder: () => void; onPick: (it
         </Track>
       </section>}
 
-      {/* Coffee of the day (owner, 2026-10-22): a button that opens the day's coffees as a list (CoffeeOfTheDay.tsx) */}
-      <CoffeeOfTheDay items={cotdItems} onPick={onPick} />
+      {/* Coffee of the day (owner, 2026-10-23): a slide like New this season with Mars' photos (CoffeeOfTheDay.tsx) */}
+      <CoffeeOfTheDay items={cotdItems} onPick={onPick} Shelf={Track} />
 
       {/* 4. Your Mood Drink */}
       {/* 4. Build Your Drink + Based On Your Mood: two 16:9 photo cards framed by white strokes (owner, 2026-09-25) */}

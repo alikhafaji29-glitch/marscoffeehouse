@@ -97,4 +97,4 @@ export const TINT: Record<string, [number, number, number]> = {
   extra: [204, 204, 204], sweets: [222, 170, 120], savory: [230, 204, 150],
 }
 export const categoryOf = (name: string): string => MENU.find((c) => c.items.some((i) => i.name === name))?.id ?? 'extra'
-export const isIced = (cat: string) => cat === 'coldCoffee' || cat === 'refreshers' || cat === 'mojito'
+export const isIced = (cat: string) => cat === 'coldCoffee' || cat === 'refreshers' || cat === 'mojito' || cat === 'matcha' // the matchas are served iced (2026-10-23)

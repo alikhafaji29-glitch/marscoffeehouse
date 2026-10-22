@@ -125,10 +125,11 @@ export const MENU: MenuCategory[] = [
   },
   {
     id: 'matcha',
+    // iced, so the cold sizes (owner, 2026-10-23: hot drinks 8 / 12 oz, cold drinks 12 / 16 oz)
     items: [
-      { name: 'Classic Matcha', price: [5000, 6000], sizes: oz8_12 },
-      { name: 'Mid-Night Matcha', price: [5000, 6000], sizes: oz8_12 },
-      { name: 'Berry Matcha', price: [5000, 6000], sizes: oz8_12 },
+      { name: 'Classic Matcha', price: [5000, 6000], sizes: oz12_16 },
+      { name: 'Mid-Night Matcha', price: [5000, 6000], sizes: oz12_16 },
+      { name: 'Berry Matcha', price: [5000, 6000], sizes: oz12_16 },
     ],
   },
   {
@@ -159,7 +160,7 @@ export const MENU: MenuCategory[] = [
       { name: 'Mango Mousse Cake', price: 6500 },
       { name: 'Orange Cream Cake', price: 7500 },
       { name: 'Red Velvet Cake', price: 6500 },
-      { name: 'Carrot Cake', price: 6000 }, // added 2026-10-22 for New this season (owner); price a placeholder, also in the database
+      { name: 'Carrot Cake', price: 5000 }, // added 2026-10-22 for New this season (owner); Erbil 5,000 / Kirkuk 4,000 (owner, 2026-10-23)
       { name: 'Chocolate Danish', price: 6500 },
       { name: 'Molten Cake', price: 3500 }, // Kirkuk only
       { name: 'Brownies Cup', price: 5500 },
