@@ -257,9 +257,8 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
     const now = chosen(k, g.id)
     const next = now.includes(n) ? now.filter((x) => x !== n) : g.pick === 1 ? [n] : now.length < g.pick ? [...now, n] : now
     setPicks({ ...picks, [kk(k, g.id)]: next })
-    // one choice per step: the tap also moves on (the Back button returns to change it)
-    const it = ALL.find((i) => i.name === n)
-    if (g.pick === 1 && !now.includes(n) && !(offer.sizes && it?.sizes) && !(it && groupsFor(it, 'en').length)) { const from = step; setTimeout(() => forward(from), 260) }
+    // a tap only chooses; the customer moves on with Next on every step (owner, 2026-10-23), so a choice can be changed
+    // right there before going on
   }
   const place = () => {
     unlockAudio() // this tap lets the order's status sounds play later
