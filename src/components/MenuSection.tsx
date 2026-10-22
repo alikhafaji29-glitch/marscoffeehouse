@@ -42,6 +42,9 @@ const BADGE_LABELS = { top: 'TOP SELLER', premium: 'PREMIUM', signature: 'SIGNAT
 
 /** an item's picture as the menu shows it: staff's (or the site's) photo, else the cup drawn in its category's colour.
  *  Shared with Home's Coffee of the day (owner, 2026-10-22: "why not use the menu's photo") */
+/** the picture for a section: its first item that has a photo, else its first item (drawn cup) */
+export const sectionPicOf = (items: { name: string }[]) => (items.find((i) => photoOf(i.name)) ?? items[0]).name
+
 export function ItemPic({ name, cat = categoryOf(name), size = 64 }: { name: string; cat?: string; size?: number }) {
   const photo = photoOf(name)
   return photo ? <img src={photo} alt="" loading="lazy" /> : <MiniCup color={TINT[cat] || [200, 200, 200]} ice={cat === 'coldCoffee' || cat === 'refreshers' || cat === 'mojito' ? 1 : 0} size={size} />
@@ -137,7 +140,7 @@ export function MenuSection({ onPick, gift = false }: { onPick: (item: MenuItem)
             {sections.map((c) => (
               <li key={c.id}>
                 <button type="button" className="combo-section order-section" onClick={() => openSection(c.id)}>
-                  <span className="combo-section-cup" aria-hidden="true"><ItemPic name={c.items[0].name} size={40} /></span>
+                  <span className="combo-section-cup" aria-hidden="true"><ItemPic name={sectionPicOf(c.items)} size={40} /></span>
                   <span className="combo-section-text"><b>{sectionName(c.id)}</b><small>{c.items.length === 1 ? u('menuItem1') : u('menuItemsN', { n: c.items.length })}</small></span>
                   <span className="combo-section-go" aria-hidden="true">›</span>
                 </button>

@@ -131,7 +131,7 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
           <>
             <h3>{(a?.name || name.trim()) ? t('thanksName').replace('{name}', (a?.name || name).trim().split(/\s+/)[0]) : t('orderPlaced')}</h3>
             {placed && <p className="modal-line">{t('thanksReady')}</p>}
-            {placed && <OrderTracker order={placed} dark />}
+            {placed && <OrderTracker order={placed} />}
             {waLink && <><a className="btn-pill" href={waLink} target="_blank" rel="noreferrer">{s('siteSendWhatsapp')}</a><p className="modal-line small">{s('siteWhatsappHint')}</p></>}
             {a && <p className="modal-line">{t('pointsEarned').replace('{n}', String(paid.points))}</p>}
             {paid.reward && <p className="modal-line"><b>{t('rewardUnlocked')}</b></p>}

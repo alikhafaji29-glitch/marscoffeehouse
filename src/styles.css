@@ -2179,8 +2179,8 @@ body:has(.modal-overlay) .time-changer { display: none; }
 .order-sections { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.6rem; }
 @media (min-width: 761px) { .order-sections { grid-template-columns: repeat(2, 1fr); gap: 0.8rem; } }
 .order-section { min-height: 4.6rem; }
-.order-section .combo-section-cup { overflow: hidden; }
-.order-section .combo-section-cup img { width: 100%; height: 100%; object-fit: cover; }
+.combo-section-cup { overflow: hidden; }
+.combo-section-cup img { width: 100%; height: 100%; object-fit: cover; } /* the menu's and Positive Hours' section lists (2026-10-22) */
 .osection .combo-sections-back { margin-bottom: 0.2rem; }
 /* the customer's feedback window (owner, 2026-10-22) */
 .feedback-box { max-width: 26rem; width: min(92vw, 26rem); }
@@ -2209,3 +2209,19 @@ label.missing input, label.missing textarea, label.missing select, .place-fields
 #seasonal .fav-head, body[data-view='home'] #seasonal .fav-head { position: static; color: var(--navy); text-shadow: none; padding: 1.2rem 1.2rem 0.5rem; }
 #seasonal .fav-head .eyebrow { color: var(--sky-deep); }
 @media (min-width: 761px) { #seasonal .fav-head, body[data-view='home'] #seasonal .fav-head { padding: 1.6rem 4vw 0.6rem; } }
+/* Pop-up windows in the item page's colours (owner, 2026-10-22: "the signature white", "use same colors"): white card,
+   navy text, navy-tint boxes, solid navy button; was sky blue with white outlines */
+.modal { background: #fff; color: var(--navy); border: none; box-shadow: 0 18px 50px rgba(3, 30, 70, 0.28); }
+.modal .btn-pill { align-self: stretch; background: var(--navy); border-color: var(--navy); color: #fff; font: 700 0.85rem/1.2 var(--font-display); letter-spacing: 0.12em; text-transform: uppercase; padding: 1rem 1.4rem; text-align: center; }
+.modal .btn-pill:hover { background: var(--ink); border-color: var(--ink); color: #fff; }
+.modal .btn-pill.ghost { background: #fff; color: var(--navy); border-color: rgba(0, 36, 76, 0.25); backdrop-filter: none; }
+.modal .modal-line.small, .modal .note { color: rgba(0, 36, 76, 0.7); opacity: 1; }
+.missing-list li { background: rgba(0, 47, 109, 0.06); }
+.branch-pick-btn { background: rgba(0, 47, 109, 0.06); border-color: transparent; }
+.branch-icon { background: rgba(0, 47, 109, 0.06); }
+.track-modal .track + .track { border-top-color: rgba(0, 36, 76, 0.12); }
+.fb-stars button { color: rgba(0, 47, 109, 0.2); }
+.fb-stars button.on { color: var(--caramel); text-shadow: none; }
+.fb-tag { border-color: rgba(0, 36, 76, 0.2); }
+.fb-comment { border: 1.5px solid rgba(0, 36, 76, 0.15); }
+.fb-later, .branch-pick-close { color: var(--navy); }
