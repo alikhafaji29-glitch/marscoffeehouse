@@ -89,9 +89,13 @@ const PRODUCTS: { key: TKey; price: number; img: string; bg: string }[] = [
  */
 /* Positive Hours background: the owner's reel clips, one after another, crossfaded, muted, looping.
  * Two stacked <video>s: while one plays, the other is loaded with the next clip. Phones get the
- * portrait crops, wide screens the full-frame versions; reduced motion keeps the photo. */
-const HOURS_CLIPS_PHONE = ['/assets/featured/hours-indoor.mp4', '/assets/featured/hours-sea.mp4', '/assets/featured/hours-city.mp4', '/assets/featured/sandwich-open.mp4']
-const HOURS_CLIPS_WIDE = ['/assets/featured/hours-indoor-wide.mp4', '/assets/featured/hours-city-wide.mp4', '/assets/featured/hours-sea-wide.mp4']
+ * portrait crops, wide screens the full-frame versions; reduced motion keeps the photo.
+ * Since 2026-10-22 one reel (owner's IMG_0019: the Mars bag, sandwiches and iced drinks at the table);
+ * the wide cut is the portrait reel centred over a blurred copy of itself. */
+const HOURS_CLIPS_PHONE = ['/assets/featured/hours-reel.mp4']
+const HOURS_CLIPS_WIDE = ['/assets/featured/hours-reel-wide.mp4']
+const HOURS_POSTER_PHONE = '/assets/featured/hours-reel.jpg'
+const HOURS_POSTER_WIDE = '/assets/featured/hours-reel-wide.jpg'
 // Lunch Hours (owner, 2026-09-27): the owner's lunch reel; the phone cut follows the food shot by shot, the mute icon is blurred
 const LUNCH_CLIPS_PHONE = ['/assets/featured/lunch-hours.mp4']
 const LUNCH_CLIPS_WIDE = ['/assets/featured/lunch-hours-wide.mp4']
@@ -180,7 +184,7 @@ export function HomeDeck({ onOrder, onPick }: { onOrder: () => void; onPick: (it
   const hoursSlide = (
     <section key={'hours-' + (active ? 'live' : 'pre')} className={'slide slide-photo' + (active ? ' live' : '')} id="hours" aria-labelledby="hours-title" style={{ background: '#d9c9b0' }}>
       {/* after 12:00 (pre-order) the owner's flat-lay photo instead of the video (owner, 2026-09-27) */}
-      {active ? <HoursVideo poster={PHOTOS.hours} /> : <img className="bg" src={PREORDER_PHOTO} alt="" draggable={false} />}
+      {active ? <HoursVideo poster={window.matchMedia('(max-width: 760px)').matches ? HOURS_POSTER_PHONE : HOURS_POSTER_WIDE} /> : <img className="bg" src={PREORDER_PHOTO} alt="" draggable={false} />}
       <div className="slide-text">
         <p className="eyebrow count" dir="auto">{active ? <>{t('offerEndsIn')} <b dir="ltr">{text}</b></> : <>{t('startsAgainAt')} <b dir="ltr">{text}</b></>}</p>
         <h2 className="slide-title" id="hours-title">Positive Hours</h2>

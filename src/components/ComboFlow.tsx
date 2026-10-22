@@ -300,12 +300,14 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
         <div className="combo-body" ref={bodyRef}>
           {step === ASK && (
             <div className="combo-count">
-              {/* a nudge to order for friends, as white stickers (owner's mock-up, 2026-10-22) */}
-              <div className="combo-cheer" aria-label={`${s('cheer1')} ${s('cheer2')} ${s('cheer3')}`}>
-                <p className="combo-sticker" aria-hidden="true"><span>{s('cheer1')}</span><span>{s('cheer2')}</span><span>{s('cheer3')}</span></p>
-                <p className="combo-sticker small" aria-hidden="true">{s('comboHowMany')}</p>
+              {/* a nudge to order for friends: the owner's "Don't eat alone" bubble (2026-10-22); the picture is
+                  English, so Arabic and Kurdish get the same bubble drawn with their own words */}
+              <div className="combo-cheer" role="img" aria-label={`${s('cheer1')} ${s('cheer2')} ${s('cheer3')}`}>
+                {lang === 'en'
+                  ? <img src="/assets/dont-eat-alone.webp" alt="" width={900} height={445} />
+                  : <p className="cheer-bubble" aria-hidden="true"><span className="cheer-a">{s('cheer1')}</span><span className="cheer-b">{s('cheer2')}</span><span className="cheer-c">{s('cheer3')}</span></p>}
               </div>
-              <p className="combo-hint">{s('comboHowManyHint')}</p>
+              <p className="combo-ask">{s('comboHowMany')}</p>
               <div className="combo-stepper">
                 <button type="button" onClick={() => setCountTo(count - 1)} disabled={count <= 1} aria-label={s('comboFewer')}>−</button>
                 <output aria-live="polite" dir="ltr">{count}</output>
