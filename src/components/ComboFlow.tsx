@@ -331,7 +331,7 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
                     return (
                       <button key={c.cat} type="button" role="listitem" className={'combo-section' + (has ? ' on' : '')} onClick={() => openSection(c.cat)}>
                         <span className="combo-section-cup" aria-hidden="true"><MiniCup color={TINT[c.cat] || [200, 200, 200]} ice={isIced(c.cat) ? 1 : 0} size={40} /></span>
-                        <span className="combo-section-text"><b>{catLabel(c.cat, lang)}</b><small>{s('comboDrinksN', { n: c.items.length })}</small></span>
+                        <span className="combo-section-text"><b>{catLabel(c.cat, lang)}</b><small>{c.items.length === 1 ? s('comboDrink1') : s('comboDrinksN', { n: c.items.length })}</small></span>
                         <span className="combo-section-go" aria-hidden="true">{has ? <IconCheck /> : '›'}</span>
                       </button>
                     )

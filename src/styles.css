@@ -2163,3 +2163,10 @@ body:has(.modal-overlay) .time-changer { display: none; }
 .ocard-name { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .ocard-foot { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.1rem; }
 .ocard-foot .ocard-badge { margin-top: 0; }
+/* the main menu's sections, as in the Positive Hours drinks (owner, 2026-10-22) */
+.order-sections { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.6rem; }
+@media (min-width: 761px) { .order-sections { grid-template-columns: repeat(2, 1fr); gap: 0.8rem; } }
+.order-section { min-height: 4.6rem; }
+.order-section .combo-section-cup { overflow: hidden; }
+.order-section .combo-section-cup img { width: 100%; height: 100%; object-fit: cover; }
+.osection .combo-sections-back { margin-bottom: 0.2rem; }

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLang } from '../i18n'
 import type { Lang } from '../i18n'
 import { MENU, ORDER_MENU, CURATED } from '../menu'
@@ -9,6 +9,7 @@ import { DESC, TINT, categoryOf } from '../menuMeta'
 import { BRANCHES, activeEvent, branchLabel, setCustomerBranch, useStaff } from '../staff/store'
 import { categoryName, itemState, nameOf, photoOf } from '../menuAdmin'
 import type { BranchId } from '../staff/store'
+import { useS } from '../staff/strings'
 
 /*
  * The Order screen, after the Blank Street ordering page (owner, 2026-09-10): a round search button and a
@@ -77,65 +78,31 @@ function Card({ item, cat, onPick }: { item: MenuItem; cat: string; onPick: (i: 
 
 export function MenuSection({ onPick, gift = false }: { onPick: (item: MenuItem) => void; gift?: boolean }) {
   const { lang, t } = useLang()
+  const u = useS()
   const staff = useStaff()
   // the New Season section is the dashboard's active event: its items, its name, its promo strip; without one it is left out
   const event = activeEvent()
   // an item the chosen branch does not sell is left out (menuAdmin.ts marks it hidden)
   const sections = ORDER_MENU.map((c) => ({ id: c.id, items: c.items.filter((i) => !i.hidden) })).filter((c) => c.items.length)
   const sectionName = (id: string) => (id === 'season' && event?.name[lang]) || catLabel(id, lang)
-  const [active, setActive] = useState(sections[0].id)
+  // the menu is a list of sections first; a tap opens one, "‹ All sections" goes back (owner, 2026-10-22: "make the main
+  // menu as sections like positive hours"; it was one long page with a tab row following the scroll)
+  const [open, setOpen] = useState('')
   const [searching, setSearching] = useState(false)
   const [q, setQ] = useState('')
-  const tabsRef = useRef<HTMLDivElement>(null)
   const query = q.trim().toLowerCase()
   const results = query ? MENU.flatMap((c) => c.items.filter((i) => !i.hidden && [i.name, ...Object.values(itemState(i.name)?.names ?? {})].some((n) => n.toLowerCase().includes(query))).map((i) => ({ item: i, cat: c.id }))) : [] // any language
-
-  // the underline follows the section in view: the last section whose top has passed the line 45% down the screen
-  // (the first one at the top of the list). Worked out from positions on every scroll, so arriving on the Menu screen
-  // from a scrolled Home cannot leave a stale tab lit (an IntersectionObserver band saw no change at the very top).
+  const shown = sections.find((c) => c.id === open)
+  // a section that left the menu (a branch switch, an event ended) goes back to the list
+  useEffect(() => { if (open && !shown) setOpen('') }, [open, shown])
+  // coming to the menu again (Order now, the header's Menu) starts at the sections
   useEffect(() => {
-    if (query) return
-    let raf = 0
-    const update = () => {
-      raf = 0
-      const heads = [...document.querySelectorAll<HTMLElement>('.osection')]
-      if (!heads.length || !heads[0].getClientRects().length) return // the Menu screen is hidden (phones)
-      const line = window.innerHeight * 0.45
-      let cur = heads[0].dataset.cat!
-      for (const h of heads) {
-        if (h.getBoundingClientRect().top > line) break
-        cur = h.dataset.cat!
-      }
-      setActive(cur)
-    }
-    const schedule = () => { if (!raf) raf = requestAnimationFrame(update) }
-    const onHash = () => setTimeout(schedule, 120) // after App has switched the screen and scrolled it to the top
-    window.addEventListener('scroll', schedule, { passive: true })
-    window.addEventListener('resize', schedule)
-    window.addEventListener('hashchange', onHash)
-    update()
-    return () => {
-      cancelAnimationFrame(raf)
-      window.removeEventListener('scroll', schedule)
-      window.removeEventListener('resize', schedule)
-      window.removeEventListener('hashchange', onHash)
-    }
-  }, [query])
-  // centre the lit tab in its row: only the row scrolls sideways (scrollIntoView also scrolled the page, which on
-  // desktop cancelled the scroll to a tapped category)
-  useEffect(() => {
-    const row = tabsRef.current
-    const tab = row?.querySelector<HTMLElement>(`[data-tab="${active}"]`)
-    if (!row || !tab) return
-    const delta = tab.getBoundingClientRect().left - row.getBoundingClientRect().left - (row.clientWidth - tab.offsetWidth) / 2
-    row.scrollBy({ left: delta, behavior: 'smooth' })
-  }, [active])
-
-  const go = (id: string) => {
-    setActive(id)
-    const el = document.getElementById('cat-' + id)
-    if (el) { const y = el.getBoundingClientRect().top + window.scrollY - 118; window.scrollTo({ top: y, behavior: 'smooth' }) }
-  }
+    const on = () => { if (location.hash === '#menu') setOpen('') }
+    window.addEventListener('hashchange', on)
+    return () => window.removeEventListener('hashchange', on)
+  }, [])
+  const toTop = () => { const el = document.getElementById('menu'); if (el && el.getBoundingClientRect().top < 0) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 70 }) }
+  const openSection = (id: string) => { setOpen(id); requestAnimationFrame(toTop) }
 
   return (
     <section className="order" id="menu">
@@ -157,15 +124,6 @@ export function MenuSection({ onPick, gift = false }: { onPick: (item: MenuItem)
           </label>
         </div>
         {searching && <input className="order-search" autoFocus placeholder={t('searchMenu')} value={q} onChange={(e) => setQ(e.target.value)} aria-label={t('searchMenu')} />}
-        {!query && (
-          <div className="order-tabs" ref={tabsRef} role="tablist">
-            {sections.map((c) => (
-              <button key={c.id} type="button" role="tab" data-tab={c.id} aria-selected={c.id === active} className={'order-tab' + (c.id === active ? ' on' : '')} onClick={() => go(c.id)}>
-                {sectionName(c.id)}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
       {query ? (
@@ -173,13 +131,26 @@ export function MenuSection({ onPick, gift = false }: { onPick: (item: MenuItem)
           <h2 className="osection-title">{t('results')}</h2>
           {results.length ? <ul className="ocards">{results.map(({ item, cat }) => <Card key={item.name} item={item} cat={cat} onPick={onPick} />)}</ul> : <p className="acct-hint">{t('noResults')}</p>}
         </div>
+      ) : !shown ? (
+        <div className="osection" data-cat="sections">
+          <ul className="order-sections" aria-label={u('comboSections')}>
+            {sections.map((c) => (
+              <li key={c.id}>
+                <button type="button" className="combo-section order-section" onClick={() => openSection(c.id)}>
+                  <span className="combo-section-cup" aria-hidden="true"><ItemPic name={c.items[0].name} size={40} /></span>
+                  <span className="combo-section-text"><b>{sectionName(c.id)}</b><small>{c.items.length === 1 ? u('menuItem1') : u('menuItemsN', { n: c.items.length })}</small></span>
+                  <span className="combo-section-go" aria-hidden="true">›</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
       ) : (
-        sections.map((c) => (
-          <div className="osection" key={c.id} id={'cat-' + c.id} data-cat={c.id}>
-            <h2 className="osection-title">{sectionName(c.id)}</h2>
-            <ul className="ocards">{c.items.map((item) => <Card key={item.name} item={item} cat={CURATED.includes(c.id) ? categoryOf(item.name) : c.id} onPick={onPick} />)}</ul>
-          </div>
-        ))
+        <div className="osection" id={'cat-' + shown.id} data-cat={shown.id}>
+          <button type="button" className="combo-sections-back" onClick={() => openSection('')}>‹ {u('comboAllSections')}</button>
+          <h2 className="osection-title">{sectionName(shown.id)}</h2>
+          <ul className="ocards">{shown.items.map((item) => <Card key={item.name} item={item} cat={CURATED.includes(shown.id) ? categoryOf(item.name) : shown.id} onPick={onPick} />)}</ul>
+        </div>
       )}
     </section>
   )
