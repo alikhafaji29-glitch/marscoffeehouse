@@ -332,3 +332,6 @@ button.d-chip.on { background: var(--d-ink); color: #fff; }
 .d-fb-tags { margin: 0; display: flex; flex-wrap: wrap; gap: 0.3rem; }
 .d-fb-tags span { font-size: 0.78rem; padding: 0.2rem 0.55rem; border-radius: 999px; background: #e8ecf2; }
 .d-fb-comment { margin: 0; font-size: 0.9rem; font-style: italic; }
+/* Coffee of the day on the Offers page (2026-10-23) */
+.d-cotd-card { display: grid; gap: 0.8rem; }
+.d-cotd-card .d-field, .d-cotd-card label { max-width: 14rem; }

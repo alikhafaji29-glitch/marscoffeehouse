@@ -19,7 +19,6 @@ import type { Cat } from './BaristaJourney'
 import { SidePanel } from './SidePanel'
 import { PHOTOS } from '../photos'
 import { Logo } from './Header'
-import { IconPin } from './Icons'
 import { iqd } from '../account'
 
 // Build Your Drink card photo: a finished iced build in the Mars cup (the builder's last frame)
@@ -331,17 +330,8 @@ export function HomeDeck({ onOrder, onPick }: { onOrder: () => void; onPick: (it
       <section className="slide slide-brand" id="about">
         <div className="brand-logo"><Logo /></div>
         <p className="brand-line">{t('footer')}</p>
-        <div className="branches" id="locations">
-          {[1, 2].map((n) => (
-            <div className="branch" key={n}>
-              <span className="branch-icon"><IconPin /></span>
-              <div>
-                <h3>{t('branch')} {n} · Erbil</h3>
-                <p>{t('locTbc')}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+        {/* the two placeholder branch cards ("coming soon") are out until Mars gives the addresses and hours (2026-10-23) */}
+        <div id="locations" />
         <p className="brand-copy">© Mars CoffeeHouse</p>
       </section>
       {moodOpen && <MoodDialog onPick={onPick} onClose={() => setMoodOpen(false)} />}

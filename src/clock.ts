@@ -7,7 +7,9 @@ import { useEffect, useState } from 'react'
  * is kept on this device (localStorage) until "Live" is chosen again.
  * Turn SHOW_TIME_CHANGER off before launch so customers never see the button.
  */
-export const SHOW_TIME_CHANGER = true
+// off on the real address (marscoffeehouse.com, live since 2026-10-23): customers always get the real time; the demo
+// (vercel.app), the Cloudflare test copy (pages.dev) and this PC keep it for reviewing
+export const SHOW_TIME_CHANGER = typeof location === 'undefined' || !/(^|\.)marscoffeehouse\.com$/.test(location.hostname)
 /** the review time a visitor starts at, until they pick another or "Live now" (owner, 2026-10-22: the demo site opens
  *  during Positive Hours). Off with the time changer, so the real site always runs on the real time. */
 const DEFAULT_PREVIEW: string | null = SHOW_TIME_CHANGER ? '09:00' : null
@@ -24,6 +26,7 @@ try {
   const saved = localStorage.getItem(KEY)
   offset = saved !== null ? Number(saved) || 0 : DEFAULT_PREVIEW ? offsetTo(DEFAULT_PREVIEW) : 0
 } catch { offset = DEFAULT_PREVIEW ? offsetTo(DEFAULT_PREVIEW) : 0 }
+if (!SHOW_TIME_CHANGER) offset = 0 // the real site: never a review time, even one saved on this device earlier
 const subs = new Set<() => void>()
 
 /** the site's "now": real time, or the review time while one is set */

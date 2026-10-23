@@ -4,7 +4,8 @@ import { useLang } from '../i18n'
 import { iqd } from '../account'
 import { MENU } from '../menu'
 import { CatPicker, ItemPicker, L3Fields } from './Events'
-import { l3, offersFor, uid, update, useStaff } from './store'
+import { COTD_DEFAULT, l3, offersFor, settingsFor, uid, update, useStaff } from './store'
+import { nameOf } from '../menuAdmin'
 import type { Offer, OfferGroup } from './store'
 import { useS } from './strings'
 import { Field, I, Modal, Switch } from './ui'
@@ -94,6 +95,38 @@ function OfferEditor({ offer, isNew, onClose }: { offer: Offer; isNew: boolean; 
   )
 }
 
+/* Coffee of the day, on the Offers page next to the combo deals (owner, 2026-10-23: "add coffee of the day price control
+ * in the dashboard"; it was under Tools): show it on Home, its one price, and which coffees. Per branch, saved with the
+ * branch's settings (in the database for a manager), so customers see a change within a minute. */
+function CotdCard() {
+  const s = useS()
+  const data = useStaff()
+  const cotd = settingsFor(data.branch).cotd ?? COTD_DEFAULT
+  const patch = (c: Partial<typeof cotd>) => update((st) => ({ settings: { ...st.settings, [st.branch]: { ...settingsFor(st.branch), cotd: { ...(settingsFor(st.branch).cotd ?? COTD_DEFAULT), ...c } } } }))
+  return (
+    <section className={'d-card d-cotd-card' + (cotd.on ? ' active' : '')} aria-labelledby="d-cotd-title">
+      <div className="d-row-main">
+        <span className="d-row-icon"><I.money /></span>
+        <div className="d-row-text">
+          <h3 id="d-cotd-title">{s('cotdTitle')}<em className={'d-pill ' + (cotd.on ? 'ok' : 'line')}>{cotd.on ? s('active') : s('inactive')}</em></h3>
+          <p>{s('cotdToolsSub')}</p>
+        </div>
+        <Switch on={cotd.on} onChange={(v) => patch({ on: v })} label={s('cotdShow')} />
+      </div>
+      <Field label={s('cotdPrice')}>
+        <input type="number" inputMode="numeric" min={0} step={250} dir="ltr" value={cotd.price} onChange={(e) => patch({ price: Math.max(0, Math.round(Number(e.target.value) || 0)) })} />
+      </Field>
+      <p className="d-form-title">{s('cotdItems')}</p>
+      <div className="d-chips">
+        {MENU.filter((c) => c.id === 'coffeeMore' || c.id === 'coldCoffee').flatMap((c) => c.items).map((i) => {
+          const on = cotd.items.includes(i.name)
+          return <button key={i.name} type="button" className={'d-chip' + (on ? ' on' : '')} aria-pressed={on} onClick={() => patch({ items: on ? cotd.items.filter((x) => x !== i.name) : [...cotd.items, i.name] })}>{nameOf(i.name, 'en')}</button>
+        })}
+      </div>
+    </section>
+  )
+}
+
 export function Offers() {
   const s = useS()
   const { lang } = useLang()
@@ -131,6 +164,7 @@ export function Offers() {
           {sure === o.id && <p className="d-error">{s('tapAgainDelete')}</p>}
         </section>
       )) : <p className="staff-empty">{s('noOffers')}</p>}
+      <CotdCard />
       <p className="demo-note">{s('offersNote')}</p>
       {edit && <OfferEditor offer={edit.offer} isNew={edit.isNew} onClose={() => setEdit(null)} />}
     </>
