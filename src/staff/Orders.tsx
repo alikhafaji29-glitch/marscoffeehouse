@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useLang } from '../i18n'
 import type { Lang, TKey } from '../i18n'
-import { iqd } from '../account'
+import { iqd, waNumber } from '../account'
 import type { Order } from '../account'
 import { CANCEL_REASONS, LEAD_MIN, STAGES, dueOf, groupLines, isActive, isCancelled, isLater, nextStage, reasonText, stageIndex, stagesFor, timeText, untilText, useNow, whenText } from '../orders'
 import { branchName, settingsFor, useStaff } from './store'
@@ -12,6 +12,7 @@ import { IconCheck, IconPin } from '../components/Icons'
 import { mapsLink } from '../components/ShareLocation'
 import { cancelOrder, moveOrder } from './remote'
 import { useS } from './strings'
+import { I } from './ui'
 
 /*
  * Orders: the incoming orders and the buttons that move each one through the tracking stages the customer sees
@@ -30,6 +31,50 @@ export function ago(at: number, now: number, lang: Lang, justNow: string): strin
 }
 
 const phoneOf = (o: Order) => o.delivery?.phone ?? o.customer?.phone ?? ''
+
+/*
+ * Send a delivery order to a driver on WhatsApp (owner, 2026-10-23): one button per driver set in Tools, and Other…
+ * to pick any chat. WhatsApp opens with the order written out (who, phone, address, map link, items, note, what to
+ * collect); staff press Send there. This device remembers who it went to, to show on the card.
+ */
+const SENT_KEY = 'mars-staff-sent'
+const readSent = (): Record<string, { name: string; at: number }> => { try { return JSON.parse(localStorage.getItem(SENT_KEY) || '{}') } catch { return {} } }
+function SendToDriver({ o }: { o: Order }) {
+  const { t, lang } = useLang()
+  const s = useS()
+  const now = useNow(30000)
+  const viewing = useStaff().branch
+  const drivers = (settingsFor(o.branch ?? viewing).drivers ?? []).filter((d) => d.phone.replace(/\D/g, '').length >= 8)
+  const key = o.uid ?? o.id
+  const [sent, setSent] = useState(() => readSent()[key])
+  const text = () => {
+    const lines = [`Mars CoffeeHouse · ${branchName(o.branch)} · #${o.id}`, '']
+    if (o.customer) lines.push(`${s('waCustomer')}: ${o.customer.name} · ${phoneOf(o)}`)
+    if (o.delivery?.address) lines.push(`${s('waAddress')}: ${o.delivery.address}`)
+    // the plain map link of the customer's pin (owner chose it over a directions link, 2026-10-23); WhatsApp links cannot carry a location pin
+    if (o.delivery?.location) lines.push(`${s('waLocation')}: ${mapsLink(o.delivery.location)}`)
+    lines.push('')
+    for (const g of groupLines(o.items)) { if (g.combo) lines.push(s('comboN', { n: g.combo })); for (const x of g.lines) lines.push('• ' + x) }
+    if (o.note) lines.push('', `${t('orderNote')}: ${o.note}`)
+    lines.push('', o.pay === 'wallet' ? t('paidByWallet') : s('waCollect', { n: iqd(o.total) }))
+    return lines.join('\n')
+  }
+  const send = (name: string, phone?: string) => {
+    window.open(`https://wa.me/${phone ? waNumber(phone) : ''}?text=${encodeURIComponent(text())}`, '_blank', 'noopener')
+    const all = readSent()
+    all[key] = { name, at: Date.now() }
+    try { localStorage.setItem(SENT_KEY, JSON.stringify(all)) } catch { /* ignore */ }
+    setSent(all[key])
+  }
+  return (
+    <>
+      {/* in the card's action row, beside Print receipt (owner, 2026-10-23) */}
+      {drivers.map((d, i) => <button key={i} type="button" className="staff-wa" title={s('sendToDriver')} onClick={() => send(d.name || d.phone, d.phone)}><I.whatsapp />{d.name || d.phone}</button>)}
+      <button type="button" className={'staff-wa' + (drivers.length ? ' other' : '')} title={s('sendToDriver')} onClick={() => send(drivers.length ? s('sendOther') : 'WhatsApp')}><I.whatsapp />{drivers.length ? s('sendOther') : s('sendWhatsapp')}</button>
+      {sent && <small className="staff-sent">{s('sentTo', { name: sent.name, t: ago(sent.at, now, lang, t('justNow')) })}</small>}
+    </>
+  )
+}
 
 /** the receipt's words for an order, in the dashboard's language (the Print button and auto-print use it) */
 export function useReceiptText(): (o: Order) => ReceiptText {
@@ -115,7 +160,10 @@ export function OrderCard({ o, lead = LEAD_MIN }: { o: Order; lead?: number }) {
         </div>
       )}
       <p className="staff-total"><b dir="ltr">{iqd(o.total)} IQD</b> · {o.pay === 'wallet' ? t('paidByWallet') : o.fulfil === 'delivery' ? t('payOnDelivery') : t('payAtPickup')}{o.offer?.fee ? <> · {s('inclFee', { n: iqd(o.offer.fee) })}</> : null}</p>
-      <button type="button" className="staff-print" onClick={() => printReceipt(o, receipt(o))}><PrintIcon />{s('printReceipt')}</button>
+      <div className="staff-acts" role="group">
+        <button type="button" className="staff-print" onClick={() => printReceipt(o, receipt(o))}><PrintIcon />{s('printReceipt')}</button>
+        {o.fulfil === 'delivery' && !cancelled && isActive(o) && <SendToDriver o={o} />}
+      </div>
       {cancelled && <p className="staff-cancel-reason"><b>{t('cancelReason')}:</b> {reasonText(o.cancelReason, t)}</p>}
       {!cancelled && <ol className="staff-steps" aria-label={t('trackOrder')}>
         {stages.map((st, i) => (

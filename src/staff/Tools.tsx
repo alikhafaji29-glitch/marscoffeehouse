@@ -39,6 +39,20 @@ export function Tools() {
         </div>
         <p className="d-hint">{s('fulfilOne')}</p>
       </Card>
+      <Card title={s('driversTitle')} sub={s('driversSub')}>
+        {(set.drivers ?? []).map((d, i) => {
+          const edit = (p: Partial<typeof d>) => patch({ drivers: (set.drivers ?? []).map((x, j) => (j === i ? { ...x, ...p } : x)) })
+          return (
+            <div key={i} className="d-driver">
+              <Field label={s('driverName')}><input value={d.name} maxLength={40} onChange={(e) => edit({ name: e.target.value })} /></Field>
+              <Field label={s('driverPhone')}><input type="tel" inputMode="tel" dir="ltr" value={d.phone} placeholder="0750 000 0000" onChange={(e) => edit({ phone: e.target.value.replace(/[^\d+ ]/g, '') })} /></Field>
+              <button type="button" className="d-btn line" onClick={() => patch({ drivers: (set.drivers ?? []).filter((_, j) => j !== i) })}>{s('driverRemove')}</button>
+            </div>
+          )
+        })}
+        {!(set.drivers ?? []).length && <p className="d-hint">{s('driversNone')}</p>}
+        <button type="button" className="d-btn" onClick={() => patch({ drivers: [...(set.drivers ?? []), { name: '', phone: '' }] })}><I.plus />{s('driverAdd')}</button>
+      </Card>
       <Card title={s('leadTitle')} sub={s('leadSub')}>
         <div className="d-seg" role="radiogroup" aria-label={s('leadTitle')}>
           {[10, 15, 20, 30].map((n) => <button key={n} type="button" role="radio" aria-checked={(set.lead ?? LEAD_MIN) === n} className={(set.lead ?? LEAD_MIN) === n ? 'on' : ''} onClick={() => patch({ lead: n })}>{s('leadMin', { n })}</button>)}

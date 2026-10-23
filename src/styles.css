@@ -2242,3 +2242,15 @@ body.ph-on .band-pill, body.ph-on .header-order-in { display: none; }
 /* order receipt (2026-10-23): a Print button on each order card */
 .staff-print { justify-self: start; align-self: flex-start; display: inline-flex; align-items: center; gap: 0.4rem; min-height: 40px; padding: 0 0.9rem; border-radius: 999px; border: 1.5px solid rgba(17, 38, 75, 0.2); background: #fff; color: var(--navy); font: 600 0.85rem/1 var(--font-sans); cursor: pointer; }
 .staff-print:hover { border-color: var(--navy); }
+/* send a delivery order to a driver on WhatsApp (2026-10-23) */
+.staff-send { display: grid; gap: 0.4rem; padding: 0.6rem 0.7rem; border-radius: 0.8rem; background: rgba(37, 211, 102, 0.08); }
+.staff-send-btns { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.staff-wa { display: inline-flex; align-items: center; gap: 0.35rem; min-height: 40px; padding: 0 0.9rem; border-radius: 999px; border: 0; background: #1f8f4e; color: #fff; font: 600 0.88rem/1 var(--font-sans); cursor: pointer; }
+.staff-wa svg { width: 18px; height: 18px; }
+.staff-wa.other { background: #fff; color: #1f8f4e; border: 1.5px solid #1f8f4e; }
+.staff-sent { color: #1f6b3d; font-size: 0.8rem; }
+.d-driver { display: grid; grid-template-columns: 1fr 1fr auto; gap: 0.6rem; align-items: end; margin-bottom: 0.6rem; }
+@media (max-width: 560px) { .d-driver { grid-template-columns: 1fr; } }
+/* Print receipt and the WhatsApp buttons in one row; "Sent to" on its own line under them (2026-10-23) */
+.staff-acts { display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem; }
+.staff-acts .staff-sent { flex-basis: 100%; }
