@@ -12,7 +12,7 @@ import type { SKey } from './strings'
 import { useRemote } from './remote'
 import { backendOn } from '../backend'
 import { localFeedback } from '../feedback'
-import { ago } from './Orders'
+import { PhoneIcon, ago } from './Orders'
 import { Card, I, Stat } from './ui'
 
 /* Dashboard: today at a glance for the chosen branch, the orders waiting for a hand, and what is running on the site. */
@@ -85,6 +85,12 @@ export function Overview({ orders, go, readOnly = false }: { orders: Order[]; go
                   {f.kind === 'received' && f.rating ? <b className="d-fb-stars" aria-label={`${f.rating} / 5`}>{'★'.repeat(f.rating)}<span>{'★'.repeat(5 - f.rating)}</span></b> : <b className="d-fb-cancel">{s('fbCancelledTag')}</b>}
                   <small dir="ltr">#{f.code} · {ago(f.at, now, lang, t('justNow'))}</small>
                 </div>
+                {(f.name || f.phone) && (
+                  <p className="d-fb-who">
+                    {f.name && <b>{f.name}</b>}
+                    {f.phone && <a className="staff-phone" dir="ltr" href={'tel:' + f.phone}><PhoneIcon />{f.phone}</a>}
+                  </p>
+                )}
                 {f.tags.length > 0 && <p className="d-fb-tags">{f.tags.map((id) => <span key={id}>{s(('fb_' + id) as SKey)}</span>)}</p>}
                 {f.comment && <p className="d-fb-comment">“{f.comment}”</p>}
               </li>

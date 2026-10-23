@@ -36,11 +36,11 @@ async function load(sb: SupabaseClient) {
   const { data, error } = await sb.from('orders').select('*').order('created_at', { ascending: false }).limit(300)
   if (error) { console.warn('[backend] could not load orders:', error.message); set({ error: 'load' }); return }
   set({ orders: (data as OrderRow[]).map(fromRow), error: '' })
-  // the customers' feedback with the order's number (the rules show staff their branch's only)
-  const fb = await sb.from('order_feedback').select('order_uid,branch,kind,rating,tags,comment,created_at,orders(code)').order('created_at', { ascending: false }).limit(60)
+  // the customers' feedback with the order's number and customer (the rules show staff their branch's only)
+  const fb = await sb.from('order_feedback').select('order_uid,branch,kind,rating,tags,comment,created_at,orders(code,customer_name,customer_phone,delivery_phone)').order('created_at', { ascending: false }).limit(60)
   if (!fb.error) {
-    type Row = { order_uid: string; branch: string; kind: Feedback['kind']; rating: number | null; tags: string[]; comment: string | null; created_at: string; orders: { code: string } | null }
-    set({ feedback: (fb.data as unknown as Row[]).map((r) => ({ order: r.order_uid, code: r.orders?.code ?? '', branch: r.branch, kind: r.kind, rating: r.rating ?? undefined, tags: r.tags ?? [], comment: r.comment ?? undefined, at: Date.parse(r.created_at) })) })
+    type Row = { order_uid: string; branch: string; kind: Feedback['kind']; rating: number | null; tags: string[]; comment: string | null; created_at: string; orders: { code: string; customer_name: string | null; customer_phone: string | null; delivery_phone: string | null } | null }
+    set({ feedback: (fb.data as unknown as Row[]).map((r) => ({ order: r.order_uid, code: r.orders?.code ?? '', branch: r.branch, kind: r.kind, rating: r.rating ?? undefined, tags: r.tags ?? [], comment: r.comment ?? undefined, at: Date.parse(r.created_at), name: r.orders?.customer_name || undefined, phone: r.orders?.delivery_phone || r.orders?.customer_phone || undefined })) })
   }
 }
 

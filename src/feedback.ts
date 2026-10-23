@@ -9,7 +9,7 @@ import { backendOn, ensureUser, getClerkClient, getClient } from './backend'
  * nobody is asked twice. Without the backend (the demo build) the answers stay on this device for the demo dashboard.
  */
 export type FeedbackKind = 'received' | 'cancelled'
-export interface Feedback { order: string; code: string; branch: string; kind: FeedbackKind; rating?: number; tags: string[]; comment?: string; at: number }
+export interface Feedback { order: string; code: string; branch: string; kind: FeedbackKind; rating?: number; tags: string[]; comment?: string; at: number; name?: string; phone?: string } // name / phone: the order's customer, for staff
 
 /** the options to tap, by kind: an id (what is stored) per option; the words are in strings.ts as fb_<id> */
 export const FEEDBACK_TAGS: Record<FeedbackKind, string[]> = {
@@ -30,7 +30,7 @@ export async function sendFeedback(o: Order, kind: FeedbackKind, f: { rating?: n
   markFeedbackDone(o, kind)
   const comment = f.comment?.trim().slice(0, 500) || undefined
   if (!backendOn || !o.uid) {
-    write(LOCAL, [{ order: o.uid ?? o.id, code: o.id, branch: o.branch ?? '', kind, rating: f.rating, tags: f.tags, comment, at: Date.now() }, ...localFeedback()].slice(0, 100))
+    write(LOCAL, [{ order: o.uid ?? o.id, code: o.id, branch: o.branch ?? '', kind, rating: f.rating, tags: f.tags, comment, at: Date.now(), name: o.customer?.name || undefined, phone: o.delivery?.phone || o.customer?.phone || undefined }, ...localFeedback()].slice(0, 100))
     return true
   }
   const sb = o.clerk ? await getClerkClient() : await getClient()

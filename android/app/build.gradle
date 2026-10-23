@@ -1,0 +1,47 @@
+plugins {
+    id 'com.android.application'
+}
+
+// The release key stays on this PC only (android/keystore/, git-ignored). Keep a backup: an update must be signed
+// with the same key, or the tablets need the app removed and installed again.
+def keyProps = new Properties()
+def keyFile = rootProject.file('keystore/keystore.properties')
+if (keyFile.exists()) keyFile.withInputStream { keyProps.load(it) }
+
+android {
+    namespace 'com.marscoffeehouse.staff'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.marscoffeehouse.staff'
+        minSdk 24
+        targetSdk 35
+        versionCode 1
+        versionName '1.0'
+    }
+
+    signingConfigs {
+        release {
+            if (keyFile.exists()) {
+                storeFile rootProject.file('keystore/' + keyProps['storeFile'])
+                storePassword keyProps['storePassword']
+                keyAlias keyProps['keyAlias']
+                keyPassword keyProps['keyPassword']
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig keyFile.exists() ? signingConfigs.release : signingConfigs.debug
+        }
+    }
+
+    buildFeatures { buildConfig true }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
