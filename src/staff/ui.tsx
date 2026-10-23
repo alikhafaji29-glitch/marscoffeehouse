@@ -38,6 +38,7 @@ export const I = {
   bag: () => <svg {...ic}><path d="M5 8.5h14l-1 12H6z" /><path d="M9 8.5V7a3 3 0 0 1 6 0v1.5" /></svg>,
   save: () => <svg {...ic}><path d="M5 4.5h11l3.5 3.5v11.5H5z" /><path d="M8 4.5v5h7v-5M8 19.5v-6h8v6" /></svg>,
   back: () => <svg {...ic} className="d-flip"><path d="M19 12H5M11 6l-6 6 6 6" /></svg>,
+  print: () => <svg {...ic}><path d="M7 9V3h10v6M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2" /><path d="M7 14h10v7H7z" /></svg>,
   sound: () => <svg {...ic}><path d="M4 10v4h3.5L12 18V6L7.5 10z" /><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" /></svg>,
   exit: () => <svg {...ic} className="d-flip"><path d="M10 4.5H5v15h5M14 8l4 4-4 4M18 12H9" /></svg>,
 }

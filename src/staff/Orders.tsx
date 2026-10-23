@@ -4,7 +4,9 @@ import type { Lang, TKey } from '../i18n'
 import { iqd } from '../account'
 import type { Order } from '../account'
 import { CANCEL_REASONS, LEAD_MIN, STAGES, dueOf, groupLines, isActive, isCancelled, isLater, nextStage, reasonText, stageIndex, stagesFor, timeText, untilText, useNow, whenText } from '../orders'
-import { settingsFor, useStaff } from './store'
+import { branchName, settingsFor, useStaff } from './store'
+import { printReceipt } from './receipt'
+import type { ReceiptText } from './receipt'
 import type { Stage } from '../orders'
 import { IconCheck, IconPin } from '../components/Icons'
 import { mapsLink } from '../components/ShareLocation'
@@ -28,6 +30,28 @@ export function ago(at: number, now: number, lang: Lang, justNow: string): strin
 }
 
 const phoneOf = (o: Order) => o.delivery?.phone ?? o.customer?.phone ?? ''
+
+/** the receipt's words for an order, in the dashboard's language (the Print button and auto-print use it) */
+export function useReceiptText(): (o: Order) => ReceiptText {
+  const { t, lang } = useLang()
+  const s = useS()
+  return (o) => ({
+    branch: branchName(o.branch),
+    dir: lang === 'en' ? 'ltr' : 'rtl',
+    when: whenText(o.at, lang),
+    how: o.fulfil === 'delivery' ? t('getDelivery') : t('getPickup'),
+    scheduled: o.offer?.wantAt ? t('scheduledFor').replace('{t}', whenText(o.offer.wantAt, lang)) : o.arriveAt ? s('arriveAt', { t: timeText(o.arriveAt, lang) }) : undefined,
+    customer: s('secCustomer'),
+    combo: (n) => s('comboN', { n }),
+    note: t('orderNote'),
+    deliverTo: o.giftTo ? `${t('giftFor')} ${o.giftTo}` : s('secDeliverTo'),
+    location: s('rcLocation'),
+    pay: o.pay === 'wallet' ? t('paidByWallet') : o.fulfil === 'delivery' ? t('payOnDelivery') : t('payAtPickup'),
+    fee: o.offer?.fee ? s('inclFee', { n: iqd(o.offer.fee) }) : undefined,
+    thanks: s('rcThanks'),
+  })
+}
+const PrintIcon = () => <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M7 9V3h10v6M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2" /><path d="M7 14h10v7H7z" /></svg>
 const PhoneIcon = () => <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2" /></svg>
 export function OrderCard({ o, lead = LEAD_MIN }: { o: Order; lead?: number }) {
   const { t, lang } = useLang()
@@ -37,6 +61,7 @@ export function OrderCard({ o, lead = LEAD_MIN }: { o: Order; lead?: number }) {
   const next = nextStage(o)
   const stages = stagesFor(o)
   const cancelled = isCancelled(o)
+  const receipt = useReceiptText()
   // cancelling: a reason is required, a ready-made one or the staff's own words
   const [asking, setAsking] = useState(false)
   const [why, setWhy] = useState('')
@@ -90,6 +115,7 @@ export function OrderCard({ o, lead = LEAD_MIN }: { o: Order; lead?: number }) {
         </div>
       )}
       <p className="staff-total"><b dir="ltr">{iqd(o.total)} IQD</b> · {o.pay === 'wallet' ? t('paidByWallet') : o.fulfil === 'delivery' ? t('payOnDelivery') : t('payAtPickup')}{o.offer?.fee ? <> · {s('inclFee', { n: iqd(o.offer.fee) })}</> : null}</p>
+      <button type="button" className="staff-print" onClick={() => printReceipt(o, receipt(o))}><PrintIcon />{s('printReceipt')}</button>
       {cancelled && <p className="staff-cancel-reason"><b>{t('cancelReason')}:</b> {reasonText(o.cancelReason, t)}</p>}
       {!cancelled && <ol className="staff-steps" aria-label={t('trackOrder')}>
         {stages.map((st, i) => (

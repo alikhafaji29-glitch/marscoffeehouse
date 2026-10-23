@@ -14,7 +14,8 @@ import { Category, ItemEditor, NewCategory, NewItem } from './Catalog'
 import { Branches } from './Branches'
 import { Events } from './Events'
 import { Offers } from './Offers'
-import { Orders } from './Orders'
+import { Orders, useReceiptText } from './Orders'
+import { printReceipt } from './receipt'
 import { Overview } from './Overview'
 import { Tools } from './Tools'
 import { Warehouse } from './Warehouse'
@@ -89,13 +90,23 @@ export function StaffScreen() {
     try { localStorage.setItem('mars-staff-sound', on ? '1' : '0') } catch { /* ignore */ }
     if (on) chime() // also unlocks audio on this tap
   }
-  // a chime when an order id shows up that was not there before (not on the first render)
+  // Auto-print (owner, 2026-10-23): this device prints the receipt of each new order of its branch as it arrives
+  const [autoPrint, setAutoPrint] = useState(() => { try { return localStorage.getItem('mars-staff-autoprint') === '1' } catch { return false } })
+  const toggleAutoPrint = () => {
+    const on = !autoPrint
+    setAutoPrint(on)
+    try { localStorage.setItem('mars-staff-autoprint', on ? '1' : '0') } catch { /* ignore */ }
+  }
+  const receipt = useReceiptText()
+  // a chime when an order id shows up that was not there before (not on the first render), and its receipt if asked
   const known = useRef<Set<string> | null>(null)
   useEffect(() => {
     const ids = new Set(all.map((o) => o.uid ?? o.id))
-    if (known.current && ok && sound && all.some((o) => !known.current!.has(o.uid ?? o.id))) chime()
+    const fresh = known.current ? all.filter((o) => !known.current!.has(o.uid ?? o.id)) : []
+    if (ok && sound && fresh.length) chime()
+    if (ok && autoPrint) fresh.filter((o) => (o.branch ?? BRANCHES[0].id) === data.branch && isActive(o)).forEach((o) => { void printReceipt(o, receipt(o)) })
     known.current = ids
-  }, [all, ok, sound])
+  }, [all, ok, sound]) // eslint-disable-line react-hooks/exhaustive-deps
   // and a chime when an order waiting under Later comes due (its time within `lead` minutes) and moves to Active
   const laterKey = orders.filter((o) => isLater(o, now, lead)).map((o) => o.uid ?? o.id).join(',')
   const wasLater = useRef<string[] | null>(null)
@@ -224,6 +235,7 @@ export function StaffScreen() {
         </nav>
         <div className="d-side-foot">
           {langSelect}
+          <button type="button" className={'d-foot-btn' + (autoPrint ? ' on' : '')} aria-pressed={autoPrint} onClick={toggleAutoPrint} title={s('autoPrintHint')}><I.print /><span>{autoPrint ? s('autoPrintOn') : s('autoPrintOff')}</span></button>
           <button type="button" className={'d-foot-btn' + (sound ? ' on' : '')} aria-pressed={sound} onClick={toggleSound} title={sound ? t('soundOn') : t('soundOff')}><I.sound /><span>{sound ? t('soundOn') : t('soundOff')}</span></button>
           <button type="button" className="d-foot-btn" onClick={leave} title={t('staffLeave')}><I.exit /><span>{t('staffLeave')}</span></button>
         </div>
