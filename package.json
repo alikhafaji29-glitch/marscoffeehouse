@@ -7,7 +7,7 @@
     "dev": "vite",
     "dev:https": "vite --mode https",
     "dev:demo": "vite --mode demo",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && vite build --mode old",
     "build:demo": "tsc -b && vite build --mode demo",
     "preview": "vite preview"
   },
@@ -21,7 +21,10 @@
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-basic-ssl": "^2.3.0",
+    "@vitejs/plugin-legacy": "^6.1.1",
     "@vitejs/plugin-react": "^4.3.4",
+    "flex-gap-polyfill": "^5.0.0",
+    "terser": "^5.51.2",
     "typescript": "~5.6.2",
     "vite": "^6.0.3"
   }

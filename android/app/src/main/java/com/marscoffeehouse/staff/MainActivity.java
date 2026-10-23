@@ -36,13 +36,18 @@ import java.util.List;
  * What the app adds over a browser tab:
  *  - the screen stays on, and the page keeps running while the app is open;
  *  - the new-order chime plays without a tap first;
- *  - receipts print through Android's print service (the page's hidden-frame print is caught by SHIM below);
+ *  - receipts print on a Sunmi's built-in printer with no window (SunmiPrinter), elsewhere through Android's print
+ *    service (the page's hidden-frame print is caught by SHIM below);
  *  - WhatsApp, phone and Maps links open their own apps;
  *  - photo uploads in Drinks / Food open the file picker;
  *  - with no internet it says so and retries every 10 seconds.
  */
 public class MainActivity extends Activity {
-    static final String START_URL = "https://www.marscoffeehouse.com/#staff";
+    // an old browser engine (the Sunmi D2mini's Android 8.1, before Chrome 85) gets the site's old-engine copy
+    static final String MODERN_URL = "https://www.marscoffeehouse.com/#staff";
+    static final String OLD_URL = "https://www.marscoffeehouse.com/old/#staff";
+    static final int MODERN_ENGINE = 85;
+    private String startUrl = MODERN_URL;
     static final String SITE = "marscoffeehouse.com";
     static final int PICK_FILE = 1;
 
@@ -65,9 +70,12 @@ public class MainActivity extends Activity {
         + "if(x.hostname.indexOf('" + SITE + "')<0){MarsAndroid.openExternal(x.href);return null}}catch(e){}"
         + "return op.call(window,u,t,f)};})();";
 
+    private SunmiPrinter printer;
+
     @Override
     protected void onCreate(Bundle saved) {
         super.onCreate(saved);
+        WebView.enableSlowWholeDocumentDraw(); // the receipt is drawn whole into a picture for the Sunmi printer
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         FrameLayout root = new FrameLayout(this);
@@ -90,6 +98,7 @@ public class MainActivity extends Activity {
         s.setDatabaseEnabled(true);
         s.setMediaPlaybackRequiresUserGesture(false);
         s.setSupportMultipleWindows(false); // target=_blank links come through shouldOverrideUrlLoading
+        if (engineVersion(s.getUserAgentString()) < MODERN_ENGINE) startUrl = OLD_URL;
         s.setUserAgentString(s.getUserAgentString() + " MarsStaffApp/" + BuildConfig.VERSION_NAME);
         CookieManager.getInstance().setAcceptCookie(true);
         web.addJavascriptInterface(new Bridge(), "MarsAndroid");
@@ -115,7 +124,7 @@ public class MainActivity extends Activity {
                 if (!r.isForMainFrame()) return;
                 failed = true;
                 offline.setVisibility(View.VISIBLE);
-                main.postDelayed(() -> { failed = false; web.loadUrl(START_URL); }, 10000);
+                main.postDelayed(() -> { failed = false; web.loadUrl(startUrl); }, 10000);
             }
         });
 
@@ -135,7 +144,20 @@ public class MainActivity extends Activity {
         });
 
         if (saved != null) web.restoreState(saved);
-        else web.loadUrl(START_URL);
+        else web.loadUrl(startUrl);
+        printer = new SunmiPrinter(this, root);
+    }
+
+    @Override
+    protected void onDestroy() {
+        printer.close();
+        super.onDestroy();
+    }
+
+    /* the WebView's Chrome version from its user agent ("… Chrome/69.0.3497.100 …"); 0 when it cannot be read */
+    static int engineVersion(String ua) {
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("Chrome/(\\d+)").matcher(ua);
+        return m.find() ? Integer.parseInt(m.group(1)) : 0;
     }
 
     @Override
@@ -182,8 +204,10 @@ public class MainActivity extends Activity {
         }
     }
 
-    /* Prints a receipt page through Android's print service (the printer chosen there is remembered). */
+    /* Prints a receipt page: on the Sunmi's built-in printer straight away when there is one, otherwise through
+       Android's print service (the printer chosen there is remembered). */
     void printHtml(String html, String title) {
+        if (printer.ready()) { printer.print(html); return; }
         WebView pv = new WebView(this);
         printing.add(pv);
         pv.setWebViewClient(new WebViewClient() {

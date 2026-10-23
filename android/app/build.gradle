@@ -16,8 +16,8 @@ android {
         applicationId 'com.marscoffeehouse.staff'
         minSdk 24
         targetSdk 35
-        versionCode 1
-        versionName '1.0'
+        versionCode 3
+        versionName '1.2'
     }
 
     signingConfigs {
@@ -44,4 +44,9 @@ android {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
+}
+
+dependencies {
+    // the receipt printer built into Sunmi devices (bound only when the device has one)
+    implementation 'com.sunmi:printerlibrary:1.0.24'
 }

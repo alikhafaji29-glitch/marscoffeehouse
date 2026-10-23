@@ -24,10 +24,10 @@ export const STAGE_LABEL: Record<Stage, TKey> = { received: 'stReceived', prepar
 export function ago(at: number, now: number, lang: Lang, justNow: string): string {
   const s = Math.round((now - at) / 1000)
   if (s < 45) return justNow
-  const rtf = new Intl.RelativeTimeFormat(lang === 'ku' ? 'ckb' : lang, { numeric: 'always' })
-  if (s < 3600) return rtf.format(-Math.round(s / 60), 'minute')
-  if (s < 86400) return rtf.format(-Math.round(s / 3600), 'hour')
-  return rtf.format(-Math.round(s / 86400), 'day')
+  const [n, unit, short]: [number, Intl.RelativeTimeFormatUnit, string] = s < 3600 ? [Math.round(s / 60), 'minute', 'min'] : s < 86400 ? [Math.round(s / 3600), 'hour', 'h'] : [Math.round(s / 86400), 'day', 'd']
+  // old browser engines (the Sunmi D2mini's, before Chrome 71) have no RelativeTimeFormat: "8 min" instead of crashing
+  if (typeof Intl.RelativeTimeFormat !== 'function') return `${n} ${short}`
+  return new Intl.RelativeTimeFormat(lang === 'ku' ? 'ckb' : lang, { numeric: 'always' }).format(-n, unit)
 }
 
 const phoneOf = (o: Order) => o.delivery?.phone ?? o.customer?.phone ?? ''

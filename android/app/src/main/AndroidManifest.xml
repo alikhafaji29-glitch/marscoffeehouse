@@ -5,6 +5,8 @@
 
     <!-- links to WhatsApp, the dialer and Maps (Android 11+ only opens what it may see) -->
     <queries>
+        <!-- the Sunmi printer service -->
+        <package android:name="woyou.aidlservice.jiuiv5" />
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="https" />
