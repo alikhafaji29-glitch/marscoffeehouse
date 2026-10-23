@@ -269,7 +269,7 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
     if (live && !delivery && arriveAt < clockNow().getTime()) miss.push('arrive')
     if (nm.length < 2) miss.push('name')
     if (normPhone(phone).length < 10) miss.push('phone')
-    if (delivery && address.trim().length < 6 && !location) miss.push('place')
+    if (delivery && !location) miss.push('place') // the shared pin is required for delivery (owner, 2026-10-23); the address is extra
     if (miss.length) { setMissing(miss); setMissOpen(true); return }
     const arrive = live && !delivery ? arriveAt : 0 // a pre-order's pickup time is its chosen time
     const res = placeOfferOrder({ total, items: lines, name: nm, phone: phone.trim(), address: delivery ? address.trim() : undefined, location: delivery && location ? location : undefined, offer: { name: offer.name.en, price: offer.price, count: count > 1 ? count : undefined, fee: fee || undefined, pre: !live || undefined, wantAt: !live ? wantAt : undefined }, note: staffNote.trim() || undefined, arriveAt: arrive || undefined })
@@ -424,7 +424,7 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
                 {delivery
                   ? <>
                     <div data-field="place" className={'place-fields' + (missing.includes('place') ? ' missing' : '')}>
-                      <label><span>{t('deliveryAddress')}</span><textarea rows={2} value={address} onChange={(e) => { setAddress(e.target.value); setNote(''); filled('place') }} placeholder={t('addressHint')} autoComplete="street-address" /></label>
+                      <label><span>{t('deliveryAddress')}</span><textarea rows={2} value={address} onChange={(e) => { setAddress(e.target.value); setNote('') }} placeholder={t('addressHint')} autoComplete="street-address" /></label>
                       <ShareLocation value={location} onChange={(p) => { setLocation(p); setNote(''); if (p) filled('place') }} />
                     </div>
                   </>

@@ -397,7 +397,7 @@ const S = {
   missSub: ['To place your order, please:', 'لإتمام طلبك، من فضلك:', 'بۆ تەواوکردنی داواکارییەکەت، تکایە:'],
   missName: ['Write your first name', 'اكتب اسمك الأول', 'ناوی یەکەمت بنووسە'],
   missPhone: ['Write your phone number (at least 10 digits)', 'اكتب رقم هاتفك (10 أرقام على الأقل)', 'ژمارەی مۆبایلەکەت بنووسە (لانیکەم 10 ژمارە)'],
-  missPlace: ['Write your address, or tap “Share my location”', 'اكتب عنوانك، أو اضغط «مشاركة موقعي»', 'ناونیشانەکەت بنووسە، یان «هاوبەشکردنی شوێنەکەم» دابگرە'],
+  missPlace: ['Tap “Share my location” so the driver can find you', 'اضغط «مشاركة موقعي» ليصل إليك السائق', '«هاوبەشکردنی شوێنەکەم» دابگرە بۆ ئەوەی شۆفێر بتدۆزێتەوە'],
   missWhen: ['Choose when you want your order', 'اختر متى تريد طلبك', 'هەڵبژێرە کەی داواکارییەکەتت دەوێت'],
   missArrive: ['Choose when you will arrive', 'اختر متى ستصل', 'هەڵبژێرە کەی دەگەیت'],
   cheer1: ['Don’t eat alone', 'لا تأكل وحدك', 'بە تەنها مەخۆ'],
