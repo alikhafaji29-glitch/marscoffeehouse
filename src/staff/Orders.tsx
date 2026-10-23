@@ -10,7 +10,7 @@ import type { ReceiptText } from './receipt'
 import type { Stage } from '../orders'
 import { IconCheck, IconPin } from '../components/Icons'
 import { mapsLink } from '../components/ShareLocation'
-import { cancelOrder, moveOrder } from './remote'
+import { cancelOrder, moveOrder, sendWhatsApp } from './remote'
 import { useS } from './strings'
 import { I } from './ui'
 
@@ -34,11 +34,13 @@ const phoneOf = (o: Order) => o.delivery?.phone ?? o.customer?.phone ?? ''
 
 /*
  * Send a delivery order to a driver on WhatsApp (owner, 2026-10-23): one button per driver set in Tools, and Other…
- * to pick any chat. WhatsApp opens with the order written out (who, phone, address, map link, items, note, what to
- * collect); staff press Send there. This device remembers who it went to, to show on the card.
+ * to pick any chat. A driver button sends through the WhatsApp Cloud API (owner, 2026-10-24) with no step in WhatsApp;
+ * when that cannot send (not set up yet, Meta refuses) WhatsApp opens with the order written out (who, phone, address,
+ * map link, items, note, what to collect) and staff press Send there, as before. Other… always opens WhatsApp.
+ * This device remembers who it went to, to show on the card.
  */
 const SENT_KEY = 'mars-staff-sent'
-const readSent = (): Record<string, { name: string; at: number }> => { try { return JSON.parse(localStorage.getItem(SENT_KEY) || '{}') } catch { return {} } }
+const readSent = (): Record<string, { name: string; at: number; api?: boolean }> => { try { return JSON.parse(localStorage.getItem(SENT_KEY) || '{}') } catch { return {} } }
 function SendToDriver({ o }: { o: Order }) {
   const { t, lang } = useLang()
   const s = useS()
@@ -59,19 +61,35 @@ function SendToDriver({ o }: { o: Order }) {
     lines.push('', o.pay === 'wallet' ? t('paidByWallet') : s('waCollect', { n: iqd(o.total) }))
     return lines.join('\n')
   }
-  const send = (name: string, phone?: string) => {
-    window.open(`https://wa.me/${phone ? waNumber(phone) : ''}?text=${encodeURIComponent(text())}`, '_blank', 'noopener')
+  const [busy, setBusy] = useState(false)
+  const [failed, setFailed] = useState('')
+  const remember = (name: string, api?: boolean) => {
     const all = readSent()
-    all[key] = { name, at: Date.now() }
+    all[key] = { name, at: Date.now(), ...(api && { api }) }
     try { localStorage.setItem(SENT_KEY, JSON.stringify(all)) } catch { /* ignore */ }
     setSent(all[key])
+  }
+  const send = async (name: string, phone?: string) => {
+    setFailed('')
+    if (phone && o.uid) {
+      setBusy(true)
+      const r = await sendWhatsApp(o.uid, waNumber(phone), text())
+      setBusy(false)
+      if (r.ok) { remember(name, true); return }
+      // not set up yet (or no backend): quietly the old way; a real refusal is shown
+      if (r.reason !== 'not_configured' && r.reason !== 'no_backend' && r.reason !== 'unreachable') setFailed(s('waApiFailed', { why: r.message || r.reason || '?' }))
+    }
+    const w = window.open(`https://wa.me/${phone ? waNumber(phone) : ''}?text=${encodeURIComponent(text())}`, '_blank')
+    if (w) w.opener = null
+    remember(name)
   }
   return (
     <>
       {/* in the card's action row, beside Print receipt (owner, 2026-10-23) */}
-      {drivers.map((d, i) => <button key={i} type="button" className="staff-wa" title={s('sendToDriver')} onClick={() => send(d.name || d.phone, d.phone)}><I.whatsapp />{d.name || d.phone}</button>)}
-      <button type="button" className={'staff-wa' + (drivers.length ? ' other' : '')} title={s('sendToDriver')} onClick={() => send(drivers.length ? s('sendOther') : 'WhatsApp')}><I.whatsapp />{drivers.length ? s('sendOther') : s('sendWhatsapp')}</button>
-      {sent && <small className="staff-sent">{s('sentTo', { name: sent.name, t: ago(sent.at, now, lang, t('justNow')) })}</small>}
+      {drivers.map((d, i) => <button key={i} type="button" className="staff-wa" title={s('sendToDriver')} disabled={busy} onClick={() => void send(d.name || d.phone, d.phone)}><I.whatsapp />{busy ? s('waSending') : d.name || d.phone}</button>)}
+      <button type="button" className={'staff-wa' + (drivers.length ? ' other' : '')} title={s('sendToDriver')} disabled={busy} onClick={() => void send(drivers.length ? s('sendOther') : 'WhatsApp')}><I.whatsapp />{drivers.length ? s('sendOther') : s('sendWhatsapp')}</button>
+      {failed && <small className="staff-sent staff-wa-failed" role="alert">{failed}</small>}
+      {sent && <small className="staff-sent">{s(sent.api ? 'sentApi' : 'sentTo', { name: sent.name, t: ago(sent.at, now, lang, t('justNow')) })}</small>}
     </>
   )
 }
@@ -98,7 +116,20 @@ export function useReceiptText(): (o: Order) => ReceiptText {
 }
 const PrintIcon = () => <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M7 9V3h10v6M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2" /><path d="M7 14h10v7H7z" /></svg>
 export const PhoneIcon = () => <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2" /></svg>
-export function OrderCard({ o, lead = LEAD_MIN }: { o: Order; lead?: number }) {
+/*
+ * The same customer placing a second order soon after the first (owner, 2026-10-24: customers order one combo, then
+ * another, instead of several in one order): the active orders from the same phone, in the same branch, within 30
+ * minutes of this one, so staff prepare and deliver them together.
+ */
+const SAME_WINDOW = 30 * 60_000
+const phoneKey = (o: Order) => phoneOf(o).replace(/\D/g, '').slice(-9)
+export function sameCustomer(o: Order, all: Order[]): Order[] {
+  const k = phoneKey(o)
+  if (k.length < 9 || !isActive(o)) return []
+  return all.filter((x) => x !== o && (x.uid ?? x.id) !== (o.uid ?? o.id) && isActive(x) && (x.branch ?? '') === (o.branch ?? '') && Math.abs(x.at - o.at) <= SAME_WINDOW && phoneKey(x) === k).sort((a, b) => a.at - b.at)
+}
+
+export function OrderCard({ o, lead = LEAD_MIN, all = [] }: { o: Order; lead?: number; all?: Order[] }) {
   const { t, lang } = useLang()
   const s = useS()
   const now = useNow(15000)
@@ -107,6 +138,7 @@ export function OrderCard({ o, lead = LEAD_MIN }: { o: Order; lead?: number }) {
   const stages = stagesFor(o)
   const cancelled = isCancelled(o)
   const receipt = useReceiptText()
+  const same = sameCustomer(o, all)
   // cancelling: a reason is required, a ready-made one or the staff's own words
   const [asking, setAsking] = useState(false)
   const [why, setWhy] = useState('')
@@ -119,7 +151,7 @@ export function OrderCard({ o, lead = LEAD_MIN }: { o: Order; lead?: number }) {
     setAsking(false)
   }
   return (
-    <article className={'staff-order' + (isActive(o) ? '' : ' finished') + (cancelled ? ' cancelled' : '')}>
+    <article id={'order-' + o.id} className={'staff-order' + (isActive(o) ? '' : ' finished') + (cancelled ? ' cancelled' : '')}>
       <header className="staff-order-head">
         <b dir="ltr">#{o.id}</b>
         <span className="staff-ago">{ago(o.at, now, lang, t('justNow'))}</span>
@@ -132,6 +164,13 @@ export function OrderCard({ o, lead = LEAD_MIN }: { o: Order; lead?: number }) {
         {o.offer?.pre && <span className="staff-how pre">{s('preOrderBadge')}</span>}
         {dueOf(o) && isActive(o) && (o.status ?? 'received') === 'received' && !isLater(o, now, lead) && <span className="staff-how now">{s('makeNow')}</span>}
       </p>
+      {same.length > 0 && (
+        <p className="staff-same" role="note">
+          <b>{s('sameCustomer')}</b>{' '}
+          {same.map((x) => <button key={x.uid ?? x.id} type="button" className="link-btn" dir="ltr" onClick={() => document.getElementById('order-' + x.id)?.scrollIntoView({ behavior: 'smooth', block: 'center' })}>#{x.id}</button>)}
+          <small> · {s('sameTogether')}</small>
+        </p>
+      )}
       {o.offer?.wantAt && <p className="staff-want">{t('scheduledFor').replace('{t}', whenText(o.offer.wantAt, lang))}{isActive(o) && o.offer.wantAt > now && <small> · {s('inTime', { t: untilText(o.offer.wantAt, now, s('hShort'), s('minShort')) })}</small>}</p>}
       {o.arriveAt && <p className="staff-want">{s('arriveAt', { t: timeText(o.arriveAt, lang) })}{isActive(o) && o.arriveAt > now && <small> · {s('inTime', { t: untilText(o.arriveAt, now, s('hShort'), s('minShort')) })}</small>}</p>}
       {/* top to bottom, as the cashier works through it (owner, 2026-10-19): who, how to reach them, what, where */}
@@ -236,7 +275,7 @@ export function Orders({ orders, live = false }: { orders: Order[]; live?: boole
         <button role="tab" aria-selected={tab === 'later'} className={tab === 'later' ? 'on' : ''} onClick={() => setTab('later')}>{s('laterTab')} · {later.length}</button>
         <button role="tab" aria-selected={tab === 'all'} className={tab === 'all' ? 'on' : ''} onClick={() => setTab('all')}>{t('staffAll')} · {orders.length}</button>
       </div>
-      {shown.length ? <div className="staff-list">{shown.map((o) => <OrderCard key={o.uid ?? o.id} o={o} lead={lead} />)}</div> : <p className="staff-empty">{tab === 'later' ? s('laterNone') : orders.length ? t('staffNoneHere') : t('staffNoOrders')}</p>}
+      {shown.length ? <div className="staff-list">{shown.map((o) => <OrderCard key={o.uid ?? o.id} o={o} lead={lead} all={orders} />)}</div> : <p className="staff-empty">{tab === 'later' ? s('laterNone') : orders.length ? t('staffNoneHere') : t('staffNoOrders')}</p>}
       {!live && <p className="demo-note">{t('staffDemoNote')}</p>}
     </>
   )

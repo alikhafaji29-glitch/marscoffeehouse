@@ -1183,6 +1183,9 @@ body[data-view='home'] .deck > .slide:first-child::before { content: ''; positio
 .combo-how button { flex: 1; font: 700 0.92rem/1 var(--font-sans); min-height: 44px; border: none; border-radius: 999px; background: transparent; color: var(--navy); cursor: pointer; }
 .combo-how button.on { background: var(--navy); color: #fff; }
 .combo-form select { font: inherit; padding: 0.7rem 0.8rem; border-radius: 0.8rem; border: 1.5px solid rgba(32, 52, 105, 0.25); background: #fff; color: var(--navy); }
+.staff-same { margin: 0; padding: 0.45rem 0.7rem; border-radius: 0.6rem; background: #fff4d6; border: 1.5px solid #e0a100; color: #5a4100; font-size: 0.9rem; }
+.staff-same .link-btn { font-weight: 700; margin-inline-end: 0.4rem; }
+.staff-same small { font-size: 0.82rem; }
 .staff-want { margin: 0; padding: 0.45rem 0.7rem; border-radius: 0.6rem; background: var(--navy); color: #fff; font-weight: 700; font-size: 0.9rem; }
 .combo-thanks { margin: 0; font-size: 1rem; line-height: 1.5; color: var(--navy); }
 /* how many combos */
@@ -2249,6 +2252,8 @@ body.ph-on .band-pill, body.ph-on .header-order-in { display: none; }
 .staff-wa svg { width: 18px; height: 18px; }
 .staff-wa.other { background: #fff; color: #1f8f4e; border: 1.5px solid #1f8f4e; }
 .staff-sent { color: #1f6b3d; font-size: 0.8rem; }
+.staff-sent.staff-wa-failed { color: #b3261e; }
+.staff-wa:disabled { opacity: 0.6; cursor: progress; }
 .d-driver { display: grid; grid-template-columns: 1fr 1fr auto; gap: 0.6rem; align-items: end; margin-bottom: 0.6rem; }
 @media (max-width: 560px) { .d-driver { grid-template-columns: 1fr; } }
 /* Print receipt and the WhatsApp buttons in one row; "Sent to" on its own line under them (2026-10-23) */

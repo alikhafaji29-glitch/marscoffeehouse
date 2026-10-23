@@ -44,7 +44,7 @@ export function Overview({ orders, go, readOnly = false }: { orders: Order[]; go
       <div className="d-grid2 wide-first">
         <Card title={s('needsHand')} right={<button type="button" className="d-btn text" onClick={() => go('orders')}>{s('seeAll')}</button>}>
           {active.length
-            ? <div className="staff-list">{active.slice(0, 4).map((o) => <OrderCard key={o.uid ?? o.id} o={o} />)}</div>
+            ? <div className="staff-list">{active.slice(0, 4).map((o) => <OrderCard key={o.uid ?? o.id} o={o} all={orders} />)}</div>
             : <p className="d-empty">{s('noActive')}</p>}
         </Card>
         <Card title={s('runningNow')}>
