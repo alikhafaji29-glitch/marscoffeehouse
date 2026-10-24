@@ -128,10 +128,10 @@ export function moveOrder(o: Order, stage: Stage) {
  *  with a reason when it cannot: no backend, the function not there yet ('unreachable'), not set up ('not_configured'),
  *  or Meta refused ('meta', with Meta's message); the caller then opens WhatsApp instead */
 export type WaResult = { ok: boolean; reason?: string; message?: string }
-export async function sendWhatsApp(orderUid: string, to: string, text: string): Promise<WaResult> {
+export async function sendWhatsApp(orderUid: string, to: string, text: string, lang: string): Promise<WaResult> {
   const sb = backendOn ? await getClient() : null
   if (!sb) return { ok: false, reason: 'no_backend' }
-  const { data, error } = await sb.functions.invoke('send-whatsapp', { body: { order_uid: orderUid, to, text } })
+  const { data, error } = await sb.functions.invoke('send-whatsapp', { body: { order_uid: orderUid, to, text, lang } })
   if (error) return { ok: false, reason: 'unreachable', message: error.message }
   return (data as WaResult) ?? { ok: false, reason: 'unreachable' }
 }

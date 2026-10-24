@@ -74,7 +74,7 @@ function SendToDriver({ o }: { o: Order }) {
     setFailed('')
     if (phone && o.uid) {
       setBusy(true)
-      const r = await sendWhatsApp(o.uid, waNumber(phone), text())
+      const r = await sendWhatsApp(o.uid, waNumber(phone), text(), lang) // the template in the dashboard's language (Kurdish: Arabic)
       setBusy(false)
       if (r.ok) { remember(name, true); return }
       // not set up yet (or no backend): quietly the old way; a real refusal is shown

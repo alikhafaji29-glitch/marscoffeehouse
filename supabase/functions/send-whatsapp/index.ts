@@ -11,11 +11,12 @@
 //   WA_PHONE_ID        the Phone number ID of the number that sends (WhatsApp Manager → API Setup)
 //   WA_TEMPLATE        optional: the approved template's name. A driver who has not written to the number in the last
 //                      24 hours can only be sent a template (Meta's rule); without one, plain text is sent.
-//   WA_TEMPLATE_LANG   optional: the template's language code (default en)
+//   (the template's language follows the dashboard's: English → en, Arabic → ar, Kurdish → ar, since WhatsApp has no
+//   Kurdish templates; owner, 2026-10-24: "arabic")
 //   WA_GRAPH_VERSION   optional: Graph API version (default v23.0)
 //   ALLOWED_ORIGINS    optional: comma-separated site addresses allowed to call it
 //
-// The template's body has 7 variables, in this order (see HANDOFF decision 185 for the wording sent to Meta):
+// The template mars_delivery_order (approved wording in HANDOFF decision 193) has 7 variables, in this order:
 //   {{1}} order number  {{2}} branch  {{3}} customer + phone  {{4}} address  {{5}} map link  {{6}} items  {{7}} collect
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
@@ -44,7 +45,12 @@ function waNumber(raw: string): string {
 /** a template variable may not hold line breaks, tabs or long runs of spaces (Meta's rule) */
 const flat = (s: string, max = 900) => s.replace(/\s+/g, ' ').trim().slice(0, max) || '-'
 const iqd = (n: number) => n.toLocaleString('en-US')
-const BRANCH: Record<string, string> = { erbil: 'Erbil', kirkuk: 'Kirkuk' }
+const BRANCH: Record<string, Record<string, string>> = {
+  en: { erbil: 'Erbil', kirkuk: 'Kirkuk' },
+  ar: { erbil: 'أربيل', kirkuk: 'كركوك' },
+}
+/** the template language for the dashboard's language: WhatsApp has no Kurdish templates, Kurdish gets Arabic */
+const templateLang = (lang?: string) => (lang === 'ar' || lang === 'ku' ? 'ar' : 'en')
 
 Deno.serve(async (req: Request) => {
   const origin = req.headers.get('origin')
@@ -55,7 +61,7 @@ Deno.serve(async (req: Request) => {
 
   const auth = req.headers.get('authorization') ?? ''
   if (!auth.startsWith('Bearer ')) return json(401, { ok: false, reason: 'not_signed_in' })
-  let body: { order_uid?: string; to?: string; text?: string }
+  let body: { order_uid?: string; to?: string; text?: string; lang?: string }
   try { body = await req.json() } catch { return json(400, { ok: false, reason: 'bad_request' }) }
   if (!body.order_uid || !body.to) return json(400, { ok: false, reason: 'bad_request' })
 
@@ -82,23 +88,24 @@ Deno.serve(async (req: Request) => {
   if (to.length < 10 || to.length > 15) return json(400, { ok: false, reason: 'bad_number' })
 
   const template = Deno.env.get('WA_TEMPLATE')
+  const tl = templateLang(body.lang)
   const phone = o.delivery_phone || o.customer_phone || ''
   const message = template
     ? {
       type: 'template',
       template: {
         name: template,
-        language: { code: Deno.env.get('WA_TEMPLATE_LANG') ?? 'en' },
+        language: { code: tl },
         components: [{
           type: 'body',
           parameters: [
             o.code,
-            BRANCH[o.branch] ?? o.branch,
+            BRANCH[tl][o.branch] ?? o.branch,
             [o.customer_name, phone].filter(Boolean).join(' · '),
             o.address ?? '',
             o.location ? `https://www.google.com/maps?q=${o.location.lat},${o.location.lng}` : '',
             (o.items ?? []).join(' · '),
-            o.pay === 'wallet' ? 'Paid by wallet' : `${iqd(o.total)} IQD`,
+            o.pay === 'wallet' ? (tl === 'ar' ? 'مدفوع بالمحفظة' : 'Paid by wallet') : `${iqd(o.total)} ${tl === 'ar' ? 'دينار' : 'IQD'}`,
           ].map((t) => ({ type: 'text', text: flat(t) })),
         }],
       },

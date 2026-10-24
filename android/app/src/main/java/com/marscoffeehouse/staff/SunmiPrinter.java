@@ -25,6 +25,7 @@ import java.util.ArrayDeque;
  * On any other device ready() stays false and receipts go through Android's print service as before.
  */
 class SunmiPrinter {
+    private static final int FEED_LINES = 7; // empty lines after a receipt: 4 left the last line on the D2mini's tear bar
     private static final int RECEIPT_CSS_WIDTH = 272; // the receipt page's body width (72 mm) in CSS pixels
     private static final String PRINT_CSS = "<style>body{width:" + RECEIPT_CSS_WIDTH + "px!important;margin:0!important;"
         + "background:#fff}img{filter:brightness(0)}</style>";
@@ -135,7 +136,7 @@ class SunmiPrinter {
             service.printerInit(null);
             service.setAlignment(1, null); // centred
             service.printBitmap(bmp, null);
-            service.lineWrap(4, null);
+            service.lineWrap(FEED_LINES, null); // past the tear bar, so the last line is not torn (owner, 2026-10-24)
             try { service.cutPaper(null); } catch (Exception e) { /* no cutter on this model */ }
             service.exitPrinterBuffer(true);
         } catch (Exception e) {
