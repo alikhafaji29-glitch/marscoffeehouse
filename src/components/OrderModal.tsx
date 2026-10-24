@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { PickupSwitch } from './PickupSwitch'
 import { useLang } from '../i18n'
 import { unlockAudio } from '../chime'
 import { useCart } from '../cart'
@@ -150,10 +151,7 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
                   </div>
                 )}
                 {pickupOnly && <p className="modal-line small cotd-pickup-note">{s('cotdPickupOnly')}</p>}
-                {!pickupOnly && set.pickup && set.delivery && <div className="get-toggle" role="radiogroup" aria-label={t('getHow')}>
-                  <button type="button" role="radio" aria-checked={how === 'delivery'} className={how === 'delivery' ? 'on' : ''} onClick={() => setHow('delivery')}>{t('getDelivery')}</button>
-                  <button type="button" role="radio" aria-checked={how === 'pickup'} className={how === 'pickup' ? 'on' : ''} onClick={() => { setHow('pickup'); setNote('') }}>{t('getPickup')}</button>
-                </div>}
+                {!pickupOnly && set.pickup && set.delivery && <PickupSwitch on={how === 'pickup'} onChange={(p) => { setHow(p ? 'pickup' : 'delivery'); setNote('') }} />}
                 {how === 'delivery' && (
                   <div className="deliv-form">
                     {!guestMode && <label data-field="phone" className={missing.includes('phone') ? 'missing' : ''}>
