@@ -30,7 +30,8 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
   const [note, setNote] = useState('')
   const [staffNote, setStaffNote] = useState('') // the customer's note for the café
   const [paid, setPaid] = useState<{ orderId: string; points: number; reward: boolean } | null>(null)
-  const [how, setHow] = useState<'pickup' | 'delivery'>(set.pickup ? 'pickup' : 'delivery')
+  // Delivery first when the branch delivers (owner, 2026-10-24: customers thought ordering defaulted to pickup)
+  const [how, setHow] = useState<'pickup' | 'delivery'>(set.delivery ? 'delivery' : 'pickup')
   const [phone, setPhone] = useState(() => a?.phone ?? savedContact().phone ?? '')
   const [address, setAddress] = useState(() => a?.address ?? savedContact().address ?? '')
   // no sign-in needed to order (owner, 2026-10-22): a customer who is not signed in gives a name and a number, as in
@@ -150,8 +151,8 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
                 )}
                 {pickupOnly && <p className="modal-line small cotd-pickup-note">{s('cotdPickupOnly')}</p>}
                 {!pickupOnly && set.pickup && set.delivery && <div className="get-toggle" role="radiogroup" aria-label={t('getHow')}>
-                  <button type="button" role="radio" aria-checked={how === 'pickup'} className={how === 'pickup' ? 'on' : ''} onClick={() => { setHow('pickup'); setNote('') }}>{t('getPickup')}</button>
                   <button type="button" role="radio" aria-checked={how === 'delivery'} className={how === 'delivery' ? 'on' : ''} onClick={() => setHow('delivery')}>{t('getDelivery')}</button>
+                  <button type="button" role="radio" aria-checked={how === 'pickup'} className={how === 'pickup' ? 'on' : ''} onClick={() => { setHow('pickup'); setNote('') }}>{t('getPickup')}</button>
                 </div>}
                 {how === 'delivery' && (
                   <div className="deliv-form">
