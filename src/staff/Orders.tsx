@@ -3,15 +3,16 @@ import { useLang } from '../i18n'
 import type { Lang, TKey } from '../i18n'
 import { iqd, waNumber } from '../account'
 import type { Order } from '../account'
-import { CANCEL_REASONS, LEAD_MIN, STAGES, dueOf, groupLines, isActive, isCancelled, isLater, nextStage, reasonText, stageIndex, stagesFor, timeText, untilText, useNow, whenText } from '../orders'
+import { CANCEL_REASONS, LEAD_MIN, STAGES, dueOf, groupLines, isActive, isCancelled, isLater, mergedInto, nextStage, reasonText, stageIndex, stagesFor, timeText, untilText, useNow, whenText } from '../orders'
 import { branchName, settingsFor, useStaff } from './store'
 import { printReceipt } from './receipt'
 import type { ReceiptText } from './receipt'
 import type { Stage } from '../orders'
 import { IconCheck, IconPin } from '../components/Icons'
 import { mapsLink } from '../components/ShareLocation'
-import { cancelOrder, moveOrder, sendWhatsApp } from './remote'
+import { cancelOrder, mergeOrders, moveOrder, sendWhatsApp } from './remote'
 import { useS } from './strings'
+import { backendOn } from '../backend'
 import { I } from './ui'
 
 /*
@@ -139,6 +140,18 @@ export function OrderCard({ o, lead = LEAD_MIN, all = [] }: { o: Order; lead?: n
   const cancelled = isCancelled(o)
   const receipt = useReceiptText()
   const same = sameCustomer(o, all)
+  const [merging, setMerging] = useState('') // the order waiting for the confirming second tap
+  const [mergeBusy, setMergeBusy] = useState(false)
+  const [mergeError, setMergeError] = useState('')
+  const merge = async (keep: Order, absorb: Order) => {
+    const id = absorb.uid ?? absorb.id
+    if (merging !== id) { setMerging(id); setMergeError(''); return }
+    setMergeBusy(true)
+    const why = await mergeOrders(keep, absorb)
+    setMergeBusy(false)
+    setMerging('')
+    if (why) setMergeError(why)
+  }
   // cancelling: a reason is required, a ready-made one or the staff's own words
   const [asking, setAsking] = useState(false)
   const [why, setWhy] = useState('')
@@ -169,6 +182,17 @@ export function OrderCard({ o, lead = LEAD_MIN, all = [] }: { o: Order; lead?: n
           <b>{s('sameCustomer')}</b>{' '}
           {same.map((x) => <button key={x.uid ?? x.id} type="button" className="link-btn" dir="ltr" onClick={() => document.getElementById('order-' + x.id)?.scrollIntoView({ behavior: 'smooth', block: 'center' })}>#{x.id}</button>)}
           <small> · {s('sameTogether')}</small>
+          {/* merge (2026-10-24): the newer order always goes into the older one; a second tap confirms */}
+          {backendOn && same.map((x) => {
+            const [keep, absorb] = x.at < o.at ? [x, o] : [o, x]
+            const id = absorb.uid ?? absorb.id
+            return (
+              <button key={'m' + id} type="button" className={'staff-merge' + (merging === id ? ' sure' : '')} disabled={mergeBusy} onClick={() => void merge(keep, absorb)}>
+                {merging === id ? s('mergeSure', { a: absorb.id, b: keep.id }) : keep === o ? s('mergeHere', { code: absorb.id }) : s('mergeInto', { code: keep.id })}
+              </button>
+            )
+          })}
+          {mergeError && <small className="staff-merge-err" role="alert">{s('mergeFailed', { why: mergeError })}</small>}
         </p>
       )}
       {o.offer?.wantAt && <p className="staff-want">{t('scheduledFor').replace('{t}', whenText(o.offer.wantAt, lang))}{isActive(o) && o.offer.wantAt > now && <small> · {s('inTime', { t: untilText(o.offer.wantAt, now, s('hShort'), s('minShort')) })}</small>}</p>}
@@ -255,7 +279,7 @@ export function Orders({ orders, live = false }: { orders: Order[]; live?: boole
   const active = orders.filter((o) => isActive(o) && !isLater(o, now, lead)).sort((a, b) => need(a) - need(b))
   const shown = tab === 'active' ? active : tab === 'later' ? later : tab === 'all' ? orders : orders.filter((o) => (o.status ?? 'received') === tab && !isLater(o, now, lead))
   const counts = STAGES.map((st) => orders.filter((o) => (o.status ?? 'received') === st && !isLater(o, now, lead)).length)
-  const cancelledCount = orders.filter((o) => isCancelled(o)).length
+  const cancelledCount = orders.filter((o) => isCancelled(o) && !mergedInto(o)).length // a merged order was not lost
   return (
     <>
       <p className="d-lead">{s('ordersLead')}</p>

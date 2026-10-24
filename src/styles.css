@@ -1186,6 +1186,11 @@ body[data-view='home'] .deck > .slide:first-child::before { content: ''; positio
 .staff-same { margin: 0; padding: 0.45rem 0.7rem; border-radius: 0.6rem; background: #fff4d6; border: 1.5px solid #e0a100; color: #5a4100; font-size: 0.9rem; }
 .staff-same .link-btn { font-weight: 700; margin-inline-end: 0.4rem; }
 .staff-same small { font-size: 0.82rem; }
+.staff-merge { display: block; margin-top: 0.45rem; min-height: 38px; padding: 0 0.9rem; border-radius: 999px; border: 1.5px solid #8a6400; background: #fff; color: #5a4100; font: 700 0.86rem/1.2 var(--font-sans); cursor: pointer; }
+.staff-merge.sure { background: #8a6400; color: #fff; }
+.staff-merge-err { display: block; margin-top: 0.35rem; color: #b3261e; }
+.track-merged { display: flex; flex-direction: column; gap: 0.3rem; margin-top: 0.6rem; padding: 0.7rem 0.85rem; border-radius: 0.8rem; background: #e9f3ec; color: #1f5c36; }
+.track-merged .track-ok { align-self: flex-start; }
 .staff-want { margin: 0; padding: 0.45rem 0.7rem; border-radius: 0.6rem; background: var(--navy); color: #fff; font-weight: 700; font-size: 0.9rem; }
 .combo-thanks { margin: 0; font-size: 1rem; line-height: 1.5; color: var(--navy); }
 /* how many combos */

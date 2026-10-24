@@ -89,7 +89,9 @@ export const untilText = (at: number, now: number, h: string, min: string) => {
   return m >= 60 ? `${Math.floor(m / 60)} ${h}${m % 60 ? ` ${m % 60} ${min}` : ''}` : `${m} ${min}`
 }
 /** a cancellation reason in the reader's language: a ready-made one ('r:stock') is translated, the staff's own words as typed */
-export const reasonText = (r: string | undefined, t: (k: TKey) => string) => (r?.startsWith('r:') ? t(('cr_' + r.slice(2)) as TKey) : r ?? '')
+/** staff merged this order into another of the same customer's (owner, 2026-10-24): that order's code, else null */
+export const mergedInto = (order: Order): string | null => (order.cancelReason?.startsWith('merged:') ? order.cancelReason.slice(7) : null)
+export const reasonText = (r: string | undefined, t: (k: TKey) => string) => (r?.startsWith('r:') ? t(('cr_' + r.slice(2)) as TKey) : r?.startsWith('merged:') ? t('mergedReason').replace('{code}', r.slice(7)) : r ?? '')
 
 const PICKUP_STAGES: readonly Stage[] = ['received', 'preparing', 'done', 'delivered']
 /** The stages this order goes through: delivery has "On the way", pickup does not. */

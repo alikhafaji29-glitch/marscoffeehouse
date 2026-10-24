@@ -60,10 +60,10 @@ async function pull(sb: SupabaseClient, clerkId: string | null) {
   // identity it belongs to (a Clerk order by that Clerk session, the others by this device's Supabase identity)
   const uids = myOrders().filter((o) => o.uid && o.synced && (o.clerk ?? null) === clerkId && (isActive(o) || (recentlyCancelled(o) && !o.cancelReason))).map((o) => o.uid!)
   if (!uids.length) return
-  const { data, error } = await sb.from('orders').select('uid,status,history,cancel_reason').in('uid', uids)
+  const { data, error } = await sb.from('orders').select('uid,status,history,cancel_reason,items,total,offer,note').in('uid', uids)
   if (error) { console.warn('[backend] could not read order stages:', error.message); return }
-  const rows = data as Pick<OrderRow, 'uid' | 'status' | 'history' | 'cancel_reason'>[]
-  for (const r of rows) applyRemoteStatus(r.uid, r.status, r.history, r.cancel_reason)
+  const rows = data as Pick<OrderRow, 'uid' | 'status' | 'history' | 'cancel_reason' | 'items' | 'total' | 'offer' | 'note'>[]
+  for (const r of rows) applyRemoteStatus(r.uid, r.status, r.history, r.cancel_reason, r)
   // an order the database no longer has was deleted there (owner, 2026-10-22: test orders cleared but still tracked on
   // the phone): stop following it. (The read is as this device's identity, the one that placed it; staff signed in on
   // the same browser read their branch's orders, so only another branch's would be missed there.)
@@ -95,8 +95,8 @@ async function run() {
         clerkListening = true
         cb.channel('my-clerk-orders')
           .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, (p) => {
-            const r = p.new as Pick<OrderRow, 'uid' | 'status' | 'history' | 'cancel_reason'>
-            applyRemoteStatus(r.uid, r.status, r.history, r.cancel_reason)
+            const r = p.new as OrderRow
+            applyRemoteStatus(r.uid, r.status, r.history, r.cancel_reason, r)
           })
           .subscribe()
       }
@@ -116,8 +116,8 @@ async function run() {
     // the row rules let a customer hear only their own orders
     sb.channel('my-orders')
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, (p) => {
-        const r = p.new as Pick<OrderRow, 'uid' | 'status' | 'history' | 'cancel_reason'>
-        applyRemoteStatus(r.uid, r.status, r.history, r.cancel_reason)
+        const r = p.new as OrderRow
+        applyRemoteStatus(r.uid, r.status, r.history, r.cancel_reason, r)
       })
       .subscribe()
   }

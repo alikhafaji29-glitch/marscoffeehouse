@@ -135,3 +135,13 @@ export async function sendWhatsApp(orderUid: string, to: string, text: string): 
   if (error) return { ok: false, reason: 'unreachable', message: error.message }
   return (data as WaResult) ?? { ok: false, reason: 'unreachable' }
 }
+
+/** merge `absorb` into `keep` (same customer, both open; database function merge_orders, 2026-10-24); null when done,
+ *  else the database's reason. The live channel brings both changed orders to every dashboard. */
+export async function mergeOrders(keep: Order, absorb: Order): Promise<string | null> {
+  const sb = backendOn ? await getClient() : null
+  if (!sb || !keep.uid || !absorb.uid) return 'no backend'
+  const { error } = await sb.rpc('merge_orders', { keep_uid: keep.uid, absorb_uid: absorb.uid })
+  if (error) { console.warn('[backend] could not merge the orders:', error.message); return error.message }
+  return null
+}

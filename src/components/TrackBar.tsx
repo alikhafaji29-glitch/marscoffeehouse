@@ -3,7 +3,7 @@ import { statusSound, unlockAudio } from '../chime'
 import { useLang } from '../i18n'
 import { useMyOrders } from '../account'
 import { useCart } from '../cart'
-import { isActive, recentlyCancelled, stageOf, useNow } from '../orders'
+import { isActive, mergedInto, recentlyCancelled, stageOf, useNow } from '../orders'
 import { TrackModal } from './TrackModal'
 import { askFeedback } from './FeedbackPrompt'
 import { IconTruck } from './Icons'
@@ -29,9 +29,9 @@ export function TrackBar() {
     if (seen.current) for (const [k, st] of cur) {
       const was = seen.current.get(k)
       if (was && was !== st) {
-        changed = st
         // the order reached its last stage: how was it? (owner, 2026-10-22)
         const o = orders.find((x) => (x.uid ?? x.id) === k)
+        changed = o && mergedInto(o) ? 'merged' : st
         if (o && st === 'delivered') setTimeout(() => askFeedback(o, 'received'), 1500)
       }
     }
