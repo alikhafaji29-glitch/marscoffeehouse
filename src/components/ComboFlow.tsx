@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
+import { PickupSwitch } from './PickupSwitch'
 import { createPortal } from 'react-dom'
 import { useLang } from '../i18n'
 import { unlockAudio } from '../chime'
@@ -399,10 +400,7 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
               )}
               <div className="combo-form">
                 {set.delivery && set.pickup && (
-                  <div className="combo-how" role="radiogroup" aria-label={s('comboHow')}>
-                    <button type="button" role="radio" aria-checked={delivery} className={delivery ? 'on' : ''} onClick={() => { setHow('delivery'); setNote('') }}>{t('getDelivery')}</button>
-                    <button type="button" role="radio" aria-checked={!delivery} className={!delivery ? 'on' : ''} onClick={() => { setHow('pickup'); setNote('') }}>{t('getPickup')}</button>
-                  </div>
+                  <PickupSwitch on={!delivery} onChange={(p) => { setHow(p ? 'pickup' : 'delivery'); setNote('') }} />
                 )}
                 {!live && (
                   <label data-field="when" className={missing.includes('when') ? 'missing' : ''}><span>{s(delivery ? 'comboWhenDelivery' : 'comboWhenPickup')}</span>

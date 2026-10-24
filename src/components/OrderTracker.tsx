@@ -12,7 +12,7 @@ const LABEL = { received: 'stReceived', preparing: 'stPreparing', done: 'stDone'
 /** Where an order is right now: five steps, the ones passed ticked, the current one pulsing. A combo order shows one
  *  card per combo (its sandwich and drink, the drink's choices small), one under another in their own scroll box; the status
  *  bar and the window's Close stay in view under them (owner, 2026-10-21); other orders a short list, one item a line. */
-export function OrderTracker({ order, dark = false, onOk }: { order: Order; dark?: boolean; onOk?: () => void }) {
+export function OrderTracker({ order, dark = false }: { order: Order; dark?: boolean }) {
   const { t, lang } = useLang()
   const s = useS()
   const now = useNow()
@@ -58,14 +58,12 @@ export function OrderTracker({ order, dark = false, onOk }: { order: Order; dark
         <div className="track-merged" role="status">
           <b>{t('mergedTitle').replace('{code}', mergedInto(order)!)}</b>
           <span>{t('mergedLine')}</span>
-          {onOk && <button type="button" className="track-ok" onClick={onOk}>{t('cancelOk')}</button>}
         </div>
       )}
       {isCancelled(order) && !mergedInto(order) && (
         <div className="track-cancelled" role="status">
           <b>{t('orderCancelled')}</b>
           {order.cancelReason && <span>{t('cancelReason')}: {reasonText(order.cancelReason, t)}</span>}
-          {onOk && <button type="button" className="track-ok" onClick={onOk}>{t('cancelOk')}</button>}
         </div>
       )}
       {/* one slim bar instead of the five-step list (owner, 2026-10-21: "keep the screen as clean as possible") */}
