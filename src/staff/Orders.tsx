@@ -3,15 +3,16 @@ import { useLang } from '../i18n'
 import type { Lang, TKey } from '../i18n'
 import { iqd, waNumber } from '../account'
 import type { Order } from '../account'
-import { CANCEL_REASONS, LEAD_MIN, STAGES, dueOf, groupLines, isActive, isCancelled, isLater, nextStage, reasonText, stageIndex, stagesFor, timeText, untilText, useNow, whenText } from '../orders'
+import { CANCEL_REASONS, LEAD_MIN, STAGES, dueOf, groupLines, isActive, isCancelled, isLater, mergedInto, nextStage, reasonText, stageIndex, stagesFor, timeText, untilText, useNow, whenText } from '../orders'
 import { branchName, settingsFor, useStaff } from './store'
 import { printReceipt } from './receipt'
 import type { ReceiptText } from './receipt'
 import type { Stage } from '../orders'
 import { IconCheck, IconPin } from '../components/Icons'
 import { mapsLink } from '../components/ShareLocation'
-import { cancelOrder, moveOrder } from './remote'
+import { cancelOrder, mergeOrders, moveOrder } from './remote'
 import { useS } from './strings'
+import { backendOn } from '../backend'
 import { I } from './ui'
 
 /*
@@ -90,7 +91,6 @@ export function useReceiptText(): (o: Order) => ReceiptText {
     combo: (n) => s('comboN', { n }),
     note: t('orderNote'),
     deliverTo: o.giftTo ? `${t('giftFor')} ${o.giftTo}` : s('secDeliverTo'),
-    location: s('rcLocation'),
     pay: o.pay === 'wallet' ? t('paidByWallet') : o.fulfil === 'delivery' ? t('payOnDelivery') : t('payAtPickup'),
     fee: o.offer?.fee ? s('inclFee', { n: iqd(o.offer.fee) }) : undefined,
     thanks: s('rcThanks'),
@@ -98,7 +98,20 @@ export function useReceiptText(): (o: Order) => ReceiptText {
 }
 const PrintIcon = () => <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M7 9V3h10v6M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2" /><path d="M7 14h10v7H7z" /></svg>
 export const PhoneIcon = () => <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2" /></svg>
-export function OrderCard({ o, lead = LEAD_MIN }: { o: Order; lead?: number }) {
+/*
+ * The same customer placing a second order soon after the first (owner, 2026-10-24: customers order one combo, then
+ * another, instead of several in one order): the active orders from the same phone, in the same branch, within 30
+ * minutes of this one, so staff prepare and deliver them together.
+ */
+const SAME_WINDOW = 30 * 60_000
+const phoneKey = (o: Order) => phoneOf(o).replace(/\D/g, '').slice(-9)
+export function sameCustomer(o: Order, all: Order[]): Order[] {
+  const k = phoneKey(o)
+  if (k.length < 9 || !isActive(o)) return []
+  return all.filter((x) => x !== o && (x.uid ?? x.id) !== (o.uid ?? o.id) && isActive(x) && (x.branch ?? '') === (o.branch ?? '') && Math.abs(x.at - o.at) <= SAME_WINDOW && phoneKey(x) === k).sort((a, b) => a.at - b.at)
+}
+
+export function OrderCard({ o, lead = LEAD_MIN, all = [] }: { o: Order; lead?: number; all?: Order[] }) {
   const { t, lang } = useLang()
   const s = useS()
   const now = useNow(15000)
@@ -107,6 +120,19 @@ export function OrderCard({ o, lead = LEAD_MIN }: { o: Order; lead?: number }) {
   const stages = stagesFor(o)
   const cancelled = isCancelled(o)
   const receipt = useReceiptText()
+  const same = sameCustomer(o, all)
+  const [merging, setMerging] = useState('') // the order waiting for the confirming second tap
+  const [mergeBusy, setMergeBusy] = useState(false)
+  const [mergeError, setMergeError] = useState('')
+  const merge = async (keep: Order, absorb: Order) => {
+    const id = absorb.uid ?? absorb.id
+    if (merging !== id) { setMerging(id); setMergeError(''); return }
+    setMergeBusy(true)
+    const why = await mergeOrders(keep, absorb)
+    setMergeBusy(false)
+    setMerging('')
+    if (why) setMergeError(why)
+  }
   // cancelling: a reason is required, a ready-made one or the staff's own words
   const [asking, setAsking] = useState(false)
   const [why, setWhy] = useState('')
@@ -119,7 +145,7 @@ export function OrderCard({ o, lead = LEAD_MIN }: { o: Order; lead?: number }) {
     setAsking(false)
   }
   return (
-    <article className={'staff-order' + (isActive(o) ? '' : ' finished') + (cancelled ? ' cancelled' : '')}>
+    <article id={'order-' + o.id} className={'staff-order' + (isActive(o) ? '' : ' finished') + (cancelled ? ' cancelled' : '')}>
       <header className="staff-order-head">
         <b dir="ltr">#{o.id}</b>
         <span className="staff-ago">{ago(o.at, now, lang, t('justNow'))}</span>
@@ -132,6 +158,24 @@ export function OrderCard({ o, lead = LEAD_MIN }: { o: Order; lead?: number }) {
         {o.offer?.pre && <span className="staff-how pre">{s('preOrderBadge')}</span>}
         {dueOf(o) && isActive(o) && (o.status ?? 'received') === 'received' && !isLater(o, now, lead) && <span className="staff-how now">{s('makeNow')}</span>}
       </p>
+      {same.length > 0 && (
+        <p className="staff-same" role="note">
+          <b>{s('sameCustomer')}</b>{' '}
+          {same.map((x) => <button key={x.uid ?? x.id} type="button" className="link-btn" dir="ltr" onClick={() => document.getElementById('order-' + x.id)?.scrollIntoView({ behavior: 'smooth', block: 'center' })}>#{x.id}</button>)}
+          <small> · {s('sameTogether')}</small>
+          {/* merge (2026-10-24): the newer order always goes into the older one; a second tap confirms */}
+          {backendOn && same.map((x) => {
+            const [keep, absorb] = x.at < o.at ? [x, o] : [o, x]
+            const id = absorb.uid ?? absorb.id
+            return (
+              <button key={'m' + id} type="button" className={'staff-merge' + (merging === id ? ' sure' : '')} disabled={mergeBusy} onClick={() => void merge(keep, absorb)}>
+                {merging === id ? s('mergeSure', { a: absorb.id, b: keep.id }) : keep === o ? s('mergeHere', { code: absorb.id }) : s('mergeInto', { code: keep.id })}
+              </button>
+            )
+          })}
+          {mergeError && <small className="staff-merge-err" role="alert">{s('mergeFailed', { why: mergeError })}</small>}
+        </p>
+      )}
       {o.offer?.wantAt && <p className="staff-want">{t('scheduledFor').replace('{t}', whenText(o.offer.wantAt, lang))}{isActive(o) && o.offer.wantAt > now && <small> · {s('inTime', { t: untilText(o.offer.wantAt, now, s('hShort'), s('minShort')) })}</small>}</p>}
       {o.arriveAt && <p className="staff-want">{s('arriveAt', { t: timeText(o.arriveAt, lang) })}{isActive(o) && o.arriveAt > now && <small> · {s('inTime', { t: untilText(o.arriveAt, now, s('hShort'), s('minShort')) })}</small>}</p>}
       {/* top to bottom, as the cashier works through it (owner, 2026-10-19): who, how to reach them, what, where */}
@@ -216,7 +260,7 @@ export function Orders({ orders, live = false }: { orders: Order[]; live?: boole
   const active = orders.filter((o) => isActive(o) && !isLater(o, now, lead)).sort((a, b) => need(a) - need(b))
   const shown = tab === 'active' ? active : tab === 'later' ? later : tab === 'all' ? orders : orders.filter((o) => (o.status ?? 'received') === tab && !isLater(o, now, lead))
   const counts = STAGES.map((st) => orders.filter((o) => (o.status ?? 'received') === st && !isLater(o, now, lead)).length)
-  const cancelledCount = orders.filter((o) => isCancelled(o)).length
+  const cancelledCount = orders.filter((o) => isCancelled(o) && !mergedInto(o)).length // a merged order was not lost
   return (
     <>
       <p className="d-lead">{s('ordersLead')}</p>
@@ -236,7 +280,7 @@ export function Orders({ orders, live = false }: { orders: Order[]; live?: boole
         <button role="tab" aria-selected={tab === 'later'} className={tab === 'later' ? 'on' : ''} onClick={() => setTab('later')}>{s('laterTab')} · {later.length}</button>
         <button role="tab" aria-selected={tab === 'all'} className={tab === 'all' ? 'on' : ''} onClick={() => setTab('all')}>{t('staffAll')} · {orders.length}</button>
       </div>
-      {shown.length ? <div className="staff-list">{shown.map((o) => <OrderCard key={o.uid ?? o.id} o={o} lead={lead} />)}</div> : <p className="staff-empty">{tab === 'later' ? s('laterNone') : orders.length ? t('staffNoneHere') : t('staffNoOrders')}</p>}
+      {shown.length ? <div className="staff-list">{shown.map((o) => <OrderCard key={o.uid ?? o.id} o={o} lead={lead} all={orders} />)}</div> : <p className="staff-empty">{tab === 'later' ? s('laterNone') : orders.length ? t('staffNoneHere') : t('staffNoOrders')}</p>}
       {!live && <p className="demo-note">{t('staffDemoNote')}</p>}
     </>
   )

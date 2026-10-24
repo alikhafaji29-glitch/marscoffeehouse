@@ -275,9 +275,12 @@ export function markHeld(uid: string, why: NonNullable<Order['held']>) {
   commit(mine)
 }
 /** the stage staff moved the order to, as the backend has it */
-export function applyRemoteStatus(uid: string, status: Status, history?: Order['history'], reason?: string | null) {
+export function applyRemoteStatus(uid: string, status: Status, history?: Order['history'], reason?: string | null, content?: { items?: string[]; total?: number; offer?: Order['offer'] | null; note?: string | null }) {
   const { mine, o } = findByUid(uid)
-  if (!o || (o.status === status && (history?.length ?? 0) <= (o.history?.length ?? 0) && (status !== 'cancelled' || !reason || o.cancelReason === reason))) return
+  // staff merged another order into this one (2026-10-24): its lines, total, offer and note changed
+  const grown = !!o && !!content?.items && (content.items.length !== o.items.length || content.total !== o.total)
+  if (!o || (!grown && o.status === status && (history?.length ?? 0) <= (o.history?.length ?? 0) && (status !== 'cancelled' || !reason || o.cancelReason === reason))) return
+  if (grown) { o.items = content!.items!; o.total = content!.total ?? o.total; o.offer = content!.offer ?? undefined; o.note = content!.note ?? undefined }
   o.status = status
   if (status === 'cancelled') o.cancelReason = reason ?? undefined
   if (history?.length) o.history = history

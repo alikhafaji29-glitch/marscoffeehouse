@@ -5,7 +5,7 @@ import { groupLines } from '../orders'
 /*
  * The order receipt for the counter's receipt printer (owner, 2026-10-23: "print the receipt of the order as soon as
  * the order arrives"). Laid out for 80 mm paper (it also prints fine on A4): logo, branch, number and time, how the
- * order is fulfilled, the customer, the lines (combos grouped), the note, the address, the total and how it is paid.
+ * order is fulfilled, the customer, the lines (combos grouped), the note, the address, the total and how it is paid. (No "location shared" line: owner, 2026-10-24.)
  * It is printed from a hidden frame so the dashboard itself never changes. A browser shows its print window each
  * time; to print without it, the counter's Chrome is started with --kiosk-printing (see HANDOFF).
  */
@@ -19,7 +19,6 @@ export interface ReceiptText {
   combo: (n: number) => string
   note: string
   deliverTo: string
-  location: string
   pay: string
   fee?: string
   thanks: string
@@ -46,7 +45,7 @@ p { margin: 0.6mm 0; } ul { margin: 0.5mm 0 1.5mm; padding-inline-start: 4mm; } 
 <hr><p class="big">${esc(L.how)}</p>${L.scheduled ? `<p class="big">${esc(L.scheduled)}</p>` : ''}
 ${o.customer ? `<p>${esc(L.customer)}: <b>${esc(o.customer.name)}</b></p>` : ''}${phone ? `<p class="ltr">${esc(phone)}</p>` : ''}
 <hr>${lines}${o.note ? `<p class="note"><b>${esc(L.note)}:</b> ${esc(o.note)}</p>` : ''}
-${o.delivery?.address || o.delivery?.location ? `<hr><p><b>${esc(L.deliverTo)}:</b></p>${o.delivery.address ? `<p>${esc(o.delivery.address)}</p>` : ''}${o.delivery.location ? `<p>${esc(L.location)}</p>` : ''}` : ''}
+${o.delivery?.address ? `<hr><p><b>${esc(L.deliverTo)}:</b></p><p>${esc(o.delivery.address)}</p>` : ''}
 <hr><p class="total"><span class="ltr">${iqd(o.total)} IQD</span></p><p>${esc(L.pay)}${L.fee ? ` · ${esc(L.fee)}` : ''}</p>
 <hr><p class="c">${esc(L.thanks)}</p>
 </body></html>`

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useLang } from '../i18n'
 import { iqd } from '../account'
 import type { Order } from '../account'
-import { dueOf, groupLines, isCancelled, isLater, reasonText, splitLine, stageIndex, stagesFor, timeText, useNow, whenText } from '../orders'
+import { dueOf, groupLines, isCancelled, isLater, mergedInto, reasonText, splitLine, stageIndex, stagesFor, timeText, useNow, whenText } from '../orders'
 import { nameOf } from '../menuAdmin'
 import { useS } from '../staff/strings'
 import { backendOn } from '../backend'
@@ -21,7 +21,7 @@ export function OrderTracker({ order, dark = false, onOk }: { order: Order; dark
   const combos = groups.some((g) => g.combo)
   const [open, setOpen] = useState(false) // several combos: one line "Combo ×4" until Show details (owner, 2026-10-22)
   // an order for later says when it is scheduled until the café's board brings it up (LEAD_MIN before its time)
-  const status = isCancelled(order) ? t('stCancelled') : isLater(order, now) ? t('scheduledFor').replace('{t}', timeText(dueOf(order)!, lang)) : t(LABEL[stagesFor(order)[cur]])
+  const status = mergedInto(order) ? t('mergedTitle').replace('{code}', mergedInto(order)!) : isCancelled(order) ? t('stCancelled') : isLater(order, now) ? t('scheduledFor').replace('{t}', timeText(dueOf(order)!, lang)) : t(LABEL[stagesFor(order)[cur]])
   const item = (line: string, i: number) => {
     const p = splitLine(line)
     return <li key={i}><span>{nameOf(p.name.replace(/\s*\((8|12|16|20)oz\)$/, ''), lang)}{/\((\d+oz)\)$/.exec(p.name)?.[1] && <small dir="ltr"> {/\((\d+oz)\)$/.exec(p.name)![1]}</small>}{p.qty > 1 && <b dir="ltr"> ×{p.qty}</b>}</span>{p.extra && <small>{p.extra}</small>}</li>
@@ -54,7 +54,14 @@ export function OrderTracker({ order, dark = false, onOk }: { order: Order; dark
       {order.arriveAt && <p className="track-items"><b>{s('arriveAt', { t: timeText(order.arriveAt, lang) })}</b></p>}
       {order.note && <p className="track-items">{t('orderNote')}: {order.note}</p>}
       {order.delivery && <p className="track-items">{t('deliveryTo')}: {[order.delivery.address, order.delivery.location && s('locPin')].filter(Boolean).join(' · ')}</p>}
-      {isCancelled(order) && (
+      {mergedInto(order) && (
+        <div className="track-merged" role="status">
+          <b>{t('mergedTitle').replace('{code}', mergedInto(order)!)}</b>
+          <span>{t('mergedLine')}</span>
+          {onOk && <button type="button" className="track-ok" onClick={onOk}>{t('cancelOk')}</button>}
+        </div>
+      )}
+      {isCancelled(order) && !mergedInto(order) && (
         <div className="track-cancelled" role="status">
           <b>{t('orderCancelled')}</b>
           {order.cancelReason && <span>{t('cancelReason')}: {reasonText(order.cancelReason, t)}</span>}
