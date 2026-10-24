@@ -109,7 +109,6 @@ export function useReceiptText(): (o: Order) => ReceiptText {
     combo: (n) => s('comboN', { n }),
     note: t('orderNote'),
     deliverTo: o.giftTo ? `${t('giftFor')} ${o.giftTo}` : s('secDeliverTo'),
-    location: s('rcLocation'),
     pay: o.pay === 'wallet' ? t('paidByWallet') : o.fulfil === 'delivery' ? t('payOnDelivery') : t('payAtPickup'),
     fee: o.offer?.fee ? s('inclFee', { n: iqd(o.offer.fee) }) : undefined,
     thanks: s('rcThanks'),

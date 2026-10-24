@@ -349,7 +349,6 @@ const S = {
   autoPrintOn: ['Auto-print on', 'الطباعة التلقائية مفعّلة', 'چاپی خۆکار کارایە'],
   autoPrintOff: ['Auto-print off', 'الطباعة التلقائية متوقفة', 'چاپی خۆکار ڕاگیراوە'],
   autoPrintHint: ['Print each new order as soon as it arrives, on this device', 'طباعة كل طلب جديد فور وصوله، على هذا الجهاز', 'هەر داواکارییەکی نوێ هەر کە گەیشت چاپ بکە، لەسەر ئەم ئامێرە'],
-  rcLocation: ['Location shared: see the dashboard map', 'تمت مشاركة الموقع: انظر الخريطة في لوحة التحكم', 'شوێن نێردراوە: نەخشەکە لە داشبۆرد ببینە'],
   rcThanks: ['Thank you for choosing Mars CoffeeHouse', 'شكرًا لاختياركم مارس كوفي هاوس', 'سوپاس بۆ هەڵبژاردنی مارس کۆفی هاوس'],
   cancelWhy: ['Why is the order cancelled? The customer sees this.', 'لماذا أُلغي الطلب؟ سيرى الزبون هذا السبب.', 'بۆچی داواکارییەکە هەڵدەوەشێنرێتەوە؟ کڕیار ئەمە دەبینێت.'],
   cancelOther: ['Other reason', 'سبب آخر', 'هۆکارێکی تر'],
