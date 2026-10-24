@@ -36,6 +36,7 @@ import './staff.css'
  */
 const PIN = '1234'
 const DEMO_USER = 'demo' // the demo build only (no backend, nothing real behind it): username demo, password 1234
+const RING_EVERY = 4000 // ms between chimes while an order waits as Request received (the chime itself lasts ~1.5 s)
 const MAIN: { id: string; key: SKey; icon: () => ReactNode }[] = [
   { id: 'dashboard', key: 'navDashboard', icon: I.dashboard },
   { id: 'orders', key: 'navOrders', icon: I.orders },
@@ -116,6 +117,14 @@ export function StaffScreen() {
     if (wasLater.current && ok && sound && due) chime()
     wasLater.current = cur
   }, [laterKey]) // eslint-disable-line react-hooks/exhaustive-deps
+  // the chime keeps ringing while an order of this branch waits as Request received, until staff mark it Preparing
+  // (or cancel it) (owner, 2026-10-25); orders under Later wait quietly until they come due; Sound off silences it
+  const ringing = orders.filter((o) => isActive(o) && (o.status ?? 'received') === 'received' && !isLater(o, now, lead)).map((o) => o.uid ?? o.id).join(',')
+  useEffect(() => {
+    if (!ok || !sound || !ringing) return
+    const id = window.setInterval(() => chime(), RING_EVERY)
+    return () => window.clearInterval(id)
+  }, [ringing, ok, sound])
   const go = (p: string) => {
     setPage(p)
     setDrawer(false)
