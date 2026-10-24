@@ -2,9 +2,8 @@ import type { ReactNode } from 'react'
 import { useLang } from '../i18n'
 import { iqd } from '../account'
 import type { Order } from '../account'
-import { hmText, isActive, useNow } from '../orders'
+import { hmText, isActive, isCancelled, useNow } from '../orders'
 import { outCount, useMenuVersion } from '../menuAdmin'
-import { startOf } from './stats'
 import { OrderCard } from './Orders'
 import { activeEvent, branchName, positiveOffer, settingsFor, useStaff } from './store'
 import { useS } from './strings'
@@ -12,7 +11,7 @@ import type { SKey } from './strings'
 import { useRemote } from './remote'
 import { backendOn } from '../backend'
 import { localFeedback } from '../feedback'
-import { PhoneIcon, ago } from './Orders'
+import { OrderFilterBar, PhoneIcon, ago, useOrderFilter } from './Orders'
 import { Card, I, Stat } from './ui'
 
 /* Dashboard: today at a glance for the chosen branch, the orders waiting for a hand, and what is running on the site. */
@@ -22,8 +21,11 @@ export function Overview({ orders, go, readOnly = false }: { orders: Order[]; go
   const data = useStaff()
   useMenuVersion()
   const now = useNow(30000)
-  const today = orders.filter((o) => o.at >= startOf(now))
-  const active = orders.filter((o) => isActive(o))
+  // the date picks the day of the figures; the search narrows the orders waiting for a hand (owner, 2026-10-24)
+  const f = useOrderFilter()
+  const today = orders.filter((o) => f.byDay(o))
+  const active = orders.filter((o) => isActive(o) && f.byText(o))
+  const dayLabel = f.day ? new Date(f.day + 'T12:00').toLocaleDateString(lang === 'ku' ? 'ckb' : lang, { day: 'numeric', month: 'short' }) : ''
   const offer = positiveOffer(data.branch)
   const ev = activeEvent()
   const set = settingsFor(data.branch)
@@ -35,9 +37,10 @@ export function Overview({ orders, go, readOnly = false }: { orders: Order[]; go
   return (
     <>
       <p className="d-lead">{s('overviewLead', { branch: branchName(data.branch) })}</p>
+      <OrderFilterBar f={f} />
       <div className="d-stats">
-        <Stat icon={<I.receipt />} value={today.length} label={s('ordersTodayStat')} />
-        <Stat icon={<I.money />} tone="green" value={iqd(today.reduce((n, o) => n + o.total, 0))} label={s('revenueToday')} />
+        <Stat icon={<I.receipt />} value={today.length} label={f.today ? s('ordersTodayStat') : f.day ? s('ordersDayStat', { d: dayLabel }) : s('ordersAllStat')} />
+        <Stat icon={<I.money />} tone="green" value={iqd(today.filter((o) => !isCancelled(o)).reduce((n, o) => n + o.total, 0))} label={f.today ? s('revenueToday') : f.day ? s('revenueDay', { d: dayLabel }) : s('revenueAll')} />
         <Stat icon={<I.clock />} tone="caramel" value={active.length} label={s('activeNow')} />
         <Stat icon={<I.alert />} tone={outCount() ? 'red' : 'sky'} value={outCount()} label={s('outOfStock')} />
       </div>

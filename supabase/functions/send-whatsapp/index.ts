@@ -9,10 +9,16 @@
 // Secrets (Supabase → Edge Functions → Secrets, never in the code or the site):
 //   WA_TOKEN           the permanent access token (a System User token of Mars' Meta Business account)
 //   WA_PHONE_ID        the Phone number ID of the number that sends (WhatsApp Manager → API Setup)
-//   WA_TEMPLATE        optional: the approved template's name. A driver who has not written to the number in the last
-//                      24 hours can only be sent a template (Meta's rule); without one, plain text is sent.
-//   (the template's language follows the dashboard's: English → en, Arabic → ar, Kurdish → ar, since WhatsApp has no
-//   Kurdish templates; owner, 2026-10-24: "arabic")
+//   WA_TEMPLATE        optional: the template's name, default mars_delivery_order (owner, 2026-10-24: "add it
+//                      yourself"). A driver who has not written to the number in the last 24 hours can only be sent a
+//                      template (Meta's rule). The template is tried first; while Meta has not approved it (or it is
+//                      refused) the plain text and the pin go instead, which reach drivers who wrote in the last 24 h.
+//   (the template's language follows the dashboard's: English → en, Arabic → ar, Kurdish → fa: WhatsApp has no Kurdish,
+//   so the Kurdish wording is filed under Persian (owner, 2026-10-24: "i said kurdish template"); if Meta has no
+//   approved fa version, it is sent again in Arabic)
+//   The customer's pin is sent as a real WhatsApp location (owner, 2026-10-24: "send the location as WhatsApp sends
+//   it"): with templates, `<WA_TEMPLATE>_loc` (the same wording with a LOCATION header) is tried first, then the
+//   plain template; without templates, a location message follows the text.
 //   WA_GRAPH_VERSION   optional: Graph API version (default v23.0)
 //   ALLOWED_ORIGINS    optional: comma-separated site addresses allowed to call it
 //
@@ -48,9 +54,15 @@ const iqd = (n: number) => n.toLocaleString('en-US')
 const BRANCH: Record<string, Record<string, string>> = {
   en: { erbil: 'Erbil', kirkuk: 'Kirkuk' },
   ar: { erbil: 'أربيل', kirkuk: 'كركوك' },
+  fa: { erbil: 'هەولێر', kirkuk: 'کەرکووک' },
 }
-/** the template language for the dashboard's language: WhatsApp has no Kurdish templates, Kurdish gets Arabic */
-const templateLang = (lang?: string) => (lang === 'ar' || lang === 'ku' ? 'ar' : 'en')
+/** the template language for the dashboard's language: Kurdish is filed under Persian (WhatsApp has no Kurdish) */
+const templateLang = (lang?: string) => (lang === 'ku' ? 'fa' : lang === 'ar' ? 'ar' : 'en')
+const COLLECT: Record<string, { wallet: string; cur: string }> = {
+  en: { wallet: 'Paid by wallet', cur: 'IQD' },
+  ar: { wallet: 'مدفوع بالمحفظة', cur: 'دينار' },
+  fa: { wallet: 'بە جزدان پارەی دراوە', cur: 'دینار' },
+}
 
 Deno.serve(async (req: Request) => {
   const origin = req.headers.get('origin')
@@ -87,40 +99,54 @@ Deno.serve(async (req: Request) => {
   const to = waNumber(body.to)
   if (to.length < 10 || to.length > 15) return json(400, { ok: false, reason: 'bad_number' })
 
-  const template = Deno.env.get('WA_TEMPLATE')
+  const template = Deno.env.get('WA_TEMPLATE') || 'mars_delivery_order'
   const tl = templateLang(body.lang)
   const phone = o.delivery_phone || o.customer_phone || ''
-  const message = template
-    ? {
-      type: 'template',
-      template: {
-        name: template,
-        language: { code: tl },
-        components: [{
-          type: 'body',
-          parameters: [
-            o.code,
-            BRANCH[tl][o.branch] ?? o.branch,
-            [o.customer_name, phone].filter(Boolean).join(' · '),
-            o.address ?? '',
-            o.location ? `https://www.google.com/maps?q=${o.location.lat},${o.location.lng}` : '',
-            (o.items ?? []).join(' · '),
-            o.pay === 'wallet' ? (tl === 'ar' ? 'مدفوع بالمحفظة' : 'Paid by wallet') : `${iqd(o.total)} ${tl === 'ar' ? 'دينار' : 'IQD'}`,
-          ].map((t) => ({ type: 'text', text: flat(t) })),
-        }],
-      },
+  const pin = o.location ? { latitude: o.location.lat, longitude: o.location.lng, name: flat(o.customer_name || `#${o.code}`, 100), address: flat(o.address || `#${o.code}`, 200) } : null
+  const params = (tl: string) => [
+    o.code,
+    BRANCH[tl][o.branch] ?? o.branch,
+    [o.customer_name, phone].filter(Boolean).join(' · '),
+    o.address ?? '',
+    o.location ? `https://www.google.com/maps?q=${o.location.lat},${o.location.lng}` : '',
+    (o.items ?? []).join(' · '),
+    o.pay === 'wallet' ? COLLECT[tl].wallet : `${iqd(o.total)} ${COLLECT[tl].cur}`,
+  ].map((t) => ({ type: 'text', text: flat(t) }))
+  type Sent = { r: Response; res: { messages?: { id: string }[]; error?: { code?: number; message?: string } } }
+  const post = async (message: Record<string, unknown>): Promise<Sent> => {
+    const r = await fetch(`https://graph.facebook.com/${GRAPH}/${phoneId}/messages`, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+      body: JSON.stringify({ messaging_product: 'whatsapp', recipient_type: 'individual', to, ...message }),
+    })
+    return { r, res: await r.json().catch(() => ({})) }
+  }
+  let sent: Sent = { r: new Response(null, { status: 500 }), res: {} }
+  let used = ''
+  {
+    // the pin version first, then the plain one; Kurdish (fa) then Arabic, until Meta takes one
+    const names = pin ? [`${template}_loc`, template] : [template]
+    const langs = tl === 'fa' ? ['fa', 'ar'] : [tl]
+    attempts: for (const name of names) {
+      for (const lang of langs) {
+        const components: unknown[] = []
+        if (name.endsWith('_loc')) components.push({ type: 'header', parameters: [{ type: 'location', location: pin }] })
+        components.push({ type: 'body', parameters: params(lang) })
+        sent = await post({ type: 'template', template: { name, language: { code: lang }, components } })
+        if (sent.res.messages?.length) { used = `${name}/${lang}`; break attempts }
+      }
     }
-    : { type: 'text', text: { body: (body.text ?? '').slice(0, 4000) || `Mars order #${o.code}`, preview_url: true } }
-
-  const r = await fetch(`https://graph.facebook.com/${GRAPH}/${phoneId}/messages`, {
-    method: 'POST',
-    headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
-    body: JSON.stringify({ messaging_product: 'whatsapp', recipient_type: 'individual', to, ...message }),
-  })
-  const res = await r.json().catch(() => ({})) as { messages?: { id: string }[]; error?: { code?: number; message?: string } }
+  }
+  // no template accepted yet (in review, or refused): the text, then the pin, as before
+  if (!sent.res.messages?.length) {
+    sent = await post({ type: 'text', text: { body: (body.text ?? '').slice(0, 4000) || `Mars order #${o.code}`, preview_url: true } })
+    // the pin right after the text, as WhatsApp shows a shared location
+    if (sent.res.messages?.length && pin) await post({ type: 'location', location: pin })
+  }
+  const { r, res } = sent
   if (!r.ok || !res.messages?.length) {
     console.warn('[send-whatsapp] Meta refused:', r.status, res.error?.code, res.error?.message)
     return json(200, { ok: false, reason: 'meta', code: res.error?.code, message: res.error?.message ?? `HTTP ${r.status}` })
   }
-  return json(200, { ok: true, id: res.messages[0].id, template: !!template })
+  return json(200, { ok: true, id: res.messages[0].id, template: used || undefined })
 })

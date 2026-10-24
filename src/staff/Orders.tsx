@@ -264,9 +264,54 @@ export function OrderCard({ o, lead = LEAD_MIN, all = [] }: { o: Order; lead?: n
   )
 }
 
-export function Orders({ orders, live = false }: { orders: Order[]; live?: boolean }) {
+/*
+ * Filter for the Orders page and the Dashboard (owner, 2026-10-24: "filter by date defaulted to today's date, by name,
+ * by phone number"; "dashboard too"). The date follows the clock while it is on today (it moves on at midnight by
+ * itself); '' = all dates. An order belongs to a day when it was placed that day or is scheduled for it. The search
+ * matches the customer's name, or any part of the phone number however it was typed.
+ */
+const dayKey = (t: number) => { const d = new Date(t); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` }
+export type OrderFilter = { day: string; today: boolean; q: string; setDay: (d: string | null) => void; setQ: (q: string) => void; byDay: (o: Order) => boolean; byText: (o: Order) => boolean }
+export function useOrderFilter(): OrderFilter {
+  const now = useNow(60000)
+  const [picked, setPicked] = useState<string | null>(null) // null = today, '' = all dates, else YYYY-MM-DD
+  const [q, setQ] = useState('')
+  const day = picked ?? dayKey(now)
+  const words = q.trim().toLowerCase()
+  const digits = q.replace(/\D/g, '').replace(/^(00964|964|0)/, '')
+  return {
+    day, today: picked === null, q, setDay: setPicked, setQ,
+    byDay: (o) => !day || dayKey(o.at) === day || (dueOf(o) !== undefined && dayKey(dueOf(o)!) === day),
+    byText: (o) => {
+      if (!words) return true
+      if ((o.customer?.name ?? '').toLowerCase().includes(words) || o.id.toLowerCase().includes(words)) return true
+      return digits.length >= 3 && [o.customer?.phone, o.delivery?.phone].some((p) => (p ?? '').replace(/\D/g, '').includes(digits))
+    },
+  }
+}
+export function OrderFilterBar({ f }: { f: OrderFilter }) {
+  const s = useS()
+  return (
+    <div className="staff-filter" role="search">
+      <label className="staff-filter-date">
+        <span>{s('fDate')}</span>
+        <input type="date" value={f.day} onChange={(e) => f.setDay(e.target.value)} dir="ltr" />
+      </label>
+      <button type="button" className={'staff-filter-chip' + (f.today ? ' on' : '')} onClick={() => f.setDay(null)}>{s('fToday')}</button>
+      <button type="button" className={'staff-filter-chip' + (f.day === '' ? ' on' : '')} onClick={() => f.setDay('')}>{s('fAllDates')}</button>
+      <span className="staff-filter-q">
+        <input type="search" value={f.q} onChange={(e) => f.setQ(e.target.value)} placeholder={s('fSearch')} aria-label={s('fSearch')} />
+        {f.q && <button type="button" className="link-btn" onClick={() => f.setQ('')}>{s('fClear')}</button>}
+      </span>
+    </div>
+  )
+}
+
+export function Orders({ orders: everything, live = false }: { orders: Order[]; live?: boolean }) {
   const { t } = useLang()
   const s = useS()
+  const f = useOrderFilter()
+  const orders = everything.filter((o) => f.byDay(o) && f.byText(o))
   const [tab, setTab] = useState<'active' | 'later' | 'all' | Stage | 'cancelled'>('active')
   const branch = useStaff().branch
   const lead = settingsFor(branch).lead ?? LEAD_MIN
@@ -282,6 +327,7 @@ export function Orders({ orders, live = false }: { orders: Order[]; live?: boole
   return (
     <>
       <p className="d-lead">{s('ordersLead')}</p>
+      <OrderFilterBar f={f} />
       {/* the stage counters are tabs too: tap one to see just that stage, tap it again to go back to Active */}
       <div className="staff-counts" role="tablist" aria-label={s('navOrders')}>
         {STAGES.map((st, i) => (
@@ -298,7 +344,7 @@ export function Orders({ orders, live = false }: { orders: Order[]; live?: boole
         <button role="tab" aria-selected={tab === 'later'} className={tab === 'later' ? 'on' : ''} onClick={() => setTab('later')}>{s('laterTab')} · {later.length}</button>
         <button role="tab" aria-selected={tab === 'all'} className={tab === 'all' ? 'on' : ''} onClick={() => setTab('all')}>{t('staffAll')} · {orders.length}</button>
       </div>
-      {shown.length ? <div className="staff-list">{shown.map((o) => <OrderCard key={o.uid ?? o.id} o={o} lead={lead} all={orders} />)}</div> : <p className="staff-empty">{tab === 'later' ? s('laterNone') : orders.length ? t('staffNoneHere') : t('staffNoOrders')}</p>}
+      {shown.length ? <div className="staff-list">{shown.map((o) => <OrderCard key={o.uid ?? o.id} o={o} lead={lead} all={everything} />)}</div> : <p className="staff-empty">{tab === 'later' ? s('laterNone') : everything.length ? t('staffNoneHere') : t('staffNoOrders')}</p>}
       {!live && <p className="demo-note">{t('staffDemoNote')}</p>}
     </>
   )
