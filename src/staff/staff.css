@@ -358,3 +358,9 @@ button.d-chip.on { background: var(--d-ink); color: #fff; }
 .wa-log-sum .st-read b { color: var(--d-green); }
 .wa-log-err { grid-column: 2 / -1; color: #b3261e; font-size: 0.85rem; }
 @media (max-width: 560px) { .wa-log li { grid-template-columns: 3rem 1fr; } .wa-log-st { grid-column: 2; justify-self: start; } }
+/* the item photo moved left / right (2026-10-25) */
+.d-photo-x { width: 100%; max-width: 240px; display: flex; flex-direction: column; align-items: center; gap: 0.2rem; }
+.d-photo-x label { width: 100%; display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.82rem; color: var(--d-mute); text-align: center; }
+.d-photo-x input[type="range"] { width: 100%; accent-color: var(--navy); }
+.d-photo-x { gap: 0.55rem; }
+.d-photo-x p { margin: 0; font-size: 0.82rem; font-weight: 600; color: var(--d-ink); align-self: center; }

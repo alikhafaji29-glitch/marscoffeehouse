@@ -7,7 +7,7 @@ import { MiniCup } from './MiniCup'
 import { IconSearch } from './Icons'
 import { DESC, TINT, categoryOf } from '../menuMeta'
 import { BRANCHES, activeEvent, branchLabel, setCustomerBranch, useStaff } from '../staff/store'
-import { categoryName, itemState, nameOf, photoOf } from '../menuAdmin'
+import { categoryName, itemState, nameOf, photoOf, photoStyle } from '../menuAdmin'
 import type { BranchId } from '../staff/store'
 import { useS } from '../staff/strings'
 
@@ -47,7 +47,7 @@ export const sectionPicOf = (items: { name: string }[]) => (items.find((i) => ph
 
 export function ItemPic({ name, cat = categoryOf(name), size = 64 }: { name: string; cat?: string; size?: number }) {
   const photo = photoOf(name)
-  return photo ? <img src={photo} alt="" loading="lazy" /> : <MiniCup color={TINT[cat] || [200, 200, 200]} ice={cat === 'coldCoffee' || cat === 'refreshers' || cat === 'mojito' ? 1 : 0} size={size} />
+  return photo ? <img src={photo} alt="" loading="lazy" style={photoStyle(name)} /> : <MiniCup color={TINT[cat] || [200, 200, 200]} ice={cat === 'coldCoffee' || cat === 'refreshers' || cat === 'mojito' ? 1 : 0} size={size} />
 }
 
 function Card({ item, cat, onPick }: { item: MenuItem; cat: string; onPick: (i: MenuItem) => void }) {

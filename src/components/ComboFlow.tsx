@@ -18,7 +18,7 @@ import { OrderTracker } from './OrderTracker'
 import { MissingBox, goToMissing } from './MissingBox'
 import type { Missing } from './MissingBox'
 import { TimeWheel } from './TimeWheel'
-import { nameOf, photoOf } from '../menuAdmin'
+import { nameOf, photoOf, photoStyle } from '../menuAdmin'
 import { defaultPicks, extras, groupsFor, summary, timesPicked } from '../customize'
 import type { CustGroup, Picks } from '../customize'
 import { arrivalSlots, timeText, whenText } from '../orders'
@@ -364,7 +364,7 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
                       return (
                         <div key={it.name} className={'combo-item' + (on ? ' on' : '')}>
                           <button type="button" role={cur.g.pick === 1 ? 'radio' : 'checkbox'} aria-checked={on} onClick={() => pick(ck, cur.g, it.name)}>
-                            <span className="combo-tile" aria-hidden="true">{photoOf(it.name) ? <img src={photoOf(it.name)} alt="" loading="lazy" /> : FOOD.includes(cat) ? <FoodIcon sweet={cat === 'sweets'} /> : <MiniCup color={TINT[cat] || [200, 200, 200]} ice={isIced(cat) ? 1 : 0} size={54} />}</span>
+                            <span className="combo-tile" aria-hidden="true">{photoOf(it.name) ? <img src={photoOf(it.name)} alt="" loading="lazy" style={photoStyle(it.name)} /> : FOOD.includes(cat) ? <FoodIcon sweet={cat === 'sweets'} /> : <MiniCup color={TINT[cat] || [200, 200, 200]} ice={isIced(cat) ? 1 : 0} size={54} />}</span>
                             <span className="combo-name">{nameOf(it.name, lang)}{it.sizes && !offer.sizes && <small dir="ltr">{it.sizes[0]}</small>}</span>
                             <span className="combo-check">{on && <IconCheck />}</span>
                           </button>

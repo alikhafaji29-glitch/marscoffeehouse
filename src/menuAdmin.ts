@@ -35,6 +35,9 @@ export type NutritionEntry = Nutrition & { size: string; flavor: string } // '' 
 export interface ItemState {
   cat?: string // its category on this branch (staff can move an item); the catalogue's when missing or unknown
   photo?: string // staff's photo: its path in the `menu` storage bucket (demo: the picture itself, as a data: address)
+  photoX?: number // the photo moved left (−) or right (+) in its frame, % of its width (owner, 2026-10-25); missing = centred
+  photoY?: number // moved up (−) or down (+), % of its height; missing = centred
+  photoZoom?: number // its size in %, 50–200; missing = 100
   available: boolean // the branch sells it
   names: L3 // the item's name as this branch writes it; the catalogue's name stays the key
   sort: number // its place on the branch's menu
@@ -55,7 +58,7 @@ type Branches<T> = Record<BranchId, T> // read a branch's part with at(): a new 
 type SeedRow = { c: string; s: number; nm: Partial<L3>; p: number[]; z: string[]; t: string | null; o: number; d: string; f: string[]; n: [string, string, Nutrition][] }
 interface DbRow {
   branch: BranchId; name: string; category: string; names: Partial<L3> | null; sort: number | null; available: boolean; in_stock: boolean; prices: number[]; sizes: string[]; tag: Badge | null
-  description: Partial<L3> | null; flavors: string[] | null; nutrition: NutritionEntry[] | null; photo?: string | null; flavor_extras?: Record<string, number> | null
+  description: Partial<L3> | null; flavors: string[] | null; nutrition: NutritionEntry[] | null; photo?: string | null; photo_x?: number | null; photo_y?: number | null; photo_zoom?: number | null; flavor_extras?: Record<string, number> | null
 }
 interface DbBranch { id: string; names: Partial<L3> | null; active: boolean; sort: number | null }
 interface DbCat { branch: BranchId; id: string; kind: CatKind; names: Partial<L3> | null; sort: number | null }
@@ -74,7 +77,7 @@ const fromSeed = (r: SeedRow): ItemState => ({
 })
 const fromDb = (r: DbRow): ItemState => ({
   cat: r.category, names: l3(r.names), sort: r.sort ?? 0, available: r.available, inStock: r.in_stock, prices: r.prices, sizes: r.sizes ?? [], tag: r.tag ?? '', desc: l3(r.description),
-  flavors: r.flavors ?? [], nutrition: r.nutrition ?? [], ...(r.photo && { photo: r.photo }),
+  flavors: r.flavors ?? [], nutrition: r.nutrition ?? [], ...(r.photo && { photo: r.photo }), ...(r.photo_x && { photoX: r.photo_x }), ...(r.photo_y && { photoY: r.photo_y }), ...(r.photo_zoom && r.photo_zoom !== 100 && { photoZoom: r.photo_zoom }),
   ...(r.flavor_extras && Object.keys(r.flavor_extras).length > 0 && { flavorExtra: r.flavor_extras }),
 })
 const toBranch = (r: DbBranch): Branch => ({ id: r.id, name: r.names?.en || r.id, names: l3(r.names), active: r.active, sort: r.sort ?? 0 })
@@ -213,7 +216,7 @@ async function pull(): Promise<boolean> {
   try {
     const get = (path: string) => fetch(`${backendUrl}/rest/v1/${path}`, { headers: { apikey: backendKey! } })
     const [res, cres, bres, gres] = await Promise.all([
-      get('menu_items?select=branch,name,category,names,sort,available,in_stock,prices,sizes,tag,description,flavors,nutrition,photo,flavor_extras'),
+      get('menu_items?select=branch,name,category,names,sort,available,in_stock,prices,sizes,tag,description,flavors,nutrition,photo,photo_x,photo_y,photo_zoom,flavor_extras'),
       get('menu_categories?select=branch,id,kind,names,sort').catch(() => null),
       get('branches?select=id,names,active,sort&order=sort.asc,id.asc').catch(() => null),
       get('branch_config?select=branch,settings,offers').catch(() => null), // each branch's settings and offers
@@ -270,6 +273,8 @@ const toDb = (p: Partial<ItemState>) => ({
   ...(p.prices && { prices: p.prices }), ...(p.tag !== undefined && { tag: p.tag || null }), ...(p.desc && { description: p.desc }),
   ...(p.flavors && { flavors: p.flavors }), ...(p.flavorExtra && { flavor_extras: p.flavorExtra }), ...(p.nutrition && { nutrition: p.nutrition }), ...(p.names && { names: p.names }),
   ...(p.sizes && { sizes: p.sizes }), ...(p.sort !== undefined && { sort: p.sort }), ...(p.cat !== undefined && { category: p.cat }), ...(p.photo !== undefined && { photo: p.photo || null }),
+  ...(p.photoX !== undefined && { photo_x: p.photoX || null }), ...(p.photoY !== undefined && { photo_y: p.photoY || null }),
+  ...(p.photoZoom !== undefined && { photo_zoom: p.photoZoom && p.photoZoom !== 100 ? p.photoZoom : null }),
 })
 const setFailed = (bad: boolean) => { if (failed !== bad || bad) { failed = bad; apply() } }
 /** change an item for the dashboard's branch: in the database when the backend is on, otherwise on this device */
@@ -501,6 +506,16 @@ export function photoOf(name: string, branch: BranchId = activeBranch()): string
   const p = itemState(name, branch)?.photo
   return p ? (p.startsWith('data:') ? p : `${backendUrl}/storage/v1/object/public/menu/${p}`) : PHOTO[name]
 }
+/** an item photo's own place in its frame (moved and zoomed by staff), as a style for its <img> */
+export type PhotoFit = { x?: number; y?: number; zoom?: number }
+export function fitStyle({ x = 0, y = 0, zoom = 100 }: PhotoFit): { transform: string } | undefined {
+  if (!x && !y && zoom === 100) return undefined
+  return { transform: `translate(${x}%, ${y}%)${zoom !== 100 ? ` scale(${zoom / 100})` : ''}` }
+}
+export function photoStyle(name: string, branch: BranchId = activeBranch()): { transform: string } | undefined {
+  const st = itemState(name, branch)
+  return st ? fitStyle({ x: st.photoX, y: st.photoY, zoom: st.photoZoom }) : undefined
+}
 /** a photo made small enough for a menu: the longer side at most `max` pixels */
 async function shrink(file: File, max: number, quality: number, type: string): Promise<{ blob: Blob; url: string } | null> {
   try {
@@ -522,7 +537,7 @@ export async function uploadPhoto(name: string, file: File): Promise<'ok' | 'bad
   if (!backendOn) {
     const small = await shrink(file, 480, 0.72, 'image/jpeg') // kept on this device, so kept small
     if (!small) return 'bad'
-    saveItem(name, { photo: small.url })
+    saveItem(name, { photo: small.url, photoX: 0, photoY: 0, photoZoom: 100 })
     return 'ok'
   }
   const small = await shrink(file, 1000, 0.82, 'image/webp')
@@ -535,7 +550,7 @@ export async function uploadPhoto(name: string, file: File): Promise<'ok' | 'bad
   const sb = await getClient()
   const up = sb ? await sb.storage.from('menu').upload(path, blob, { contentType: blob.type, cacheControl: '31536000' }) : null
   if (!up || up.error) { console.warn('[backend] photo not stored:', up?.error?.message ?? 'no connection'); return 'failed' }
-  saveItem(name, { photo: path })
+  saveItem(name, { photo: path, photoX: 0, photoY: 0, photoZoom: 100 }) // a new photo starts centred, as it is
   if (before.photo && !before.photo.startsWith('data:')) void sb!.storage.from('menu').remove([before.photo]) // the old file is not needed any more
   return 'ok'
 }
@@ -543,7 +558,7 @@ export async function uploadPhoto(name: string, file: File): Promise<'ok' | 'bad
 export function removePhoto(name: string) {
   const old = itemState(name, staffData().branch)?.photo
   if (!old) return
-  saveItem(name, { photo: '' })
+  saveItem(name, { photo: '', photoX: 0, photoY: 0, photoZoom: 100 })
   if (backendOn && !old.startsWith('data:')) void getClient().then((sb) => sb?.storage.from('menu').remove([old]))
 }
 

@@ -1354,6 +1354,7 @@ a.add-btn { text-decoration: none; display: flex; align-items: center; justify-c
 .item-topbar.show { opacity: 1; transform: none; }
 .item-thumb { width: 34px; height: 34px; display: grid; place-items: center; }
 .item-thumb img { width: 34px; height: 34px; object-fit: cover; border-radius: 0.4rem; }
+.item-thumb { overflow: hidden; border-radius: 0.4rem; } /* an item photo moved left / right stays in its frame (2026-10-25) */
 .item-topbar-text { display: flex; flex-direction: column; line-height: 1.15; font-size: 0.9rem; }
 .item-topbar-text strong { font-weight: 700; }
 .item-topbar-text span { font-size: 0.85rem; color: rgba(17, 38, 75, 0.7); }
@@ -2283,3 +2284,5 @@ body.ph-on .band-pill, body.ph-on .header-order-in { display: none; }
 /* Print receipt and the WhatsApp buttons in one row; "Sent to" on its own line under them (2026-10-23) */
 .staff-acts { display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem; }
 .staff-acts .staff-sent { flex-basis: 100%; }
+/* an item photo moved left / right in a square tile (2026-10-25): the slice it uncovers is white like the product shots */
+.ocard-tile img[style*="transform"], .combo-tile img[style*="transform"], .combo-section-cup img[style*="transform"], .item-thumb img[style*="transform"], .d-thumb img[style*="transform"] { box-shadow: 0 0 0 200px #fff; }
