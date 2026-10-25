@@ -3,7 +3,7 @@ import { useLang } from '../i18n'
 /*
  * One switch instead of the Delivery | Pickup choice (owner, 2026-10-25: "a button that's off says pickup; if not pressed
  * the order is delivery; some customers order pickup meaning delivery"). Off = delivery to the customer's shared
- * location, on = they collect it at the branch. The line under it says which, in plain words.
+ * location, on = they collect it at the branch; then a line under it says so in plain words.
  */
 export function PickupSwitch({ on, onChange }: { on: boolean; onChange: (on: boolean) => void }) {
   const { t } = useLang()
@@ -13,7 +13,8 @@ export function PickupSwitch({ on, onChange }: { on: boolean; onChange: (on: boo
         <span className="ps-track" aria-hidden="true"><span className="ps-knob" /></span>
         <span className="ps-label">{t('pickupSwitch')}</span>
       </button>
-      <p className="ps-hint" aria-live="polite">{on ? t('pickupOnHint') : t('pickupOffHint')}</p>
+      {/* only when on: off is the usual case and the delivery form below says enough (owner, 2026-10-25) */}
+      {on && <p className="ps-hint" aria-live="polite">{t('pickupOnHint')}</p>}
     </div>
   )
 }
