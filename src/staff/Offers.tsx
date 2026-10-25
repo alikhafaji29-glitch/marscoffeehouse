@@ -14,7 +14,7 @@ import { Field, I, Modal, Switch } from './ui'
  * delivery and service fee, and the groups the customer picks from. The website's Positive Hours slide follows
  * the Positive Hours offer here: its hours, its price and its switch. */
 const slugify = (x: string) => x.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
-const itemsIn = (g: OfferGroup) => (g.mode === 'items' ? MENU.flatMap((c) => c.items).filter((i) => g.items.includes(i.name) && !i.soldOut).length : MENU.filter((c) => g.cats.includes(c.id)).reduce((n, c) => n + c.items.filter((i) => !i.soldOut).length, 0))
+const itemsIn = (g: OfferGroup) => (g.mode === 'items' ? MENU.flatMap((c) => c.items).filter((i) => g.items.includes(i.name) && !i.soldOut).length : MENU.filter((c) => g.cats.includes(c.id)).reduce((n, c) => n + c.items.filter((i) => !i.soldOut && !g.skip?.includes(i.name)).length, 0))
 const blankGroup = (): OfferGroup => ({ id: uid(), label: l3(), pick: 1, mode: 'cats', cats: [], items: [] })
 const blank = (): Offer => ({ id: uid(), name: l3(), slug: '', price: 0, start: '07:00', end: '12:00', freeDelivery: false, feeOn: false, fee: 1000, sizes: false, sub: l3(), fine: l3(), groups: [blankGroup()], active: false })
 
@@ -86,7 +86,7 @@ function OfferEditor({ offer, isNew, onClose }: { offer: Offer; isNew: boolean; 
             </div>
           </div>
           {g.mode === 'cats'
-            ? <CatPicker label={s('eligibleCats')} value={g.cats} onChange={(cats) => setGroup(g.id, { cats })} />
+            ? <CatPicker label={s('eligibleCats')} value={g.cats} onChange={(cats) => setGroup(g.id, { cats })} skip={g.skip ?? []} onSkip={(skip) => setGroup(g.id, { skip })} />
             : <ItemPicker label={s('eligibleItems')} value={g.items} onChange={(items) => setGroup(g.id, { items })} />}
           <p className="d-hint">{s('groupCount', { n: itemsIn(g) })}</p>
         </section>

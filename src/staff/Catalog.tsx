@@ -5,7 +5,8 @@ import { iqd } from '../account'
 import { backendOn } from '../backend'
 import { ALL_ITEMS as ALL, MENU } from '../menu'
 import type { Badge, MenuItem } from '../menu'
-import { addCategory, addItem, basePrice, branchCats, canReset, catKind, editCategory, moveCategory, isAddedCat, isChanged, itemState, menuSaveFailed, moveItem, moveToCategory, nameOf, outCount, removeCategory, removeItem, removePhoto, uploadPhoto, resetMenu, resetPrice, saveItem, setOut, setPrice, useMenuVersion, photoOf } from '../menuAdmin'
+import { addCategory, addItem, basePrice, branchCats, canReset, catKind, editCategory, moveCategory, isAddedCat, isChanged, itemState, menuSaveFailed, moveItem, moveToCategory, nameOf, outCount, removeCategory, removeItem, removePhoto, uploadPhoto, resetMenu, resetPrice, saveItem, setOut, setPrice, useMenuVersion, photoOf, photoStyle, fitStyle } from '../menuAdmin'
+import type { PhotoFit } from '../menuAdmin'
 import type { CatKind, NutritionEntry } from '../menuAdmin'
 import { DESC, TINT, categoryOf, isIced } from '../menuMeta'
 import { catLabel } from '../components/MenuSection'
@@ -24,9 +25,10 @@ import { Field, I, Switch } from './ui'
  * changes are written to the database and reach that branch's customers; in the demo they stay on this device.
  * Add Item and Add Category (owner, 2026-10-14) put a new item or category on that branch's menu.
  */
-export const Thumb = ({ name, size = 40 }: { name: string; size?: number }) => {
+// fit: the editor's unsaved place and size for the photo (its preview)
+export const Thumb = ({ name, size = 40, fit }: { name: string; size?: number; fit?: PhotoFit }) => {
   const cat = categoryOf(name)
-  return <span className="d-thumb" style={{ width: size, height: size }}>{photoOf(name) ? <img src={photoOf(name)} alt="" /> : <MiniCup color={TINT[cat] || [200, 200, 200]} ice={isIced(cat) ? 1 : 0} size={size * 0.8} />}</span>
+  return <span className="d-thumb" style={{ width: size, height: size }}>{photoOf(name) ? <img src={photoOf(name)} alt="" style={fit ? fitStyle(fit) : photoStyle(name)} /> : <MiniCup color={TINT[cat] || [200, 200, 200]} ice={isIced(cat) ? 1 : 0} size={size * 0.8} />}</span>
 }
 const MAX_FLAVOURS = 12
 const MAX_SIZES = 3
@@ -193,6 +195,10 @@ export function ItemEditor({ name, go }: { name: string; go: (page: string) => v
   const [tag, setTag] = useState<Badge | ''>(() => st?.tag ?? '')
   const [inStock, setInStock] = useState(() => st?.inStock ?? true)
   const [available, setAvailable] = useState(() => st?.available ?? true)
+  // the photo moved left / right, up / down and zoomed (owner, 2026-10-25); saved with Save
+  const [photoX, setPhotoX] = useState(() => st?.photoX ?? 0)
+  const [photoY, setPhotoY] = useState(() => st?.photoY ?? 0)
+  const [photoZoom, setPhotoZoom] = useState(() => st?.photoZoom ?? 100)
   const [sizeK, setSize] = useState(rows[0]?.k ?? '')
   const size = rows.some((r) => r.k === sizeK) ? sizeK : rows[0]?.k ?? ''
   const [picked, setFlavor] = useState(flavors[0])
@@ -249,7 +255,7 @@ export function ItemEditor({ name, go }: { name: string; go: (page: string) => v
       return Object.keys(facts).length ? ({ size: sized ? labels[i] : '', flavor: f, ...facts } as NutritionEntry) : null
     })).filter((e): e is NutritionEntry => !!e)
     const flavorExtra = Object.fromEntries(flav.map((f) => [f, Number((extra[f] ?? '').replace(/[^\d]/g, ''))] as const).filter(([, n]) => n > 0))
-    saveItem(name, { prices: nums, sizes: sized ? labels : [], inStock, available, tag, flavors: flav, flavorExtra, names: { en: names.en.trim() || name, ar: names.ar.trim(), ku: names.ku.trim() }, desc: { en: desc.en.trim(), ar: desc.ar.trim(), ku: desc.ku.trim() }, nutrition })
+    saveItem(name, { prices: nums, sizes: sized ? labels : [], inStock, available, tag, flavors: flav, flavorExtra, names: { en: names.en.trim() || name, ar: names.ar.trim(), ku: names.ku.trim() }, desc: { en: desc.en.trim(), ar: desc.ar.trim(), ku: desc.ku.trim() }, nutrition, ...(photoX !== (st.photoX ?? 0) && { photoX }), ...(photoY !== (st.photoY ?? 0) && { photoY }), ...(photoZoom !== (st.photoZoom ?? 100) && { photoZoom }) })
     if (category !== cat && cats.includes(category)) { moveToCategory(name, category); go('cat:' + category); return }
     back()
   }
@@ -269,7 +275,26 @@ export function ItemEditor({ name, go }: { name: string; go: (page: string) => v
           <div className="d-editor-details">
             <div className="d-editor-image">
               <p>{s('image')}</p>
-              <Thumb name={name} size={180} />
+              <Thumb name={name} size={180} fit={{ x: photoX, y: photoY, zoom: photoZoom }} />
+              {photoOf(name) && (
+                <div className="d-photo-x">
+                  <p>{s('photoFitHint')}</p>
+                  {/* left is left (and smaller is left) in every language */}
+                  <label>
+                    <span>{s('photoPos')}</span>
+                    <input type="range" min={-40} max={40} step={1} dir="ltr" value={photoX} onChange={(e) => setPhotoX(Number(e.target.value))} aria-valuetext={`${photoX}%`} />
+                  </label>
+                  <label>
+                    <span>{s('photoPosY')}</span>
+                    <input type="range" min={-40} max={40} step={1} dir="ltr" value={photoY} onChange={(e) => setPhotoY(Number(e.target.value))} aria-valuetext={`${photoY}%`} />
+                  </label>
+                  <label>
+                    <span>{s('photoZoom')} · {photoZoom}%</span>
+                    <input type="range" min={50} max={200} step={5} dir="ltr" value={photoZoom} onChange={(e) => setPhotoZoom(Number(e.target.value))} aria-valuetext={`${photoZoom}%`} />
+                  </label>
+                  {(photoX !== 0 || photoY !== 0 || photoZoom !== 100) && <button type="button" className="d-btn text small" onClick={() => { setPhotoX(0); setPhotoY(0); setPhotoZoom(100) }}>{s('photoCentre')}</button>}
+                </div>
+              )}
               <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => { void pick(e.target.files?.[0]); e.target.value = '' }} />
               <div className="d-photo-acts">
                 <button type="button" className="d-btn outline small" disabled={photo === 'photoBusy'} onClick={() => fileRef.current?.click()}>{photo === 'photoBusy' ? s('photoBusy') : hasPhoto ? s('changePhoto') : s('uploadPhoto')}</button>

@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
 import { useLang } from '../i18n'
+import type { Lang } from '../i18n'
 
 /* The staff dashboard's own words: [English, Arabic (formal), Kurdish (Sorani)]. Kept apart from src/i18n.tsx so
  * the customer site's dictionary stays the customer's. {name} marks a value filled in by the caller. */
@@ -66,7 +67,27 @@ const S = {
   fDate: ['Date', 'التاريخ', 'بەروار'],
   fToday: ['Today', 'اليوم', 'ئەمڕۆ'],
   fAllDates: ['All dates', 'كل الأيام', 'هەموو ڕۆژەکان'],
-  fSearch: ['Search by name or phone', 'ابحث بالاسم أو رقم الهاتف', 'بە ناو یان ژمارەی مۆبایل بگەڕێ'],
+  fSearch: ['Search name, phone, order #, items, address, note…', 'ابحث بالاسم، الهاتف، رقم الطلب، الأصناف، العنوان، الملاحظة…', 'بگەڕێ: ناو، مۆبایل، ژمارەی داواکاری، بابەت، ناونیشان، تێبینی…'],
+  fAdvanced: ['Advanced', 'بحث متقدّم', 'گەڕانی پێشکەوتوو'],
+  fSearchIn: ['Search in', 'البحث في', 'گەڕان لە'],
+  fInAll: ['Everything', 'كل شيء', 'هەموو شتێک'],
+  fInName: ['Customer name', 'اسم الزبون', 'ناوی کڕیار'],
+  fInPhone: ['Phone number', 'رقم الهاتف', 'ژمارەی مۆبایل'],
+  fInCode: ['Order number', 'رقم الطلب', 'ژمارەی داواکاری'],
+  fInItems: ['Items', 'الأصناف', 'بابەتەکان'],
+  fInAddress: ['Address', 'العنوان', 'ناونیشان'],
+  fInNote: ['Note', 'الملاحظة', 'تێبینی'],
+  fInReason: ['Cancel reason', 'سبب الإلغاء', 'هۆکاری هەڵوەشاندنەوە'],
+  fType: ['Delivery / Pickup', 'توصيل / استلام', 'گەیاندن / وەرگرتن'],
+  fKind: ['Order kind', 'نوع الطلب', 'جۆری داواکاری'],
+  fKindOffer: ['Positive Hours (offers)', 'الساعات الإيجابية (العروض)', 'کاتژمێرە ئەرێنییەکان (ئۆفەر)'],
+  fKindMenu: ['Menu orders', 'طلبات القائمة', 'داواکاریی مینیو'],
+  fAny: ['Any', 'الكل', 'هەموو'],
+  fAmount: ['Amount (IQD)', 'المبلغ (دينار)', 'بڕ (دینار)'],
+  fFrom: ['From', 'من', 'لە'],
+  fTo: ['To', 'إلى', 'بۆ'],
+  fTimed: ['Scheduled orders only', 'الطلبات المجدولة فقط', 'تەنها داواکارییە کاتدیاریکراوەکان'],
+  fReset: ['Reset filters', 'إعادة ضبط', 'ڕێکخستنەوەی فلتەر'],
   fClear: ['Clear', 'مسح', 'سڕینەوە'],
   revenueToday: ['Revenue today (IQD)', 'إيرادات اليوم (دينار)', 'داهاتی ئەمڕۆ (دینار)'],
   activeNow: ['Active now', 'نشِطة الآن', 'ئێستا چالاکن'],
@@ -123,6 +144,11 @@ const S = {
   tabPricing: ['Pricing', 'التسعير', 'نرخدانان'],
   tabNutrition: ['Nutrition', 'القيم الغذائية', 'بەهای خۆراکی'],
   image: ['Image', 'الصورة', 'وێنە'],
+  photoFitHint: ['Adjust the photo, then Save.', 'اضبط الصورة ثم احفظ.', 'وێنەکە ڕێک بخە، پاشان پاشەکەوت بکە.'],
+  photoPos: ['Left · Right', 'يسار · يمين', 'چەپ · ڕاست'],
+  photoPosY: ['Up · Down', 'أعلى · أسفل', 'سەرەوە · خوارەوە'],
+  photoZoom: ['Size', 'الحجم', 'قەبارە'],
+  photoCentre: ['Reset', 'إعادة الضبط', 'ڕێکخستنەوە'],
   imageHint: ['A square photo works best. It is made smaller before it is stored. Without a photo the drawn cup is shown.', 'الصورة المربعة هي الأفضل. تُصغَّر قبل حفظها. بدون صورة يُعرض الكوب المرسوم.', 'وێنەی چوارگۆشە باشترینە. پێش پاشەکەوتکردن بچووک دەکرێتەوە. بەبێ وێنە کوپە کێشراوەکە پیشان دەدرێت.'],
   uploadPhoto: ['Upload Photo', 'رفع صورة', 'بارکردنی وێنە'],
   changePhoto: ['Change Photo', 'تغيير الصورة', 'گۆڕینی وێنە'],
@@ -232,7 +258,7 @@ const S = {
   hoursNeeded: ['The end time must be after the start time.', 'يجب أن يكون وقت الانتهاء بعد وقت البدء.', 'کاتی کۆتایی دەبێت دوای کاتی دەستپێک بێت.'],
   freeDelivery: ['Free delivery', 'توصيل مجاني', 'گەیاندنی بەخۆڕایی'],
   serviceFee: ['Service fee', 'رسوم الخدمة', 'کرێی خزمەتگوزاری'],
-  serviceFeeHint: ['Added once per order at checkout when this combo is in the cart — the customer sees it as its own line.', 'تُضاف مرة واحدة لكل طلب عند الدفع إذا كان هذا الكومبو في السلة — يراها العميل في سطر مستقل.', 'یەک جار بۆ هەر داواکارییەک لە کاتی پارەدان زیاد دەکرێت کاتێک ئەم کۆمبۆیە لە سەبەتەدایە — کڕیار وەک هێڵێکی جیا دەیبینێت.'],
+  serviceFeeHint: ['Added once per delivery order (pickup orders pay none) — the customer sees it as its own line.', 'تُضاف مرة واحدة لكل طلب توصيل (طلبات الاستلام من الفرع بدونها) — يراها العميل في سطر مستقل.', 'یەک جار بۆ هەر داواکارییەکی گەیاندن زیاد دەکرێت (داواکاریی وەرگرتن لە لق بێ ئەمە) — کڕیار وەک هێڵێکی جیا دەیبینێت.'],
   feeIqd: ['Fee (IQD)', 'الرسوم (دينار)', 'کرێ (دینار)'],
   chooseSize: ['Let customers choose a size', 'السماح للعملاء باختيار الحجم', 'ڕێگە بە کڕیاران بدە قەبارە هەڵبژێرن'],
   chooseSizeHint: ['Every sized item defaults to its smallest size. Turn this on to let customers upgrade — the price stays the combo price.', 'كل صنف له أحجام يُضبط على أصغر حجم. فعّل هذا الخيار للسماح بالترقية — ويبقى السعر سعر الكومبو.', 'هەر بابەتێکی قەبارەدار بە بچووکترین قەبارە دادەنرێت. ئەمە چالاک بکە بۆ ئەوەی کڕیاران قەبارە بگۆڕن — نرخ هەر نرخی کۆمبۆکە دەبێت.'],
@@ -249,6 +275,15 @@ const S = {
   groupLabel: ['Group label', 'عنوان المجموعة', 'ناونیشانی گرووپ'],
   pick: ['Pick', 'عدد الاختيارات', 'ژمارەی هەڵبژاردن'],
   wholeCats: ['Whole categories', 'فئات كاملة', 'بەشی تەواو'],
+  catItemsOpen: ['Choose which items', 'اختر الأصناف', 'بابەتەکان هەڵبژێرە'],
+  catItemsHint: ['Tap a category to choose which of its items are in this step.', 'اضغط على فئة لاختيار أصنافها المشمولة في هذه الخطوة.', 'بەشێک دابگرە بۆ هەڵبژاردنی ئەو بابەتانەی لەم هەنگاوەدان.'],
+  catItemsSub: ['Untick any item that should not be in this offer step.', 'ألغِ تحديد أي صنف لا يجب أن يكون في هذه الخطوة من العرض.', 'هەر بابەتێک کە نابێت لەم هەنگاوەی ئۆفەرەکەدا بێت، نیشانەکەی لابەرە.'],
+  selectAll: ['Select all', 'تحديد الكل', 'هەمووی هەڵبژێرە'],
+  deselectAll: ['Deselect all', 'إلغاء تحديد الكل', 'هیچی هەڵمەبژێرە'],
+  included: ['Included', 'مشمول', 'تێدایە'],
+  leftOut: ['Left out', 'مستبعد', 'دەرکراوە'],
+  nOfM: ['{n} of {m}', '{n} من {m}', '{n} لە {m}'],
+  done: ['Done', 'تم', 'تەواو'],
   handPicked: ['Hand-picked items', 'أصناف مختارة', 'بابەتی هەڵبژێردراو'],
   eligibleCats: ['Eligible categories', 'الفئات المشمولة', 'بەشە گونجاوەکان'],
   eligibleItems: ['Eligible items', 'الأصناف المشمولة', 'بابەتە گونجاوەکان'],
@@ -307,6 +342,24 @@ const S = {
   driverPhone: ['WhatsApp number', 'رقم الواتساب', 'ژمارەی واتسئاپ'],
   driverAdd: ['Add a driver', 'إضافة سائق', 'زیادکردنی شۆفێر'],
   driverRemove: ['Remove', 'إزالة', 'لابردن'],
+  driverLang: ['Message language', 'لغة الرسالة', 'زمانی نامە'],
+  // the WhatsApp log (2026-10-25)
+  navWaLog: ['WhatsApp log', 'سجل واتساب', 'تۆماری واتسئاپ'],
+  waLogLead: ['Messages the driver buttons sent through WhatsApp, and what happened to each. Messages opened in WhatsApp by hand are not listed.', 'الرسائل التي أرسلتها أزرار السائقين عبر واتساب، وما حدث لكل منها. الرسائل المفتوحة في واتساب يدوياً لا تظهر هنا.', 'ئەو نامانەی دوگمەکانی شۆفێر لە ڕێگەی واتسئاپەوە ناردوویانن، و چی بەسەر هەر یەکێکیاندا هات. ئەو نامانەی بە دەست لە واتسئاپدا کراونەتەوە لێرە نین.'],
+  waLogRefresh: ['Refresh', 'تحديث', 'نوێکردنەوە'],
+  waLogFilter: ['Show', 'عرض', 'پیشاندان'],
+  waLogAll: ['All', 'الكل', 'هەموو'],
+  waStSent: ['Sent', 'أُرسلت', 'نێردرا'],
+  waStDelivered: ['Delivered', 'وصلت', 'گەیشت'],
+  waStRead: ['Read', 'قُرئت', 'خوێندرایەوە'],
+  waStFailed: ['Failed', 'فشلت', 'سەرکەوتوو نەبوو'],
+  waLogReadErr: ['The log could not be read. Check the connection.', 'تعذّرت قراءة السجل. تحقّق من الاتصال.', 'تۆمارەکە نەخوێندرایەوە. پەیوەندییەکە بپشکنە.'],
+  waLogLoading: ['Loading…', 'جارٍ التحميل…', 'بارکردن…'],
+  waLogNone: ['No WhatsApp messages on this day.', 'لا توجد رسائل واتساب في هذا اليوم.', 'لەم ڕۆژەدا هیچ نامەیەکی واتسئاپ نییە.'],
+  waLogDemo: ['The WhatsApp log works on the live system only.', 'سجل واتساب يعمل على النظام الفعلي فقط.', 'تۆماری واتسئاپ تەنها لەسەر سیستەمی ڕاستەقینە کار دەکات.'],
+  driversSave: ['Save drivers', 'حفظ السائقين', 'پاشەکەوتکردنی شۆفێران'],
+  driversSaved: ['Saved', 'تم الحفظ', 'پاشەکەوت کرا'],
+  driversUnsaved: ['Not saved yet: press Save drivers.', 'لم تُحفظ بعد: اضغط «حفظ السائقين».', 'هێشتا پاشەکەوت نەکراوە: «پاشەکەوتکردنی شۆفێران» دابگرە.'],
   driversNone: ['No drivers yet: orders can still be sent to any WhatsApp chat.', 'لا يوجد سائقون بعد: يمكن إرسال الطلبات إلى أي محادثة واتساب.', 'هێشتا شۆفێر نییە: داواکاری هێشتا دەنێردرێت بۆ هەر چاتێکی واتسئاپ.'],
   sendToDriver: ['Send to driver', 'إرسال إلى السائق', 'ناردن بۆ شۆفێر'],
   sendOther: ['Other…', 'آخر…', 'تر…'],
@@ -331,6 +384,7 @@ const S = {
   pickupHint: ['Customers pick the order up at the branch — only name + phone needed.', 'يستلم العملاء الطلب من الفرع — يكفي الاسم ورقم الهاتف.', 'کڕیاران داواکارییەکە لە لقەکە وەردەگرن — تەنها ناو + ژمارەی مۆبایل پێویستە.'],
   fulfilOne: ['At least one of the two stays on.', 'يبقى أحد الخيارين مفعّلاً على الأقل.', 'لانیکەم یەکێک لەو دووانە چالاک دەمێنێتەوە.'],
   savedAuto: ['Changes are saved as you make them. Demo: they apply in this browser only.', 'تُحفظ التغييرات فور إجرائها. نسخة تجريبية: تُطبَّق في هذا المتصفح فقط.', 'گۆڕانکارییەکان هەر کە دەیانکەیت پاشەکەوت دەبن. دیمۆ: تەنها لەم وێبگەڕەدا جێبەجێ دەبن.'],
+  savedAutoDrivers: ['Changes are saved as you make them, except the drivers: press Save drivers.', 'تُحفظ التغييرات فور إجرائها، ما عدا السائقين: اضغط «حفظ السائقين».', 'گۆڕانکارییەکان هەر کە دەیانکەیت پاشەکەوت دەبن، جگە لە شۆفێران: «پاشەکەوتکردنی شۆفێران» دابگرە.'],
   preOrderBadge: ['Pre-order', 'طلب مسبق', 'پێش-داواکاری'],
   inclFee: ['incl. service fee {n} IQD', 'شاملاً رسوم الخدمة {n} دينار', 'لەگەڵ کرێی خزمەتگوزاری {n} دینار'],
   nCombos: ['{n} combos', '{n} كومبو', '{n} کۆمبۆ'],
@@ -496,4 +550,11 @@ export function useS() {
     if (vars) for (const [k, v] of Object.entries(vars)) out = out.replace(`{${k}}`, String(v))
     return out
   }, [lang])
+}
+
+/** a dashboard string in a given language, outside the dashboard's own (a driver's message) */
+export function sIn(lang: Lang, key: SKey, vars?: Record<string, string | number>) {
+  let out: string = S[key][IDX[lang]]
+  if (vars) for (const [k, v] of Object.entries(vars)) out = out.replace(`{${k}}`, String(v))
+  return out
 }

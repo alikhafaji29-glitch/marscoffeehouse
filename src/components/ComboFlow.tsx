@@ -18,7 +18,7 @@ import { OrderTracker } from './OrderTracker'
 import { MissingBox, goToMissing } from './MissingBox'
 import type { Missing } from './MissingBox'
 import { TimeWheel } from './TimeWheel'
-import { nameOf, photoOf } from '../menuAdmin'
+import { nameOf, photoOf, photoStyle } from '../menuAdmin'
 import { defaultPicks, extras, groupsFor, summary, timesPicked } from '../customize'
 import type { CustGroup, Picks } from '../customize'
 import { arrivalSlots, timeText, whenText } from '../orders'
@@ -45,7 +45,7 @@ import { clockNow } from '../clock'
  */
 /** what the customer may pick in a group, grouped by menu category; out-of-stock items are left out */
 function choices(g: OfferGroup): { cat: string; items: MenuItem[] }[] {
-  const ok = (i: MenuItem) => !i.soldOut && (g.mode === 'items' ? g.items.includes(i.name) : true)
+  const ok = (i: MenuItem) => !i.soldOut && (g.mode === 'items' ? g.items.includes(i.name) : !g.skip?.includes(i.name))
   return MENU.filter((c) => g.mode === 'items' || g.cats.includes(c.id)).map((c) => ({ cat: c.id, items: c.items.filter(ok) })).filter((c) => c.items.length)
 }
 // food without a photo gets a drawn sandwich or pastry rather than the drink cup
@@ -172,7 +172,7 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
 
   if (!offer || !groups.length) return null
   const title = offer.name[lang] || offer.name.en
-  const fee = offer.feeOn ? offer.fee : 0
+  const fee = offer.feeOn && delivery ? offer.fee : 0 // delivery orders only: pickup pays no service fee (owner, 2026-10-26)
   // the pick steps: every group of combo 1, then of combo 2, …
   const pickSteps = Array.from({ length: count }, (_, k) => groups.map((_, i) => ({ k, i }))).flat()
   const ASK = 0
@@ -364,7 +364,7 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
                       return (
                         <div key={it.name} className={'combo-item' + (on ? ' on' : '')}>
                           <button type="button" role={cur.g.pick === 1 ? 'radio' : 'checkbox'} aria-checked={on} onClick={() => pick(ck, cur.g, it.name)}>
-                            <span className="combo-tile" aria-hidden="true">{photoOf(it.name) ? <img src={photoOf(it.name)} alt="" loading="lazy" /> : FOOD.includes(cat) ? <FoodIcon sweet={cat === 'sweets'} /> : <MiniCup color={TINT[cat] || [200, 200, 200]} ice={isIced(cat) ? 1 : 0} size={54} />}</span>
+                            <span className="combo-tile" aria-hidden="true">{photoOf(it.name) ? <img src={photoOf(it.name)} alt="" loading="lazy" style={photoStyle(it.name)} /> : FOOD.includes(cat) ? <FoodIcon sweet={cat === 'sweets'} /> : <MiniCup color={TINT[cat] || [200, 200, 200]} ice={isIced(cat) ? 1 : 0} size={54} />}</span>
                             <span className="combo-name">{nameOf(it.name, lang)}{it.sizes && !offer.sizes && <small dir="ltr">{it.sizes[0]}</small>}</span>
                             <span className="combo-check">{on && <IconCheck />}</span>
                           </button>

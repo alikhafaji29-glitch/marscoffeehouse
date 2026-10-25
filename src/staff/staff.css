@@ -337,3 +337,42 @@ button.d-chip.on { background: var(--d-ink); color: #fff; }
 /* Coffee of the day on the Offers page (2026-10-23) */
 .d-cotd-card { display: grid; gap: 0.8rem; }
 .d-cotd-card .d-field, .d-cotd-card label { max-width: 14rem; }
+/* WhatsApp log (2026-10-25) */
+.wa-log-sum { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.9rem 0; }
+.wa-log-sum button { display: inline-flex; align-items: baseline; gap: 0.4rem; padding: 0.45rem 0.9rem; border-radius: 0.75rem; border: 1px solid var(--d-line); background: var(--d-surface); color: var(--d-ink); font: inherit; }
+.wa-log-sum button b { font-size: 1.15rem; }
+.wa-log-sum button.on { border-color: var(--navy); box-shadow: 0 0 0 1px var(--navy); }
+.wa-log { list-style: none; margin: 0; padding: 0; }
+.wa-log li { display: grid; grid-template-columns: 3.4rem 1fr auto; gap: 0.3rem 0.8rem; align-items: center; padding: 0.7rem 0; border-bottom: 1px solid var(--d-line); }
+.wa-log li:last-child { border-bottom: 0; }
+.wa-log-time { color: var(--d-mute); font-variant-numeric: tabular-nums; }
+.wa-log-who svg { width: 15px; height: 15px; vertical-align: -2px; }
+.wa-log-who small { color: var(--d-mute); margin-inline-start: 0.3rem; }
+.wa-log-st { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.2rem 0.65rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600; white-space: nowrap; }
+.wa-log-st small { font-weight: 400; opacity: 0.8; }
+.st-sent.wa-log-st { background: rgba(32, 52, 105, 0.09); color: var(--navy); }
+.st-delivered.wa-log-st { background: rgba(77, 151, 207, 0.16); color: #1f5f8f; }
+.st-read.wa-log-st { background: var(--d-green); color: #fff; }
+.st-failed.wa-log-st { background: #b3261e; color: #fff; }
+.wa-log-sum .st-failed b { color: #b3261e; }
+.wa-log-sum .st-read b { color: var(--d-green); }
+.wa-log-err { grid-column: 2 / -1; color: #b3261e; font-size: 0.85rem; }
+@media (max-width: 560px) { .wa-log li { grid-template-columns: 3rem 1fr; } .wa-log-st { grid-column: 2; justify-self: start; } }
+/* the item photo moved left / right (2026-10-25) */
+.d-photo-x { width: 100%; max-width: 240px; display: flex; flex-direction: column; align-items: center; gap: 0.2rem; }
+.d-photo-x label { width: 100%; display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.82rem; color: var(--d-mute); text-align: center; }
+.d-photo-x input[type="range"] { width: 100%; accent-color: var(--navy); }
+.d-photo-x { gap: 0.55rem; }
+.d-photo-x p { margin: 0; font-size: 0.82rem; font-weight: 600; color: var(--d-ink); align-self: center; }
+/* an offer step: a chosen category's items as tick boxes (2026-10-26) */
+.d-chip button.d-chip-open { width: auto; height: auto; min-height: 0; border-radius: 0; background: none; padding: 0; font: inherit; color: inherit; text-decoration: underline dotted rgba(16, 32, 58, 0.45); text-underline-offset: 3px; cursor: pointer; }
+.d-chip.part { background: #fdf0e3; }
+.d-overlay.top { z-index: 70; }
+.d-cat-items { max-width: 560px; }
+.d-cat-items-all { display: flex; gap: 0.4rem; margin: 0.2rem 0 0.4rem; }
+.d-cat-items ul { list-style: none; margin: 0; padding: 0; }
+.d-cat-items li label { display: grid; grid-template-columns: auto auto 1fr auto; align-items: center; gap: 0.8rem; padding: 0.55rem 0.2rem; border-bottom: 1px solid var(--d-line); cursor: pointer; }
+.d-cat-items li:last-child label { border-bottom: 0; }
+.d-cat-items input[type="checkbox"] { width: 1.15rem; height: 1.15rem; accent-color: var(--navy); }
+.d-cat-items li em { font-style: normal; font-size: 0.8rem; color: var(--d-mute); }
+.d-cat-items li small { color: #b3261e; }

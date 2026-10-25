@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 
 export type Lang = 'en' | 'ar' | 'ku'
 
-const dict = {
+export const dict = {
   en: {
     about: 'ABOUT',
     aboutUs: 'About us',

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { useLang } from '../i18n'
 import type { Deal, MenuItem } from '../menu'
 import { iqd } from '../account'
-import { nameOf, photoOf } from '../menuAdmin'
+import { nameOf, photoOf, photoStyle } from '../menuAdmin'
 import { cotdFor, settingsFor } from '../staff/store'
 import { useS } from '../staff/strings'
 
@@ -39,7 +39,7 @@ export function CoffeeOfTheDay({ items, onPick, Shelf }: { items: MenuItem[]; on
             const own = CARD[it.name]
             return (
               <article key={it.name} className={'fav-card season-card' + (own ? '' : ' light menu-pic') + (it.soldOut ? ' sold' : '')} style={{ background: own ? '#3b2314' : '#fff' }} onClick={() => pick(it)}>
-                {(own || photoOf(it.name)) && <img src={own ?? photoOf(it.name)} alt="" draggable={false} />}
+                {(own || photoOf(it.name)) && <img src={own ?? photoOf(it.name)} alt="" draggable={false} style={own ? undefined : photoStyle(it.name)} />}
                 <div className="fav-card-text season-text">
                   <h3>{name}{it.soldOut && <small className="cotd-sold"> · {t('soldOut')}</small>}</h3>
                   {!it.soldOut && (

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useLang } from '../i18n'
+import { dict, useLang } from '../i18n'
 import type { Lang, TKey } from '../i18n'
 import { iqd, waNumber } from '../account'
 import type { Order } from '../account'
@@ -11,7 +11,10 @@ import type { Stage } from '../orders'
 import { IconCheck, IconPin } from '../components/Icons'
 import { mapsLink } from '../components/ShareLocation'
 import { cancelOrder, mergeOrders, moveOrder, sendWhatsApp } from './remote'
-import { useS } from './strings'
+import { sIn, useS } from './strings'
+import type { SKey } from './strings'
+import { ALL_ITEMS } from '../menu'
+import { nameOf } from '../menuAdmin'
 import { backendOn } from '../backend'
 import { I } from './ui'
 
@@ -50,16 +53,17 @@ function SendToDriver({ o }: { o: Order }) {
   const drivers = (settingsFor(o.branch ?? viewing).drivers ?? []).filter((d) => d.phone.replace(/\D/g, '').length >= 8)
   const key = o.uid ?? o.id
   const [sent, setSent] = useState(() => readSent()[key])
-  const text = () => {
+  // the message in the driver's language (Other…: the dashboard's)
+  const text = (L: Lang = lang) => {
     const lines = [`Mars CoffeeHouse · ${branchName(o.branch)} · #${o.id}`, '']
-    if (o.customer) lines.push(`${s('waCustomer')}: ${o.customer.name} · ${phoneOf(o)}`)
-    if (o.delivery?.address) lines.push(`${s('waAddress')}: ${o.delivery.address}`)
+    if (o.customer) lines.push(`${sIn(L, 'waCustomer')}: ${o.customer.name} · ${phoneOf(o)}`)
+    if (o.delivery?.address) lines.push(`${sIn(L, 'waAddress')}: ${o.delivery.address}`)
     // the plain map link of the customer's pin (owner chose it over a directions link, 2026-10-23); WhatsApp links cannot carry a location pin
-    if (o.delivery?.location) lines.push(`${s('waLocation')}: ${mapsLink(o.delivery.location)}`)
+    if (o.delivery?.location) lines.push(`${sIn(L, 'waLocation')}: ${mapsLink(o.delivery.location)}`)
     lines.push('')
-    for (const g of groupLines(o.items)) { if (g.combo) lines.push(s('comboN', { n: g.combo })); for (const x of g.lines) lines.push('• ' + x) }
-    if (o.note) lines.push('', `${t('orderNote')}: ${o.note}`)
-    lines.push('', o.pay === 'wallet' ? t('paidByWallet') : s('waCollect', { n: iqd(o.total) }))
+    for (const g of groupLines(o.items)) { if (g.combo) lines.push(sIn(L, 'comboN', { n: g.combo })); for (const x of g.lines) lines.push('• ' + x) }
+    if (o.note) lines.push('', `${dict[L].orderNote}: ${o.note}`)
+    lines.push('', o.pay === 'wallet' ? dict[L].paidByWallet : sIn(L, 'waCollect', { n: iqd(o.total) }))
     return lines.join('\n')
   }
   const [busy, setBusy] = useState(false)
@@ -70,24 +74,24 @@ function SendToDriver({ o }: { o: Order }) {
     try { localStorage.setItem(SENT_KEY, JSON.stringify(all)) } catch { /* ignore */ }
     setSent(all[key])
   }
-  const send = async (name: string, phone?: string) => {
+  const send = async (name: string, phone?: string, L: Lang = lang) => {
     setFailed('')
     if (phone && o.uid) {
       setBusy(true)
-      const r = await sendWhatsApp(o.uid, waNumber(phone), text(), lang) // the template in the dashboard's language (Kurdish: Arabic)
+      const r = await sendWhatsApp(o.uid, waNumber(phone), text(L), L, name) // the template in the driver's language (Kurdish: filed as Persian)
       setBusy(false)
       if (r.ok) { remember(name, true); return }
       // not set up yet (or no backend): quietly the old way; a real refusal is shown
       if (r.reason !== 'not_configured' && r.reason !== 'no_backend' && r.reason !== 'unreachable') setFailed(s('waApiFailed', { why: r.message || r.reason || '?' }))
     }
-    const w = window.open(`https://wa.me/${phone ? waNumber(phone) : ''}?text=${encodeURIComponent(text())}`, '_blank')
+    const w = window.open(`https://wa.me/${phone ? waNumber(phone) : ''}?text=${encodeURIComponent(text(L))}`, '_blank')
     if (w) w.opener = null
     remember(name)
   }
   return (
     <>
       {/* in the card's action row, beside Print receipt (owner, 2026-10-23) */}
-      {drivers.map((d, i) => <button key={i} type="button" className="staff-wa" title={s('sendToDriver')} disabled={busy} onClick={() => void send(d.name || d.phone, d.phone)}><I.whatsapp />{busy ? s('waSending') : d.name || d.phone}</button>)}
+      {drivers.map((d, i) => <button key={i} type="button" className="staff-wa" title={s('sendToDriver')} disabled={busy} onClick={() => void send(d.name || d.phone, d.phone, d.lang ?? lang)}><I.whatsapp />{busy ? s('waSending') : d.name || d.phone}</button>)}
       <button type="button" className={'staff-wa' + (drivers.length ? ' other' : '')} title={s('sendToDriver')} disabled={busy} onClick={() => void send(drivers.length ? s('sendOther') : 'WhatsApp')}><I.whatsapp />{drivers.length ? s('sendOther') : s('sendWhatsapp')}</button>
       {failed && <small className="staff-sent staff-wa-failed" role="alert">{failed}</small>}
       {sent && <small className="staff-sent">{s(sent.api ? 'sentApi' : 'sentTo', { name: sent.name, t: ago(sent.at, now, lang, t('justNow')) })}</small>}
@@ -267,43 +271,121 @@ export function OrderCard({ o, lead = LEAD_MIN, all = [] }: { o: Order; lead?: n
 /*
  * Filter for the Orders page and the Dashboard (owner, 2026-10-24: "filter by date defaulted to today's date, by name,
  * by phone number"; "dashboard too"). The date follows the clock while it is on today (it moves on at midnight by
- * itself); '' = all dates. An order belongs to a day when it was placed that day or is scheduled for it. The search
- * matches the customer's name, or any part of the phone number however it was typed.
+ * itself); '' = all dates. An order belongs to a day when it was placed that day or is scheduled for it.
+ * The search (owner, 2026-10-26: "advanced search … items, address, notes, and what else we have") looks in the
+ * customer's name, any part of a phone number however it was typed, the order number, the items (their English names
+ * as stored, and their Arabic / Kurdish names), the address, the note and the cancel reason. Advanced narrows it: one
+ * field only, delivery / pickup, Positive Hours / menu orders, an amount range, scheduled orders only.
  */
 const dayKey = (t: number) => { const d = new Date(t); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` }
-export type OrderFilter = { day: string; today: boolean; q: string; setDay: (d: string | null) => void; setQ: (q: string) => void; byDay: (o: Order) => boolean; byText: (o: Order) => boolean }
+export type SearchIn = 'all' | 'name' | 'phone' | 'code' | 'items' | 'address' | 'note' | 'reason'
+export type Adv = { field: SearchIn; fulfil: '' | 'delivery' | 'pickup'; kind: '' | 'offer' | 'menu'; min: string; max: string; timed: boolean }
+const NO_ADV: Adv = { field: 'all', fulfil: '', kind: '', min: '', max: '', timed: false }
+export type OrderFilter = {
+  day: string; today: boolean; q: string; adv: Adv; advCount: number
+  setDay: (d: string | null) => void; setQ: (q: string) => void; setAdv: (a: Adv) => void
+  byDay: (o: Order) => boolean; byText: (o: Order) => boolean
+}
+// Arabic / Kurdish spellings people mix up are searched as one: ة ه ە, أ إ آ ا, ى ي ی, ك ک; marks and ـ ignored
+const norm = (x: string) => x.toLowerCase().replace(/[\u064B-\u0652\u0640]/g, '').replace(/[ةە]/g, 'ه').replace(/[أإآ]/g, 'ا').replace(/[ىی]/g, 'ي').replace(/ک/g, 'ك')
+// item names in every language, to find "لاتيه" in an order stored as "Latte Classic (8oz) ×1"; longest names first
+let NAMES: [string, string][] | null = null
+const namesIndex = () => (NAMES ??= ALL_ITEMS.map((i) => i.name).sort((a, b) => b.length - a.length)
+  .map((n) => [n, [n, nameOf(n, 'en'), nameOf(n, 'ar'), nameOf(n, 'ku')].join(' ').toLowerCase()] as [string, string]))
+const itemsText = (o: Order) => {
+  const lines = o.items.join(' · ')
+  const extra = namesIndex().filter(([n]) => lines.includes(n)).map(([, all]) => all)
+  return norm(lines + ' ' + extra.join(' '))
+}
 export function useOrderFilter(): OrderFilter {
+  const { t } = useLang()
   const now = useNow(60000)
   const [picked, setPicked] = useState<string | null>(null) // null = today, '' = all dates, else YYYY-MM-DD
   const [q, setQ] = useState('')
+  const [adv, setAdv] = useState<Adv>(NO_ADV)
   const day = picked ?? dayKey(now)
-  const words = q.trim().toLowerCase()
+  const words = norm(q.trim()).split(/\s+/).filter(Boolean)
   const digits = q.replace(/\D/g, '').replace(/^(00964|964|0)/, '')
+  const min = Number(adv.min.replace(/\D/g, '')) || 0
+  const max = Number(adv.max.replace(/\D/g, '')) || 0
+  const advCount = [adv.field !== 'all', !!adv.fulfil, !!adv.kind, !!min || !!max, adv.timed].filter(Boolean).length
+  const fields = (o: Order): Record<Exclude<SearchIn, 'all'>, () => string> => ({
+    name: () => norm(o.customer?.name ?? ''),
+    phone: () => '',
+    code: () => o.id.toLowerCase(),
+    items: () => itemsText(o),
+    address: () => norm(o.delivery?.address ?? ''),
+    note: () => norm(o.note ?? ''),
+    reason: () => norm(reasonText(o.cancelReason, t)),
+  })
+  const phoneHit = (o: Order) => digits.length >= 3 && [o.customer?.phone, o.delivery?.phone].some((p) => (p ?? '').replace(/\D/g, '').includes(digits))
   return {
-    day, today: picked === null, q, setDay: setPicked, setQ,
+    day, today: picked === null, q, adv, advCount, setDay: setPicked, setQ, setAdv,
     byDay: (o) => !day || dayKey(o.at) === day || (dueOf(o) !== undefined && dayKey(dueOf(o)!) === day),
     byText: (o) => {
-      if (!words) return true
-      if ((o.customer?.name ?? '').toLowerCase().includes(words) || o.id.toLowerCase().includes(words)) return true
-      return digits.length >= 3 && [o.customer?.phone, o.delivery?.phone].some((p) => (p ?? '').replace(/\D/g, '').includes(digits))
+      if (adv.fulfil && o.fulfil !== adv.fulfil) return false
+      if (adv.kind === 'offer' && !o.offer) return false
+      if (adv.kind === 'menu' && o.offer) return false
+      if (min && o.total < min) return false
+      if (max && o.total > max) return false
+      if (adv.timed && dueOf(o) === undefined) return false
+      if (!words.length) return true
+      if (adv.field === 'phone') return phoneHit(o)
+      const f = fields(o)
+      const hay = adv.field === 'all' ? Object.values(f).map((g) => g()).join(' \n ') : f[adv.field]()
+      // every word somewhere ("caesar latte" finds an order with both); a phone number matches in Everything too
+      return words.every((w) => hay.includes(w)) || (adv.field === 'all' && phoneHit(o))
     },
   }
 }
 export function OrderFilterBar({ f }: { f: OrderFilter }) {
   const s = useS()
+  const [open, setOpen] = useState(false)
+  const set = (p: Partial<Adv>) => f.setAdv({ ...f.adv, ...p })
+  const FIELDS: [SearchIn, SKey][] = [['all', 'fInAll'], ['name', 'fInName'], ['phone', 'fInPhone'], ['code', 'fInCode'], ['items', 'fInItems'], ['address', 'fInAddress'], ['note', 'fInNote'], ['reason', 'fInReason']]
   return (
-    <div className="staff-filter" role="search">
-      <label className="staff-filter-date">
-        <span>{s('fDate')}</span>
-        <input type="date" value={f.day} onChange={(e) => f.setDay(e.target.value)} dir="ltr" />
-      </label>
-      <button type="button" className={'staff-filter-chip' + (f.today ? ' on' : '')} onClick={() => f.setDay(null)}>{s('fToday')}</button>
-      <button type="button" className={'staff-filter-chip' + (f.day === '' ? ' on' : '')} onClick={() => f.setDay('')}>{s('fAllDates')}</button>
-      <span className="staff-filter-q">
-        <input type="search" value={f.q} onChange={(e) => f.setQ(e.target.value)} placeholder={s('fSearch')} aria-label={s('fSearch')} />
-        {f.q && <button type="button" className="link-btn" onClick={() => f.setQ('')}>{s('fClear')}</button>}
-      </span>
-    </div>
+    <>
+      <div className="staff-filter" role="search">
+        <label className="staff-filter-date">
+          <span>{s('fDate')}</span>
+          <input type="date" value={f.day} onChange={(e) => f.setDay(e.target.value)} dir="ltr" />
+        </label>
+        <button type="button" className={'staff-filter-chip' + (f.today ? ' on' : '')} onClick={() => f.setDay(null)}>{s('fToday')}</button>
+        <button type="button" className={'staff-filter-chip' + (f.day === '' ? ' on' : '')} onClick={() => f.setDay('')}>{s('fAllDates')}</button>
+        <span className="staff-filter-q">
+          <input type="search" value={f.q} onChange={(e) => f.setQ(e.target.value)} placeholder={s(f.adv.field === 'all' ? 'fSearch' : FIELDS.find(([k]) => k === f.adv.field)![1])} aria-label={s('fSearch')} />
+          {f.q && <button type="button" className="link-btn" onClick={() => f.setQ('')}>{s('fClear')}</button>}
+        </span>
+        <button type="button" className={'staff-filter-chip' + (open || f.advCount ? ' on' : '')} aria-expanded={open} onClick={() => setOpen(!open)}>{s('fAdvanced')}{f.advCount > 0 && ` · ${f.advCount}`}</button>
+      </div>
+      {open && (
+        <div className="staff-adv">
+          <label><span>{s('fSearchIn')}</span>
+            <select value={f.adv.field} onChange={(e) => set({ field: e.target.value as SearchIn })}>
+              {FIELDS.map(([k, key]) => <option key={k} value={k}>{s(key)}</option>)}
+            </select>
+          </label>
+          <label><span>{s('fType')}</span>
+            <select value={f.adv.fulfil} onChange={(e) => set({ fulfil: e.target.value as Adv['fulfil'] })}>
+              <option value="">{s('fAny')}</option><option value="delivery">{s('delivery')}</option><option value="pickup">{s('pickup')}</option>
+            </select>
+          </label>
+          <label><span>{s('fKind')}</span>
+            <select value={f.adv.kind} onChange={(e) => set({ kind: e.target.value as Adv['kind'] })}>
+              <option value="">{s('fAny')}</option><option value="offer">{s('fKindOffer')}</option><option value="menu">{s('fKindMenu')}</option>
+            </select>
+          </label>
+          <label><span>{s('fAmount')}</span>
+            <span className="staff-adv-range">
+              <input inputMode="numeric" dir="ltr" placeholder={s('fFrom')} value={f.adv.min} onChange={(e) => set({ min: e.target.value.replace(/[^\d]/g, '') })} />
+              <input inputMode="numeric" dir="ltr" placeholder={s('fTo')} value={f.adv.max} onChange={(e) => set({ max: e.target.value.replace(/[^\d]/g, '') })} />
+            </span>
+          </label>
+          <label className="staff-adv-check"><input type="checkbox" checked={f.adv.timed} onChange={(e) => set({ timed: e.target.checked })} /><span>{s('fTimed')}</span></label>
+          {f.advCount > 0 && <button type="button" className="link-btn" onClick={() => f.setAdv(NO_ADV)}>{s('fReset')}</button>}
+        </div>
+      )}
+    </>
   )
 }
 

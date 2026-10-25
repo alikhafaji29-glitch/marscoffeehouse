@@ -24,9 +24,16 @@
 //
 // The template mars_delivery_order (approved wording in HANDOFF decision 193) has 7 variables, in this order:
 //   {{1}} order number  {{2}} branch  {{3}} customer + phone  {{4}} address  {{5}} map link  {{6}} items  {{7}} collect
+// The short one, mars_order_loc (owner, 2026-10-25: "too many useless words"; HANDOFF decision 204), is tried before
+// it when the order has a pin: a LOCATION header and 5 variables: {{1}} "#code · branch"  {{2}} customer + phone
+//   {{3}} address  {{4}} items  {{5}} collect. While Meta has not approved it, the long ones go as before.
+//
+// Every send is written to public.wa_messages (owner, 2026-10-25: "wa msgs log"; HANDOFF decision 205) with Meta's
+// message id, or as failed with Meta's reason; wa-webhook then marks it delivered / read / failed.
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
 const GRAPH = Deno.env.get('WA_GRAPH_VERSION') ?? 'v23.0'
+const SHORT = 'mars_order_loc'
 const allowed = (Deno.env.get('ALLOWED_ORIGINS') ?? '').split(',').map((s) => s.trim()).filter(Boolean)
 const originOk = (o: string | null) => !allowed.length || (o !== null && allowed.includes(o))
 const cors = (o: string | null) => ({
@@ -37,7 +44,7 @@ const cors = (o: string | null) => ({
 })
 
 type OrderRow = {
-  code: string; branch: string; customer_name: string | null; customer_phone: string | null; delivery_phone: string | null
+  uid: string; code: string; branch: string; customer_name: string | null; customer_phone: string | null; delivery_phone: string | null
   address: string | null; location: { lat: number; lng: number } | null; items: string[]; total: number; pay: string | null
 }
 
@@ -73,7 +80,7 @@ Deno.serve(async (req: Request) => {
 
   const auth = req.headers.get('authorization') ?? ''
   if (!auth.startsWith('Bearer ')) return json(401, { ok: false, reason: 'not_signed_in' })
-  let body: { order_uid?: string; to?: string; text?: string; lang?: string }
+  let body: { order_uid?: string; to?: string; text?: string; lang?: string; driver?: string }
   try { body = await req.json() } catch { return json(400, { ok: false, reason: 'bad_request' }) }
   if (!body.order_uid || !body.to) return json(400, { ok: false, reason: 'bad_request' })
 
@@ -89,7 +96,7 @@ Deno.serve(async (req: Request) => {
   const { data: staff } = await sb.from('staff').select('branch').eq('user_id', u.user.id).maybeSingle()
   if (!staff) return json(403, { ok: false, reason: 'not_staff' })
   const { data: o } = await sb.from('orders')
-    .select('code,branch,customer_name,customer_phone,delivery_phone,address,location,items,total,pay')
+    .select('uid,code,branch,customer_name,customer_phone,delivery_phone,address,location,items,total,pay')
     .eq('uid', body.order_uid).maybeSingle<OrderRow>()
   if (!o || (staff.branch && staff.branch !== o.branch)) return json(404, { ok: false, reason: 'no_order' })
 
@@ -112,6 +119,10 @@ Deno.serve(async (req: Request) => {
     (o.items ?? []).join(' · '),
     o.pay === 'wallet' ? COLLECT[tl].wallet : `${iqd(o.total)} ${COLLECT[tl].cur}`,
   ].map((t) => ({ type: 'text', text: flat(t) }))
+  const shortParams = (tl: string) => {
+    const p = params(tl)
+    return [{ type: 'text', text: flat(`#${o.code} · ${BRANCH[tl][o.branch] ?? o.branch}`) }, p[2], p[3], p[5], p[6]]
+  }
   type Sent = { r: Response; res: { messages?: { id: string }[]; error?: { code?: number; message?: string } } }
   const post = async (message: Record<string, unknown>): Promise<Sent> => {
     const r = await fetch(`https://graph.facebook.com/${GRAPH}/${phoneId}/messages`, {
@@ -125,13 +136,13 @@ Deno.serve(async (req: Request) => {
   let used = ''
   {
     // the pin version first, then the plain one; Kurdish (fa) then Arabic, until Meta takes one
-    const names = pin ? [`${template}_loc`, template] : [template]
+    const names = pin ? [SHORT, `${template}_loc`, template] : [template]
     const langs = tl === 'fa' ? ['fa', 'ar'] : [tl]
     attempts: for (const name of names) {
       for (const lang of langs) {
         const components: unknown[] = []
         if (name.endsWith('_loc')) components.push({ type: 'header', parameters: [{ type: 'location', location: pin }] })
-        components.push({ type: 'body', parameters: params(lang) })
+        components.push({ type: 'body', parameters: name === SHORT ? shortParams(lang) : params(lang) })
         sent = await post({ type: 'template', template: { name, language: { code: lang }, components } })
         if (sent.res.messages?.length) { used = `${name}/${lang}`; break attempts }
       }
@@ -144,9 +155,18 @@ Deno.serve(async (req: Request) => {
     if (sent.res.messages?.length && pin) await post({ type: 'location', location: pin })
   }
   const { r, res } = sent
-  if (!r.ok || !res.messages?.length) {
+  // the log, written with the service role (staff may only read it)
+  const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false, autoRefreshToken: false } })
+  const ok = r.ok && !!res.messages?.length
+  const { error: logErr } = await admin.from('wa_messages').insert({
+    wamid: ok ? res.messages![0].id : null, order_uid: o.uid, order_code: o.code, branch: o.branch, to_number: to,
+    driver: (body.driver ?? '').slice(0, 60), template: used || 'text', status: ok ? 'sent' : 'failed', sent_by: u.user.id,
+    ...(!ok && { error: (res.error?.message ?? `HTTP ${r.status}`).slice(0, 500), failed_at: new Date().toISOString() }),
+  })
+  if (logErr) console.warn('[send-whatsapp] log not written:', logErr.message)
+  if (!ok) {
     console.warn('[send-whatsapp] Meta refused:', r.status, res.error?.code, res.error?.message)
     return json(200, { ok: false, reason: 'meta', code: res.error?.code, message: res.error?.message ?? `HTTP ${r.status}` })
   }
-  return json(200, { ok: true, id: res.messages[0].id, template: used || undefined })
+  return json(200, { ok: true, id: res.messages![0].id, template: used || undefined })
 })

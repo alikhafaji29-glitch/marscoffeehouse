@@ -1354,6 +1354,7 @@ a.add-btn { text-decoration: none; display: flex; align-items: center; justify-c
 .item-topbar.show { opacity: 1; transform: none; }
 .item-thumb { width: 34px; height: 34px; display: grid; place-items: center; }
 .item-thumb img { width: 34px; height: 34px; object-fit: cover; border-radius: 0.4rem; }
+.item-thumb { overflow: hidden; border-radius: 0.4rem; } /* an item photo moved left / right stays in its frame (2026-10-25) */
 .item-topbar-text { display: flex; flex-direction: column; line-height: 1.15; font-size: 0.9rem; }
 .item-topbar-text strong { font-weight: 700; }
 .item-topbar-text span { font-size: 0.85rem; color: rgba(17, 38, 75, 0.7); }
@@ -2276,8 +2277,20 @@ body.ph-on .band-pill, body.ph-on .header-order-in { display: none; }
 .staff-sent { color: #1f6b3d; font-size: 0.8rem; }
 .staff-sent.staff-wa-failed { color: #b3261e; }
 .staff-wa:disabled { opacity: 0.6; cursor: progress; }
-.d-driver { display: grid; grid-template-columns: 1fr 1fr auto; gap: 0.6rem; align-items: end; margin-bottom: 0.6rem; }
+.d-driver { display: grid; grid-template-columns: 1fr 1fr 10rem auto; gap: 0.6rem; align-items: end; margin-bottom: 0.6rem; }
+.d-driver-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; }
+.d-driver-actions .d-btn.solid:disabled { opacity: 0.45; }
 @media (max-width: 560px) { .d-driver { grid-template-columns: 1fr; } }
 /* Print receipt and the WhatsApp buttons in one row; "Sent to" on its own line under them (2026-10-23) */
 .staff-acts { display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem; }
 .staff-acts .staff-sent { flex-basis: 100%; }
+/* an item photo moved left / right in a square tile (2026-10-25): the slice it uncovers is white like the product shots */
+.ocard-tile img[style*="transform"], .combo-tile img[style*="transform"], .combo-section-cup img[style*="transform"], .item-thumb img[style*="transform"], .d-thumb img[style*="transform"] { box-shadow: 0 0 0 200px #fff; }
+/* Orders / Dashboard: Advanced search (2026-10-26) */
+.staff-adv { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0.7rem 1rem; margin: 0.5rem 0 0.4rem; padding: 0.8rem 0.9rem; border: 1.5px solid rgba(32, 52, 105, 0.12); border-radius: 0.9rem; background: #fff; }
+.staff-adv label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.8rem; color: rgba(16, 32, 58, 0.7); }
+.staff-adv select, .staff-adv input:not([type="checkbox"]) { min-height: 40px; padding: 0 0.7rem; border: 1.5px solid rgba(32, 52, 105, 0.18); border-radius: 0.7rem; background: #fff; font: inherit; font-size: 0.9rem; color: var(--ink); }
+.staff-adv-range { display: flex; gap: 0.4rem; }
+.staff-adv-range input { width: 6.5rem; }
+.staff-adv label.staff-adv-check { flex-direction: row; align-items: center; gap: 0.45rem; min-height: 40px; font-size: 0.88rem; color: var(--ink); }
+.staff-adv-check input { width: 1.1rem; height: 1.1rem; accent-color: var(--navy); }

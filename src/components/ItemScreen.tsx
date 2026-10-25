@@ -8,7 +8,7 @@ import type { Deal, MenuItem } from '../menu'
 import { iqd } from '../account'
 import { DESC, TINT, categoryOf, isIced } from '../menuMeta'
 import { groupsFor, defaultPicks, extras, summary, timesPicked } from '../customize'
-import { itemState, nameOf, useMenuVersion, photoOf } from '../menuAdmin'
+import { itemState, nameOf, useMenuVersion, photoOf, photoStyle } from '../menuAdmin'
 import type { CustGroup, Picks } from '../customize'
 import { MiniCup } from './MiniCup'
 import { IconCheck } from './Icons'
@@ -99,13 +99,13 @@ export function ItemScreen({ item, gift = false, deal, onClose, onAdded }: { ite
     <div className="item-screen" ref={scroller} onScroll={onScroll} role="dialog" aria-modal="true" aria-labelledby="item-title">
       <button type="button" className="item-back" onClick={onClose} aria-label={t('back')}><Back /></button>
       <div className={'item-topbar' + (scrolled ? ' show' : '')} aria-hidden={!scrolled}>
-        <span className="item-thumb">{photo ? <img src={photo} alt="" /> : cup(34)}</span>
+        <span className="item-thumb">{photo ? <img src={photo} alt="" style={photoStyle(item.name)} /> : cup(34)}</span>
         <span className="item-topbar-text"><strong>{nameOf(item.name, lang)}</strong><span dir="ltr">{iqd(unit)} IQD</span></span>
       </div>
 
       <div className="item-hero" style={{ opacity: fade, transform: `scale(${0.85 + 0.15 * fade})` }}>
         <div className="item-arc" />
-        {photo ? <img src={photo} alt="" /> : cup(210)}
+        {photo ? <img src={photo} alt="" style={photoStyle(item.name)} /> : cup(210)}
       </div>
 
       <div className="item-body">
