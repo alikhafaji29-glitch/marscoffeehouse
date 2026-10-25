@@ -10,7 +10,7 @@ import type { ReceiptText } from './receipt'
 import type { Stage } from '../orders'
 import { IconCheck, IconPin } from '../components/Icons'
 import { mapsLink } from '../components/ShareLocation'
-import { cancelOrder, mergeOrders, moveOrder } from './remote'
+import { cancelOrder, mergeOrders, moveOrder, sendWhatsApp } from './remote'
 import { useS } from './strings'
 import { backendOn } from '../backend'
 import { I } from './ui'
@@ -35,11 +35,13 @@ const phoneOf = (o: Order) => o.delivery?.phone ?? o.customer?.phone ?? ''
 
 /*
  * Send a delivery order to a driver on WhatsApp (owner, 2026-10-23): one button per driver set in Tools, and Other…
- * to pick any chat. WhatsApp opens with the order written out (who, phone, address, map link, items, note, what to
- * collect); staff press Send there. This device remembers who it went to, to show on the card.
+ * to pick any chat. A driver button sends through the WhatsApp Cloud API (owner, 2026-10-24) with no step in WhatsApp;
+ * when that cannot send (not set up yet, Meta refuses) WhatsApp opens with the order written out (who, phone, address,
+ * map link, items, note, what to collect) and staff press Send there, as before. Other… always opens WhatsApp.
+ * This device remembers who it went to, to show on the card.
  */
 const SENT_KEY = 'mars-staff-sent'
-const readSent = (): Record<string, { name: string; at: number }> => { try { return JSON.parse(localStorage.getItem(SENT_KEY) || '{}') } catch { return {} } }
+const readSent = (): Record<string, { name: string; at: number; api?: boolean }> => { try { return JSON.parse(localStorage.getItem(SENT_KEY) || '{}') } catch { return {} } }
 function SendToDriver({ o }: { o: Order }) {
   const { t, lang } = useLang()
   const s = useS()
@@ -60,19 +62,35 @@ function SendToDriver({ o }: { o: Order }) {
     lines.push('', o.pay === 'wallet' ? t('paidByWallet') : s('waCollect', { n: iqd(o.total) }))
     return lines.join('\n')
   }
-  const send = (name: string, phone?: string) => {
-    window.open(`https://wa.me/${phone ? waNumber(phone) : ''}?text=${encodeURIComponent(text())}`, '_blank', 'noopener')
+  const [busy, setBusy] = useState(false)
+  const [failed, setFailed] = useState('')
+  const remember = (name: string, api?: boolean) => {
     const all = readSent()
-    all[key] = { name, at: Date.now() }
+    all[key] = { name, at: Date.now(), ...(api && { api }) }
     try { localStorage.setItem(SENT_KEY, JSON.stringify(all)) } catch { /* ignore */ }
     setSent(all[key])
+  }
+  const send = async (name: string, phone?: string) => {
+    setFailed('')
+    if (phone && o.uid) {
+      setBusy(true)
+      const r = await sendWhatsApp(o.uid, waNumber(phone), text(), lang) // the template in the dashboard's language (Kurdish: Arabic)
+      setBusy(false)
+      if (r.ok) { remember(name, true); return }
+      // not set up yet (or no backend): quietly the old way; a real refusal is shown
+      if (r.reason !== 'not_configured' && r.reason !== 'no_backend' && r.reason !== 'unreachable') setFailed(s('waApiFailed', { why: r.message || r.reason || '?' }))
+    }
+    const w = window.open(`https://wa.me/${phone ? waNumber(phone) : ''}?text=${encodeURIComponent(text())}`, '_blank')
+    if (w) w.opener = null
+    remember(name)
   }
   return (
     <>
       {/* in the card's action row, beside Print receipt (owner, 2026-10-23) */}
-      {drivers.map((d, i) => <button key={i} type="button" className="staff-wa" title={s('sendToDriver')} onClick={() => send(d.name || d.phone, d.phone)}><I.whatsapp />{d.name || d.phone}</button>)}
-      <button type="button" className={'staff-wa' + (drivers.length ? ' other' : '')} title={s('sendToDriver')} onClick={() => send(drivers.length ? s('sendOther') : 'WhatsApp')}><I.whatsapp />{drivers.length ? s('sendOther') : s('sendWhatsapp')}</button>
-      {sent && <small className="staff-sent">{s('sentTo', { name: sent.name, t: ago(sent.at, now, lang, t('justNow')) })}</small>}
+      {drivers.map((d, i) => <button key={i} type="button" className="staff-wa" title={s('sendToDriver')} disabled={busy} onClick={() => void send(d.name || d.phone, d.phone)}><I.whatsapp />{busy ? s('waSending') : d.name || d.phone}</button>)}
+      <button type="button" className={'staff-wa' + (drivers.length ? ' other' : '')} title={s('sendToDriver')} disabled={busy} onClick={() => void send(drivers.length ? s('sendOther') : 'WhatsApp')}><I.whatsapp />{drivers.length ? s('sendOther') : s('sendWhatsapp')}</button>
+      {failed && <small className="staff-sent staff-wa-failed" role="alert">{failed}</small>}
+      {sent && <small className="staff-sent">{s(sent.api ? 'sentApi' : 'sentTo', { name: sent.name, t: ago(sent.at, now, lang, t('justNow')) })}</small>}
     </>
   )
 }

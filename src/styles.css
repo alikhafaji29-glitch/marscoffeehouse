@@ -2274,6 +2274,8 @@ body.ph-on .band-pill, body.ph-on .header-order-in { display: none; }
 .staff-wa svg { width: 18px; height: 18px; }
 .staff-wa.other { background: #fff; color: #1f8f4e; border: 1.5px solid #1f8f4e; }
 .staff-sent { color: #1f6b3d; font-size: 0.8rem; }
+.staff-sent.staff-wa-failed { color: #b3261e; }
+.staff-wa:disabled { opacity: 0.6; cursor: progress; }
 .d-driver { display: grid; grid-template-columns: 1fr 1fr auto; gap: 0.6rem; align-items: end; margin-bottom: 0.6rem; }
 @media (max-width: 560px) { .d-driver { grid-template-columns: 1fr; } }
 /* Print receipt and the WhatsApp buttons in one row; "Sent to" on its own line under them (2026-10-23) */
