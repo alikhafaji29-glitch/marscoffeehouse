@@ -45,7 +45,7 @@ import { clockNow } from '../clock'
  */
 /** what the customer may pick in a group, grouped by menu category; out-of-stock items are left out */
 function choices(g: OfferGroup): { cat: string; items: MenuItem[] }[] {
-  const ok = (i: MenuItem) => !i.soldOut && (g.mode === 'items' ? g.items.includes(i.name) : true)
+  const ok = (i: MenuItem) => !i.soldOut && (g.mode === 'items' ? g.items.includes(i.name) : !g.skip?.includes(i.name))
   return MENU.filter((c) => g.mode === 'items' || g.cats.includes(c.id)).map((c) => ({ cat: c.id, items: c.items.filter(ok) })).filter((c) => c.items.length)
 }
 // food without a photo gets a drawn sandwich or pastry rather than the drink cup

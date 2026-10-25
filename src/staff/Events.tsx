@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLang } from '../i18n'
 import { ALL_ITEMS, MENU } from '../menu'
 import { catLabel } from '../components/MenuSection'
 import { THEMES, branchName, l3, uid, update, useStaff } from './store'
 import type { EventX, L3 } from './store'
 import { useS } from './strings'
+import { nameOf } from '../menuAdmin'
+import { Thumb } from './Catalog'
 import { Field, I, Modal, Switch } from './ui'
 
 /* Events, after the live panel: limited-time seasonal menus. The active event is the website's New Season section
@@ -44,18 +46,84 @@ export function ItemPicker({ value, onChange, label }: { value: string[]; onChan
   )
 }
 
-/** chosen categories as chips, with the rest offered underneath */
-export function CatPicker({ value, onChange, label }: { value: string[]; onChange: (v: string[]) => void; label: string }) {
+/** chosen categories as chips, with the rest offered underneath. With `onSkip` (an offer's step), a chosen category's
+ *  name opens its items as tick boxes: unticked ones are left out of the step (owner, 2026-10-26: "if he presses on the
+ *  selected category you will open all items of this category in a small window, for him to select what he wants") */
+export function CatPicker({ value, onChange, label, skip = [], onSkip }: { value: string[]; onChange: (v: string[]) => void; label: string; skip?: string[]; onSkip?: (skip: string[]) => void }) {
   const { lang } = useLang()
   const s = useS()
+  const [open, setOpen] = useState('')
   const rest = MENU.filter((c) => !value.includes(c.id))
+  const itemsOf = (id: string) => MENU.find((c) => c.id === id)?.items ?? []
+  const remove = (id: string) => {
+    onChange(value.filter((x) => x !== id))
+    const gone = new Set(itemsOf(id).map((i) => i.name))
+    if (onSkip && skip.some((n) => gone.has(n))) onSkip(skip.filter((n) => !gone.has(n)))
+  }
   return (
     <div className="d-picker">
       <p className="d-form-title">{label} · {value.length}</p>
       <div className="d-chips">
-        {value.map((id) => <span key={id} className="d-chip">{catLabel(id, lang)} · {MENU.find((c) => c.id === id)?.items.length ?? 0}<button type="button" aria-label={`${s('remove')} ${id}`} onClick={() => onChange(value.filter((x) => x !== id))}><I.close /></button></span>)}
+        {value.map((id) => {
+          const all = itemsOf(id).length
+          const left = itemsOf(id).filter((i) => !skip.includes(i.name)).length
+          const count = left === all ? String(all) : s('nOfM', { n: left, m: all })
+          return (
+            <span key={id} className={'d-chip' + (left < all ? ' part' : '')}>
+              {onSkip ? <button type="button" className="d-chip-open" title={s('catItemsOpen')} onClick={() => setOpen(id)}>{catLabel(id, lang)} · {count}</button> : <>{catLabel(id, lang)} · {count}</>}
+              <button type="button" aria-label={`${s('remove')} ${id}`} onClick={() => remove(id)}><I.close /></button>
+            </span>
+          )
+        })}
       </div>
+      {onSkip && value.length > 0 && <p className="d-hint">{s('catItemsHint')}</p>}
       {rest.length > 0 && <div className="d-chips add">{rest.map((c) => <button key={c.id} type="button" className="d-chip ghost" onClick={() => onChange([...value, c.id])}><I.plus />{catLabel(c.id, lang)}</button>)}</div>}
+      {open && onSkip && <CatItems cat={open} skip={skip} onSkip={onSkip} onClose={() => setOpen('')} />}
+    </div>
+  )
+}
+
+/** one category's items as tick boxes, over the offer editor; ticked = in the step */
+function CatItems({ cat, skip, onSkip, onClose }: { cat: string; skip: string[]; onSkip: (skip: string[]) => void; onClose: () => void }) {
+  const { lang } = useLang()
+  const s = useS()
+  const items = MENU.find((c) => c.id === cat)?.items ?? []
+  const names = items.map((i) => i.name)
+  // Escape closes this window only, not the offer editor under it
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.stopImmediatePropagation(); onClose() } }
+    document.addEventListener('keydown', onKey, true)
+    return () => document.removeEventListener('keydown', onKey, true)
+  }, [onClose])
+  const toggle = (n: string) => onSkip(skip.includes(n) ? skip.filter((x) => x !== n) : [...skip, n])
+  return (
+    <div className="d-overlay top" onClick={onClose}>
+      <div className="d-modal d-cat-items" role="dialog" aria-modal="true" aria-label={catLabel(cat, lang)} onClick={(e) => e.stopPropagation()}>
+        <h2>{catLabel(cat, lang)}</h2>
+        <div className="d-modal-body">
+          <p className="d-hint">{s('catItemsSub')}</p>
+          <div className="d-cat-items-all">
+            <button type="button" className="d-btn text small" onClick={() => onSkip(skip.filter((n) => !names.includes(n)))}>{s('selectAll')}</button>
+            <button type="button" className="d-btn text small" onClick={() => onSkip([...skip.filter((n) => !names.includes(n)), ...names])}>{s('deselectAll')}</button>
+          </div>
+          <ul>
+            {items.map((i) => {
+              const on = !skip.includes(i.name)
+              return (
+                <li key={i.name}>
+                  <label>
+                    <input type="checkbox" checked={on} onChange={() => toggle(i.name)} />
+                    <Thumb name={i.name} size={40} />
+                    <span>{nameOf(i.name, lang)}{i.soldOut && <small> · {s('outOfStock')}</small>}</span>
+                    <em>{on ? s('included') : s('leftOut')}</em>
+                  </label>
+                </li>
+              )
+            })}
+          </ul>
+        </div>
+        <footer><button type="button" className="d-btn solid" onClick={onClose}>{s('done')}</button></footer>
+      </div>
     </div>
   )
 }

@@ -38,7 +38,8 @@ export const COTD_DEFAULT: Cotd = { on: true, price: 3500, items: ['Americano', 
 export interface Driver { name: string; phone: string; lang?: Lang } // lang: the WhatsApp message's language (owner, 2026-10-25); missing = the dashboard's
 export interface Settings { reach: 'dashboard' | 'whatsapp'; whatsapp: string; delivery: boolean; pickup: boolean; lead?: number; cotd?: Cotd; drivers?: Driver[] } // lead: minutes before a timed order's time that it moves from Later to Active (LEAD_MIN when missing)
 export interface EventX { id: string; name: L3; theme: string; desc: L3; promo: L3; items: string[]; active: boolean }
-export interface OfferGroup { id: string; label: L3; pick: number; mode: 'cats' | 'items'; cats: string[]; items: string[] }
+// skip: items of the chosen categories left out of the step (owner, 2026-10-26: whole categories, then untick items)
+export interface OfferGroup { id: string; label: L3; pick: number; mode: 'cats' | 'items'; cats: string[]; items: string[]; skip?: string[] }
 export interface Offer {
   id: string; name: L3; slug: string; price: number; start: string; end: string // HH:MM, local time, daily
   freeDelivery: boolean; feeOn: boolean; fee: number; sizes: boolean; sub: L3; fine: L3; groups: OfferGroup[]; active: boolean

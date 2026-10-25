@@ -364,3 +364,15 @@ button.d-chip.on { background: var(--d-ink); color: #fff; }
 .d-photo-x input[type="range"] { width: 100%; accent-color: var(--navy); }
 .d-photo-x { gap: 0.55rem; }
 .d-photo-x p { margin: 0; font-size: 0.82rem; font-weight: 600; color: var(--d-ink); align-self: center; }
+/* an offer step: a chosen category's items as tick boxes (2026-10-26) */
+.d-chip button.d-chip-open { width: auto; height: auto; min-height: 0; border-radius: 0; background: none; padding: 0; font: inherit; color: inherit; text-decoration: underline dotted rgba(16, 32, 58, 0.45); text-underline-offset: 3px; cursor: pointer; }
+.d-chip.part { background: #fdf0e3; }
+.d-overlay.top { z-index: 70; }
+.d-cat-items { max-width: 560px; }
+.d-cat-items-all { display: flex; gap: 0.4rem; margin: 0.2rem 0 0.4rem; }
+.d-cat-items ul { list-style: none; margin: 0; padding: 0; }
+.d-cat-items li label { display: grid; grid-template-columns: auto auto 1fr auto; align-items: center; gap: 0.8rem; padding: 0.55rem 0.2rem; border-bottom: 1px solid var(--d-line); cursor: pointer; }
+.d-cat-items li:last-child label { border-bottom: 0; }
+.d-cat-items input[type="checkbox"] { width: 1.15rem; height: 1.15rem; accent-color: var(--navy); }
+.d-cat-items li em { font-style: normal; font-size: 0.8rem; color: var(--d-mute); }
+.d-cat-items li small { color: #b3261e; }
