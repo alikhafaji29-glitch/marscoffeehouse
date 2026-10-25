@@ -172,7 +172,7 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
 
   if (!offer || !groups.length) return null
   const title = offer.name[lang] || offer.name.en
-  const fee = offer.feeOn ? offer.fee : 0
+  const fee = offer.feeOn && delivery ? offer.fee : 0 // delivery orders only: pickup pays no service fee (owner, 2026-10-26)
   // the pick steps: every group of combo 1, then of combo 2, …
   const pickSteps = Array.from({ length: count }, (_, k) => groups.map((_, i) => ({ k, i }))).flat()
   const ASK = 0

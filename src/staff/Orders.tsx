@@ -12,6 +12,9 @@ import { IconCheck, IconPin } from '../components/Icons'
 import { mapsLink } from '../components/ShareLocation'
 import { cancelOrder, mergeOrders, moveOrder, sendWhatsApp } from './remote'
 import { sIn, useS } from './strings'
+import type { SKey } from './strings'
+import { ALL_ITEMS } from '../menu'
+import { nameOf } from '../menuAdmin'
 import { backendOn } from '../backend'
 import { I } from './ui'
 
@@ -268,43 +271,128 @@ export function OrderCard({ o, lead = LEAD_MIN, all = [] }: { o: Order; lead?: n
 /*
  * Filter for the Orders page and the Dashboard (owner, 2026-10-24: "filter by date defaulted to today's date, by name,
  * by phone number"; "dashboard too"). The date follows the clock while it is on today (it moves on at midnight by
- * itself); '' = all dates. An order belongs to a day when it was placed that day or is scheduled for it. The search
- * matches the customer's name, or any part of the phone number however it was typed.
+ * itself); '' = all dates. An order belongs to a day when it was placed that day or is scheduled for it.
+ * The search (owner, 2026-10-26: "advanced search … items, address, notes, and what else we have") looks in the
+ * customer's name, any part of a phone number however it was typed, the order number, the items (their English names
+ * as stored, and their Arabic / Kurdish names), the address, the note and the cancel reason. Advanced narrows it: one
+ * Advanced has a box per field (owner, 2026-10-26: "can we combine it like filters", "one box per field"): every box
+ * filled must match, together with delivery / pickup, Positive Hours / menu orders, an amount range, scheduled only.
  */
 const dayKey = (t: number) => { const d = new Date(t); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` }
-export type OrderFilter = { day: string; today: boolean; q: string; setDay: (d: string | null) => void; setQ: (q: string) => void; byDay: (o: Order) => boolean; byText: (o: Order) => boolean }
+export type Field = 'name' | 'phone' | 'code' | 'items' | 'address' | 'note' | 'reason'
+export type Adv = { by: Partial<Record<Field, string>>; fulfil: '' | 'delivery' | 'pickup'; kind: '' | 'offer' | 'menu'; min: string; max: string; timed: boolean }
+const NO_ADV: Adv = { by: {}, fulfil: '', kind: '', min: '', max: '', timed: false }
+export type OrderFilter = {
+  day: string; today: boolean; q: string; adv: Adv; advCount: number
+  setDay: (d: string | null) => void; setQ: (q: string) => void; setAdv: (a: Adv) => void
+  byDay: (o: Order) => boolean; byText: (o: Order) => boolean
+}
+// Arabic / Kurdish spellings people mix up are searched as one: ة ه ە, أ إ آ ا, ى ي ی, ك ک; marks and ـ ignored
+const norm = (x: string) => x.toLowerCase().replace(/[\u064B-\u0652\u0640]/g, '').replace(/[ةە]/g, 'ه').replace(/[أإآ]/g, 'ا').replace(/[ىی]/g, 'ي').replace(/ک/g, 'ك')
+// item names in every language, to find "لاتيه" in an order stored as "Latte Classic (8oz) ×1"; longest names first
+let NAMES: [string, string][] | null = null
+const namesIndex = () => (NAMES ??= ALL_ITEMS.map((i) => i.name).sort((a, b) => b.length - a.length)
+  .map((n) => [n, [n, nameOf(n, 'en'), nameOf(n, 'ar'), nameOf(n, 'ku')].join(' ').toLowerCase()] as [string, string]))
+const itemsText = (o: Order) => {
+  const lines = o.items.join(' · ')
+  const extra = namesIndex().filter(([n]) => lines.includes(n)).map(([, all]) => all)
+  return norm(lines + ' ' + extra.join(' '))
+}
 export function useOrderFilter(): OrderFilter {
+  const { t } = useLang()
   const now = useNow(60000)
   const [picked, setPicked] = useState<string | null>(null) // null = today, '' = all dates, else YYYY-MM-DD
   const [q, setQ] = useState('')
+  const [adv, setAdv] = useState<Adv>(NO_ADV)
   const day = picked ?? dayKey(now)
-  const words = q.trim().toLowerCase()
-  const digits = q.replace(/\D/g, '').replace(/^(00964|964|0)/, '')
+  const wordsOf = (x: string) => norm(x.trim()).split(/\s+/).filter(Boolean)
+  const digitsOf = (x: string) => x.replace(/\D/g, '').replace(/^(00964|964|0)/, '')
+  const words = wordsOf(q)
+  const by = Object.entries(adv.by).filter(([, v]) => v?.trim()) as [Field, string][]
+  const min = Number(adv.min.replace(/\D/g, '')) || 0
+  const max = Number(adv.max.replace(/\D/g, '')) || 0
+  const advCount = by.length + [!!adv.fulfil, !!adv.kind, !!min || !!max, adv.timed].filter(Boolean).length
+  const fields = (o: Order): Record<Exclude<Field, 'phone'>, () => string> => ({
+    name: () => norm(o.customer?.name ?? ''),
+    code: () => o.id.toLowerCase(),
+    items: () => itemsText(o),
+    address: () => norm(o.delivery?.address ?? ''),
+    note: () => norm(o.note ?? ''),
+    reason: () => norm(reasonText(o.cancelReason, t)),
+  })
+  const phoneHit = (o: Order, digits: string) => digits.length >= 3 && [o.customer?.phone, o.delivery?.phone].some((p) => (p ?? '').replace(/\D/g, '').includes(digits))
+  // every word somewhere ("caesar latte" finds an order with both)
+  const hit = (hay: string, text: string) => wordsOf(text).every((w) => hay.includes(w))
   return {
-    day, today: picked === null, q, setDay: setPicked, setQ,
+    day, today: picked === null, q, adv, advCount, setDay: setPicked, setQ, setAdv,
     byDay: (o) => !day || dayKey(o.at) === day || (dueOf(o) !== undefined && dayKey(dueOf(o)!) === day),
     byText: (o) => {
-      if (!words) return true
-      if ((o.customer?.name ?? '').toLowerCase().includes(words) || o.id.toLowerCase().includes(words)) return true
-      return digits.length >= 3 && [o.customer?.phone, o.delivery?.phone].some((p) => (p ?? '').replace(/\D/g, '').includes(digits))
+      if (adv.fulfil && o.fulfil !== adv.fulfil) return false
+      if (adv.kind === 'offer' && !o.offer) return false
+      if (adv.kind === 'menu' && o.offer) return false
+      if (min && o.total < min) return false
+      if (max && o.total > max) return false
+      if (adv.timed && dueOf(o) === undefined) return false
+      const f = fields(o)
+      // each field's own box, all of them together
+      for (const [k, v] of by) if (!(k === 'phone' ? phoneHit(o, digitsOf(v)) : hit(f[k](), v))) return false
+      // the main box: anywhere (a phone number too)
+      if (!words.length) return true
+      return hit(Object.values(f).map((g) => g()).join(' \n '), q) || phoneHit(o, digitsOf(q))
     },
   }
 }
 export function OrderFilterBar({ f }: { f: OrderFilter }) {
   const s = useS()
+  const [open, setOpen] = useState(false)
+  const set = (p: Partial<Adv>) => f.setAdv({ ...f.adv, ...p })
+  const FIELDS: [Field, SKey][] = [['name', 'fInName'], ['phone', 'fInPhone'], ['code', 'fInCode'], ['items', 'fInItems'], ['address', 'fInAddress'], ['note', 'fInNote'], ['reason', 'fInReason']]
   return (
-    <div className="staff-filter" role="search">
-      <label className="staff-filter-date">
-        <span>{s('fDate')}</span>
-        <input type="date" value={f.day} onChange={(e) => f.setDay(e.target.value)} dir="ltr" />
-      </label>
-      <button type="button" className={'staff-filter-chip' + (f.today ? ' on' : '')} onClick={() => f.setDay(null)}>{s('fToday')}</button>
-      <button type="button" className={'staff-filter-chip' + (f.day === '' ? ' on' : '')} onClick={() => f.setDay('')}>{s('fAllDates')}</button>
-      <span className="staff-filter-q">
-        <input type="search" value={f.q} onChange={(e) => f.setQ(e.target.value)} placeholder={s('fSearch')} aria-label={s('fSearch')} />
-        {f.q && <button type="button" className="link-btn" onClick={() => f.setQ('')}>{s('fClear')}</button>}
-      </span>
-    </div>
+    <>
+      <div className="staff-filter" role="search">
+        <label className="staff-filter-date">
+          <span>{s('fDate')}</span>
+          <input type="date" value={f.day} onChange={(e) => f.setDay(e.target.value)} dir="ltr" />
+        </label>
+        <button type="button" className={'staff-filter-chip' + (f.today ? ' on' : '')} onClick={() => f.setDay(null)}>{s('fToday')}</button>
+        <button type="button" className={'staff-filter-chip' + (f.day === '' ? ' on' : '')} onClick={() => f.setDay('')}>{s('fAllDates')}</button>
+        <span className="staff-filter-q">
+          <input type="search" value={f.q} onChange={(e) => f.setQ(e.target.value)} placeholder={s('fSearch')} aria-label={s('fSearch')} />
+          {f.q && <button type="button" className="link-btn" onClick={() => f.setQ('')}>{s('fClear')}</button>}
+        </span>
+        <button type="button" className={'staff-filter-chip' + (open || f.advCount ? ' on' : '')} aria-expanded={open} onClick={() => setOpen(!open)}>{s('fAdvanced')}{f.advCount > 0 && ` · ${f.advCount}`}</button>
+      </div>
+      {open && (
+        <div className="staff-adv">
+          <div className="staff-adv-fields">
+            {FIELDS.map(([k, key]) => (
+              <label key={k}><span>{s(key)}</span>
+                <input type="search" value={f.adv.by[k] ?? ''} inputMode={k === 'phone' ? 'tel' : undefined} dir={k === 'phone' || k === 'code' ? 'ltr' : undefined}
+                  onChange={(e) => set({ by: { ...f.adv.by, [k]: e.target.value } })} />
+              </label>
+            ))}
+          </div>
+          <label><span>{s('fType')}</span>
+            <select value={f.adv.fulfil} onChange={(e) => set({ fulfil: e.target.value as Adv['fulfil'] })}>
+              <option value="">{s('fAny')}</option><option value="delivery">{s('delivery')}</option><option value="pickup">{s('pickup')}</option>
+            </select>
+          </label>
+          <label><span>{s('fKind')}</span>
+            <select value={f.adv.kind} onChange={(e) => set({ kind: e.target.value as Adv['kind'] })}>
+              <option value="">{s('fAny')}</option><option value="offer">{s('fKindOffer')}</option><option value="menu">{s('fKindMenu')}</option>
+            </select>
+          </label>
+          <label><span>{s('fAmount')}</span>
+            <span className="staff-adv-range">
+              <input inputMode="numeric" dir="ltr" placeholder={s('fFrom')} value={f.adv.min} onChange={(e) => set({ min: e.target.value.replace(/[^\d]/g, '') })} />
+              <input inputMode="numeric" dir="ltr" placeholder={s('fTo')} value={f.adv.max} onChange={(e) => set({ max: e.target.value.replace(/[^\d]/g, '') })} />
+            </span>
+          </label>
+          <label className="staff-adv-check"><input type="checkbox" checked={f.adv.timed} onChange={(e) => set({ timed: e.target.checked })} /><span>{s('fTimed')}</span></label>
+          {f.advCount > 0 && <button type="button" className="link-btn" onClick={() => f.setAdv(NO_ADV)}>{s('fReset')}</button>}
+        </div>
+      )}
+    </>
   )
 }
 
