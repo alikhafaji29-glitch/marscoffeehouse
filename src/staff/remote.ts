@@ -128,10 +128,10 @@ export function moveOrder(o: Order, stage: Stage) {
  *  with a reason when it cannot: no backend, the function not there yet ('unreachable'), not set up ('not_configured'),
  *  or Meta refused ('meta', with Meta's message); the caller then opens WhatsApp instead */
 export type WaResult = { ok: boolean; reason?: string; message?: string }
-export async function sendWhatsApp(orderUid: string, to: string, text: string, lang: string): Promise<WaResult> {
+export async function sendWhatsApp(orderUid: string, to: string, text: string, lang: string, driver = ''): Promise<WaResult> {
   const sb = backendOn ? await getClient() : null
   if (!sb) return { ok: false, reason: 'no_backend' }
-  const { data, error } = await sb.functions.invoke('send-whatsapp', { body: { order_uid: orderUid, to, text, lang } })
+  const { data, error } = await sb.functions.invoke('send-whatsapp', { body: { order_uid: orderUid, to, text, lang, driver } })
   if (error) return { ok: false, reason: 'unreachable', message: error.message }
   return (data as WaResult) ?? { ok: false, reason: 'unreachable' }
 }
@@ -144,4 +144,28 @@ export async function mergeOrders(keep: Order, absorb: Order): Promise<string | 
   const { error } = await sb.rpc('merge_orders', { keep_uid: keep.uid, absorb_uid: absorb.uid })
   if (error) { console.warn('[backend] could not merge the orders:', error.message); return error.message }
   return null
+}
+
+/** the WhatsApp log (decision 205): the branch's messages to drivers on one day, newest first, with what Meta
+ *  reported for each (sent / delivered / read / failed). Null when there is no backend or it cannot be read. */
+export type WaLogRow = {
+  id: number; code: string; driver: string; to: string; template: string; status: 'sent' | 'delivered' | 'read' | 'failed'
+  error?: string; at: number; deliveredAt?: number; readAt?: number; failedAt?: number
+}
+export async function readWaLog(branch: string, day: Date): Promise<WaLogRow[] | null> {
+  const sb = backendOn ? await getClient() : null
+  if (!sb) return null
+  const from = new Date(day.getFullYear(), day.getMonth(), day.getDate())
+  const to = new Date(from.getTime() + 86400000)
+  const { data, error } = await sb.from('wa_messages')
+    .select('id,order_code,driver,to_number,template,status,error,created_at,delivered_at,read_at,failed_at')
+    .eq('branch', branch).gte('created_at', from.toISOString()).lt('created_at', to.toISOString())
+    .order('created_at', { ascending: false }).limit(300)
+  if (error) { console.warn('[backend] whatsapp log not read:', error.message); return null }
+  const ms = (t: string | null) => (t ? Date.parse(t) : undefined)
+  type Row = { id: number; order_code: string; driver: string; to_number: string; template: string; status: WaLogRow['status']; error: string | null; created_at: string; delivered_at: string | null; read_at: string | null; failed_at: string | null }
+  return (data as Row[]).map((r) => ({
+    id: r.id, code: r.order_code, driver: r.driver, to: r.to_number, template: r.template, status: r.status,
+    error: r.error ?? undefined, at: Date.parse(r.created_at), deliveredAt: ms(r.delivered_at), readAt: ms(r.read_at), failedAt: ms(r.failed_at),
+  }))
 }

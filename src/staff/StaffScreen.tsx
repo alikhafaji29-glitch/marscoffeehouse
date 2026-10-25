@@ -18,6 +18,7 @@ import { Orders, useReceiptText } from './Orders'
 import { printReceipt } from './receipt'
 import { Overview } from './Overview'
 import { Tools } from './Tools'
+import { WaLog } from './WaLog'
 import { Warehouse } from './Warehouse'
 import { backendOn } from '../backend'
 import { staffSignIn, staffSignOut, useRemote, wakeRemote } from './remote'
@@ -189,7 +190,7 @@ export function StaffScreen() {
   const catId = kind === 'cat' || kind === 'new' || kind === 'editcat' ? arg : kind === 'item' ? categoryOf(arg) : ''
   const catName = (id: string) => (id === 'all' ? s('allCategories') : catLabel(id, lang))
   const group = FOOD_CATS.includes(catId) || page === 'newcat:food' ? s('navFood') : s('navDrinks')
-  const title = kind === 'cat' ? catName(arg) : kind === 'item' ? s('editItem') : kind === 'new' ? s('addItem') : kind === 'newcat' ? s('addCategory') : kind === 'editcat' ? s('renameCategory') : kind === 'tools' ? s('navTools') : kind === 'branches' ? s('navBranches') : s(MAIN.find((m) => m.id === kind)?.key ?? 'navDashboard')
+  const title = kind === 'cat' ? catName(arg) : kind === 'item' ? s('editItem') : kind === 'new' ? s('addItem') : kind === 'newcat' ? s('addCategory') : kind === 'editcat' ? s('renameCategory') : kind === 'tools' ? s('navTools') : kind === 'walog' ? s('navWaLog') : kind === 'branches' ? s('navBranches') : s(MAIN.find((m) => m.id === kind)?.key ?? 'navDashboard')
   const catLink = (id: string) => (
     <button key={id} type="button" className={'d-nav-sub' + (catId === id && kind === 'cat' ? ' on' : catId === id ? ' near' : '')} onClick={() => go('cat:' + id)} title={catName(id)}>
       {id === 'all' && <I.dashboard />}<span>{catName(id)}</span>
@@ -240,6 +241,9 @@ export function StaffScreen() {
           <button type="button" className={kind === 'tools' ? 'on' : ''} aria-current={kind === 'tools' ? 'page' : undefined} onClick={() => go('tools')} title={s('navTools')}>
             <I.tools /><span>{s('navTools')}</span>
           </button>
+          <button type="button" className={kind === 'walog' ? 'on' : ''} aria-current={kind === 'walog' ? 'page' : undefined} onClick={() => go('walog')} title={s('navWaLog')}>
+            <I.whatsapp /><span>{s('navWaLog')}</span>
+          </button>
           </>}
         </nav>
         <div className="d-side-foot">
@@ -273,6 +277,7 @@ export function StaffScreen() {
               : kind === 'offers' ? <Offers />
                 : kind === 'warehouse' ? <Warehouse />
                   : kind === 'tools' ? <Tools />
+                  : kind === 'walog' ? <WaLog key={data.branch} />
                     : kind === 'branches' && owner ? <Branches />
                     : kind === 'cat' ? <Category id={arg} go={go} key={arg} />
                       : kind === 'item' ? <ItemEditor name={arg} go={go} key={arg + data.branch} />

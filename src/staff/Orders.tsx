@@ -75,7 +75,7 @@ function SendToDriver({ o }: { o: Order }) {
     setFailed('')
     if (phone && o.uid) {
       setBusy(true)
-      const r = await sendWhatsApp(o.uid, waNumber(phone), text(L), L) // the template in the driver's language (Kurdish: filed as Persian)
+      const r = await sendWhatsApp(o.uid, waNumber(phone), text(L), L, name) // the template in the driver's language (Kurdish: filed as Persian)
       setBusy(false)
       if (r.ok) { remember(name, true); return }
       // not set up yet (or no backend): quietly the old way; a real refusal is shown
