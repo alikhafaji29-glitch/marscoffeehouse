@@ -69,8 +69,6 @@ const S = {
   fAllDates: ['All dates', 'كل الأيام', 'هەموو ڕۆژەکان'],
   fSearch: ['Search name, phone, order #, items, address, note…', 'ابحث بالاسم، الهاتف، رقم الطلب، الأصناف، العنوان، الملاحظة…', 'بگەڕێ: ناو، مۆبایل، ژمارەی داواکاری، بابەت، ناونیشان، تێبینی…'],
   fAdvanced: ['Advanced', 'بحث متقدّم', 'گەڕانی پێشکەوتوو'],
-  fSearchIn: ['Search in', 'البحث في', 'گەڕان لە'],
-  fInAll: ['Everything', 'كل شيء', 'هەموو شتێک'],
   fInName: ['Customer name', 'اسم الزبون', 'ناوی کڕیار'],
   fInPhone: ['Phone number', 'رقم الهاتف', 'ژمارەی مۆبایل'],
   fInCode: ['Order number', 'رقم الطلب', 'ژمارەی داواکاری'],

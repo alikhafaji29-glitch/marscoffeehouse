@@ -2294,3 +2294,5 @@ body.ph-on .band-pill, body.ph-on .header-order-in { display: none; }
 .staff-adv-range input { width: 6.5rem; }
 .staff-adv label.staff-adv-check { flex-direction: row; align-items: center; gap: 0.45rem; min-height: 40px; font-size: 0.88rem; color: var(--ink); }
 .staff-adv-check input { width: 1.1rem; height: 1.1rem; accent-color: var(--navy); }
+.staff-adv-fields { flex: 1 1 100%; display: grid; grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr)); gap: 0.6rem 0.8rem; }
+.staff-adv-fields input { width: 100%; }

@@ -275,12 +275,13 @@ export function OrderCard({ o, lead = LEAD_MIN, all = [] }: { o: Order; lead?: n
  * The search (owner, 2026-10-26: "advanced search … items, address, notes, and what else we have") looks in the
  * customer's name, any part of a phone number however it was typed, the order number, the items (their English names
  * as stored, and their Arabic / Kurdish names), the address, the note and the cancel reason. Advanced narrows it: one
- * field only, delivery / pickup, Positive Hours / menu orders, an amount range, scheduled orders only.
+ * Advanced has a box per field (owner, 2026-10-26: "can we combine it like filters", "one box per field"): every box
+ * filled must match, together with delivery / pickup, Positive Hours / menu orders, an amount range, scheduled only.
  */
 const dayKey = (t: number) => { const d = new Date(t); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` }
-export type SearchIn = 'all' | 'name' | 'phone' | 'code' | 'items' | 'address' | 'note' | 'reason'
-export type Adv = { field: SearchIn; fulfil: '' | 'delivery' | 'pickup'; kind: '' | 'offer' | 'menu'; min: string; max: string; timed: boolean }
-const NO_ADV: Adv = { field: 'all', fulfil: '', kind: '', min: '', max: '', timed: false }
+export type Field = 'name' | 'phone' | 'code' | 'items' | 'address' | 'note' | 'reason'
+export type Adv = { by: Partial<Record<Field, string>>; fulfil: '' | 'delivery' | 'pickup'; kind: '' | 'offer' | 'menu'; min: string; max: string; timed: boolean }
+const NO_ADV: Adv = { by: {}, fulfil: '', kind: '', min: '', max: '', timed: false }
 export type OrderFilter = {
   day: string; today: boolean; q: string; adv: Adv; advCount: number
   setDay: (d: string | null) => void; setQ: (q: string) => void; setAdv: (a: Adv) => void
@@ -304,21 +305,24 @@ export function useOrderFilter(): OrderFilter {
   const [q, setQ] = useState('')
   const [adv, setAdv] = useState<Adv>(NO_ADV)
   const day = picked ?? dayKey(now)
-  const words = norm(q.trim()).split(/\s+/).filter(Boolean)
-  const digits = q.replace(/\D/g, '').replace(/^(00964|964|0)/, '')
+  const wordsOf = (x: string) => norm(x.trim()).split(/\s+/).filter(Boolean)
+  const digitsOf = (x: string) => x.replace(/\D/g, '').replace(/^(00964|964|0)/, '')
+  const words = wordsOf(q)
+  const by = Object.entries(adv.by).filter(([, v]) => v?.trim()) as [Field, string][]
   const min = Number(adv.min.replace(/\D/g, '')) || 0
   const max = Number(adv.max.replace(/\D/g, '')) || 0
-  const advCount = [adv.field !== 'all', !!adv.fulfil, !!adv.kind, !!min || !!max, adv.timed].filter(Boolean).length
-  const fields = (o: Order): Record<Exclude<SearchIn, 'all'>, () => string> => ({
+  const advCount = by.length + [!!adv.fulfil, !!adv.kind, !!min || !!max, adv.timed].filter(Boolean).length
+  const fields = (o: Order): Record<Exclude<Field, 'phone'>, () => string> => ({
     name: () => norm(o.customer?.name ?? ''),
-    phone: () => '',
     code: () => o.id.toLowerCase(),
     items: () => itemsText(o),
     address: () => norm(o.delivery?.address ?? ''),
     note: () => norm(o.note ?? ''),
     reason: () => norm(reasonText(o.cancelReason, t)),
   })
-  const phoneHit = (o: Order) => digits.length >= 3 && [o.customer?.phone, o.delivery?.phone].some((p) => (p ?? '').replace(/\D/g, '').includes(digits))
+  const phoneHit = (o: Order, digits: string) => digits.length >= 3 && [o.customer?.phone, o.delivery?.phone].some((p) => (p ?? '').replace(/\D/g, '').includes(digits))
+  // every word somewhere ("caesar latte" finds an order with both)
+  const hit = (hay: string, text: string) => wordsOf(text).every((w) => hay.includes(w))
   return {
     day, today: picked === null, q, adv, advCount, setDay: setPicked, setQ, setAdv,
     byDay: (o) => !day || dayKey(o.at) === day || (dueOf(o) !== undefined && dayKey(dueOf(o)!) === day),
@@ -329,12 +333,12 @@ export function useOrderFilter(): OrderFilter {
       if (min && o.total < min) return false
       if (max && o.total > max) return false
       if (adv.timed && dueOf(o) === undefined) return false
-      if (!words.length) return true
-      if (adv.field === 'phone') return phoneHit(o)
       const f = fields(o)
-      const hay = adv.field === 'all' ? Object.values(f).map((g) => g()).join(' \n ') : f[adv.field]()
-      // every word somewhere ("caesar latte" finds an order with both); a phone number matches in Everything too
-      return words.every((w) => hay.includes(w)) || (adv.field === 'all' && phoneHit(o))
+      // each field's own box, all of them together
+      for (const [k, v] of by) if (!(k === 'phone' ? phoneHit(o, digitsOf(v)) : hit(f[k](), v))) return false
+      // the main box: anywhere (a phone number too)
+      if (!words.length) return true
+      return hit(Object.values(f).map((g) => g()).join(' \n '), q) || phoneHit(o, digitsOf(q))
     },
   }
 }
@@ -342,7 +346,7 @@ export function OrderFilterBar({ f }: { f: OrderFilter }) {
   const s = useS()
   const [open, setOpen] = useState(false)
   const set = (p: Partial<Adv>) => f.setAdv({ ...f.adv, ...p })
-  const FIELDS: [SearchIn, SKey][] = [['all', 'fInAll'], ['name', 'fInName'], ['phone', 'fInPhone'], ['code', 'fInCode'], ['items', 'fInItems'], ['address', 'fInAddress'], ['note', 'fInNote'], ['reason', 'fInReason']]
+  const FIELDS: [Field, SKey][] = [['name', 'fInName'], ['phone', 'fInPhone'], ['code', 'fInCode'], ['items', 'fInItems'], ['address', 'fInAddress'], ['note', 'fInNote'], ['reason', 'fInReason']]
   return (
     <>
       <div className="staff-filter" role="search">
@@ -353,18 +357,21 @@ export function OrderFilterBar({ f }: { f: OrderFilter }) {
         <button type="button" className={'staff-filter-chip' + (f.today ? ' on' : '')} onClick={() => f.setDay(null)}>{s('fToday')}</button>
         <button type="button" className={'staff-filter-chip' + (f.day === '' ? ' on' : '')} onClick={() => f.setDay('')}>{s('fAllDates')}</button>
         <span className="staff-filter-q">
-          <input type="search" value={f.q} onChange={(e) => f.setQ(e.target.value)} placeholder={s(f.adv.field === 'all' ? 'fSearch' : FIELDS.find(([k]) => k === f.adv.field)![1])} aria-label={s('fSearch')} />
+          <input type="search" value={f.q} onChange={(e) => f.setQ(e.target.value)} placeholder={s('fSearch')} aria-label={s('fSearch')} />
           {f.q && <button type="button" className="link-btn" onClick={() => f.setQ('')}>{s('fClear')}</button>}
         </span>
         <button type="button" className={'staff-filter-chip' + (open || f.advCount ? ' on' : '')} aria-expanded={open} onClick={() => setOpen(!open)}>{s('fAdvanced')}{f.advCount > 0 && ` · ${f.advCount}`}</button>
       </div>
       {open && (
         <div className="staff-adv">
-          <label><span>{s('fSearchIn')}</span>
-            <select value={f.adv.field} onChange={(e) => set({ field: e.target.value as SearchIn })}>
-              {FIELDS.map(([k, key]) => <option key={k} value={k}>{s(key)}</option>)}
-            </select>
-          </label>
+          <div className="staff-adv-fields">
+            {FIELDS.map(([k, key]) => (
+              <label key={k}><span>{s(key)}</span>
+                <input type="search" value={f.adv.by[k] ?? ''} inputMode={k === 'phone' ? 'tel' : undefined} dir={k === 'phone' || k === 'code' ? 'ltr' : undefined}
+                  onChange={(e) => set({ by: { ...f.adv.by, [k]: e.target.value } })} />
+              </label>
+            ))}
+          </div>
           <label><span>{s('fType')}</span>
             <select value={f.adv.fulfil} onChange={(e) => set({ fulfil: e.target.value as Adv['fulfil'] })}>
               <option value="">{s('fAny')}</option><option value="delivery">{s('delivery')}</option><option value="pickup">{s('pickup')}</option>
