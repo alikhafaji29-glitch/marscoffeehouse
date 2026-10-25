@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
 import { useLang } from '../i18n'
+import type { Lang } from '../i18n'
 
 /* The staff dashboard's own words: [English, Arabic (formal), Kurdish (Sorani)]. Kept apart from src/i18n.tsx so
  * the customer site's dictionary stays the customer's. {name} marks a value filled in by the caller. */
@@ -307,6 +308,10 @@ const S = {
   driverPhone: ['WhatsApp number', 'رقم الواتساب', 'ژمارەی واتسئاپ'],
   driverAdd: ['Add a driver', 'إضافة سائق', 'زیادکردنی شۆفێر'],
   driverRemove: ['Remove', 'إزالة', 'لابردن'],
+  driverLang: ['Message language', 'لغة الرسالة', 'زمانی نامە'],
+  driversSave: ['Save drivers', 'حفظ السائقين', 'پاشەکەوتکردنی شۆفێران'],
+  driversSaved: ['Saved', 'تم الحفظ', 'پاشەکەوت کرا'],
+  driversUnsaved: ['Not saved yet: press Save drivers.', 'لم تُحفظ بعد: اضغط «حفظ السائقين».', 'هێشتا پاشەکەوت نەکراوە: «پاشەکەوتکردنی شۆفێران» دابگرە.'],
   driversNone: ['No drivers yet: orders can still be sent to any WhatsApp chat.', 'لا يوجد سائقون بعد: يمكن إرسال الطلبات إلى أي محادثة واتساب.', 'هێشتا شۆفێر نییە: داواکاری هێشتا دەنێردرێت بۆ هەر چاتێکی واتسئاپ.'],
   sendToDriver: ['Send to driver', 'إرسال إلى السائق', 'ناردن بۆ شۆفێر'],
   sendOther: ['Other…', 'آخر…', 'تر…'],
@@ -331,6 +336,7 @@ const S = {
   pickupHint: ['Customers pick the order up at the branch — only name + phone needed.', 'يستلم العملاء الطلب من الفرع — يكفي الاسم ورقم الهاتف.', 'کڕیاران داواکارییەکە لە لقەکە وەردەگرن — تەنها ناو + ژمارەی مۆبایل پێویستە.'],
   fulfilOne: ['At least one of the two stays on.', 'يبقى أحد الخيارين مفعّلاً على الأقل.', 'لانیکەم یەکێک لەو دووانە چالاک دەمێنێتەوە.'],
   savedAuto: ['Changes are saved as you make them. Demo: they apply in this browser only.', 'تُحفظ التغييرات فور إجرائها. نسخة تجريبية: تُطبَّق في هذا المتصفح فقط.', 'گۆڕانکارییەکان هەر کە دەیانکەیت پاشەکەوت دەبن. دیمۆ: تەنها لەم وێبگەڕەدا جێبەجێ دەبن.'],
+  savedAutoDrivers: ['Changes are saved as you make them, except the drivers: press Save drivers.', 'تُحفظ التغييرات فور إجرائها، ما عدا السائقين: اضغط «حفظ السائقين».', 'گۆڕانکارییەکان هەر کە دەیانکەیت پاشەکەوت دەبن، جگە لە شۆفێران: «پاشەکەوتکردنی شۆفێران» دابگرە.'],
   preOrderBadge: ['Pre-order', 'طلب مسبق', 'پێش-داواکاری'],
   inclFee: ['incl. service fee {n} IQD', 'شاملاً رسوم الخدمة {n} دينار', 'لەگەڵ کرێی خزمەتگوزاری {n} دینار'],
   nCombos: ['{n} combos', '{n} كومبو', '{n} کۆمبۆ'],
@@ -496,4 +502,11 @@ export function useS() {
     if (vars) for (const [k, v] of Object.entries(vars)) out = out.replace(`{${k}}`, String(v))
     return out
   }, [lang])
+}
+
+/** a dashboard string in a given language, outside the dashboard's own (a driver's message) */
+export function sIn(lang: Lang, key: SKey, vars?: Record<string, string | number>) {
+  let out: string = S[key][IDX[lang]]
+  if (vars) for (const [k, v] of Object.entries(vars)) out = out.replace(`{${k}}`, String(v))
+  return out
 }

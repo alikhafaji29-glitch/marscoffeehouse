@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useLang } from '../i18n'
+import { dict, useLang } from '../i18n'
 import type { Lang, TKey } from '../i18n'
 import { iqd, waNumber } from '../account'
 import type { Order } from '../account'
@@ -11,7 +11,7 @@ import type { Stage } from '../orders'
 import { IconCheck, IconPin } from '../components/Icons'
 import { mapsLink } from '../components/ShareLocation'
 import { cancelOrder, mergeOrders, moveOrder, sendWhatsApp } from './remote'
-import { useS } from './strings'
+import { sIn, useS } from './strings'
 import { backendOn } from '../backend'
 import { I } from './ui'
 
@@ -50,16 +50,17 @@ function SendToDriver({ o }: { o: Order }) {
   const drivers = (settingsFor(o.branch ?? viewing).drivers ?? []).filter((d) => d.phone.replace(/\D/g, '').length >= 8)
   const key = o.uid ?? o.id
   const [sent, setSent] = useState(() => readSent()[key])
-  const text = () => {
+  // the message in the driver's language (Other…: the dashboard's)
+  const text = (L: Lang = lang) => {
     const lines = [`Mars CoffeeHouse · ${branchName(o.branch)} · #${o.id}`, '']
-    if (o.customer) lines.push(`${s('waCustomer')}: ${o.customer.name} · ${phoneOf(o)}`)
-    if (o.delivery?.address) lines.push(`${s('waAddress')}: ${o.delivery.address}`)
+    if (o.customer) lines.push(`${sIn(L, 'waCustomer')}: ${o.customer.name} · ${phoneOf(o)}`)
+    if (o.delivery?.address) lines.push(`${sIn(L, 'waAddress')}: ${o.delivery.address}`)
     // the plain map link of the customer's pin (owner chose it over a directions link, 2026-10-23); WhatsApp links cannot carry a location pin
-    if (o.delivery?.location) lines.push(`${s('waLocation')}: ${mapsLink(o.delivery.location)}`)
+    if (o.delivery?.location) lines.push(`${sIn(L, 'waLocation')}: ${mapsLink(o.delivery.location)}`)
     lines.push('')
-    for (const g of groupLines(o.items)) { if (g.combo) lines.push(s('comboN', { n: g.combo })); for (const x of g.lines) lines.push('• ' + x) }
-    if (o.note) lines.push('', `${t('orderNote')}: ${o.note}`)
-    lines.push('', o.pay === 'wallet' ? t('paidByWallet') : s('waCollect', { n: iqd(o.total) }))
+    for (const g of groupLines(o.items)) { if (g.combo) lines.push(sIn(L, 'comboN', { n: g.combo })); for (const x of g.lines) lines.push('• ' + x) }
+    if (o.note) lines.push('', `${dict[L].orderNote}: ${o.note}`)
+    lines.push('', o.pay === 'wallet' ? dict[L].paidByWallet : sIn(L, 'waCollect', { n: iqd(o.total) }))
     return lines.join('\n')
   }
   const [busy, setBusy] = useState(false)
@@ -70,24 +71,24 @@ function SendToDriver({ o }: { o: Order }) {
     try { localStorage.setItem(SENT_KEY, JSON.stringify(all)) } catch { /* ignore */ }
     setSent(all[key])
   }
-  const send = async (name: string, phone?: string) => {
+  const send = async (name: string, phone?: string, L: Lang = lang) => {
     setFailed('')
     if (phone && o.uid) {
       setBusy(true)
-      const r = await sendWhatsApp(o.uid, waNumber(phone), text(), lang) // the template in the dashboard's language (Kurdish: Arabic)
+      const r = await sendWhatsApp(o.uid, waNumber(phone), text(L), L) // the template in the driver's language (Kurdish: filed as Persian)
       setBusy(false)
       if (r.ok) { remember(name, true); return }
       // not set up yet (or no backend): quietly the old way; a real refusal is shown
       if (r.reason !== 'not_configured' && r.reason !== 'no_backend' && r.reason !== 'unreachable') setFailed(s('waApiFailed', { why: r.message || r.reason || '?' }))
     }
-    const w = window.open(`https://wa.me/${phone ? waNumber(phone) : ''}?text=${encodeURIComponent(text())}`, '_blank')
+    const w = window.open(`https://wa.me/${phone ? waNumber(phone) : ''}?text=${encodeURIComponent(text(L))}`, '_blank')
     if (w) w.opener = null
     remember(name)
   }
   return (
     <>
       {/* in the card's action row, beside Print receipt (owner, 2026-10-23) */}
-      {drivers.map((d, i) => <button key={i} type="button" className="staff-wa" title={s('sendToDriver')} disabled={busy} onClick={() => void send(d.name || d.phone, d.phone)}><I.whatsapp />{busy ? s('waSending') : d.name || d.phone}</button>)}
+      {drivers.map((d, i) => <button key={i} type="button" className="staff-wa" title={s('sendToDriver')} disabled={busy} onClick={() => void send(d.name || d.phone, d.phone, d.lang ?? lang)}><I.whatsapp />{busy ? s('waSending') : d.name || d.phone}</button>)}
       <button type="button" className={'staff-wa' + (drivers.length ? ' other' : '')} title={s('sendToDriver')} disabled={busy} onClick={() => void send(drivers.length ? s('sendOther') : 'WhatsApp')}><I.whatsapp />{drivers.length ? s('sendOther') : s('sendWhatsapp')}</button>
       {failed && <small className="staff-sent staff-wa-failed" role="alert">{failed}</small>}
       {sent && <small className="staff-sent">{s(sent.api ? 'sentApi' : 'sentTo', { name: sent.name, t: ago(sent.at, now, lang, t('justNow')) })}</small>}

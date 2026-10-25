@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react'
 import { ALL_ITEMS as ITEMS, ORDER_MENU, SEASON_PICKS } from '../menu'
 import type { MenuItem } from '../menu'
+import type { Lang } from '../i18n'
 import { POSITIVE_HOURS } from '../components/useCountdown'
 import { backendOn, getClient } from '../backend'
 
@@ -34,7 +35,7 @@ export const branchLabel = (id: string, lang: keyof L3) => { const b = BRANCHES.
 /** Coffee of the day (owner, 2026-10-22): a Home slide; any of `items` at one price for its smallest size */
 export interface Cotd { on: boolean; price: number; items: string[] }
 export const COTD_DEFAULT: Cotd = { on: true, price: 3500, items: ['Americano', 'Espresso', 'Turkish Coffee', 'Filter Coffee'] } // 3,500 for now; the owner's order (2026-10-23)
-export interface Driver { name: string; phone: string }
+export interface Driver { name: string; phone: string; lang?: Lang } // lang: the WhatsApp message's language (owner, 2026-10-25); missing = the dashboard's
 export interface Settings { reach: 'dashboard' | 'whatsapp'; whatsapp: string; delivery: boolean; pickup: boolean; lead?: number; cotd?: Cotd; drivers?: Driver[] } // lead: minutes before a timed order's time that it moves from Later to Active (LEAD_MIN when missing)
 export interface EventX { id: string; name: L3; theme: string; desc: L3; promo: L3; items: string[]; active: boolean }
 export interface OfferGroup { id: string; label: L3; pick: number; mode: 'cats' | 'items'; cats: string[]; items: string[] }
