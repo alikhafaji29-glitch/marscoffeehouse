@@ -350,7 +350,7 @@ const S = {
   optionsNote: ['Flavours, pumps, add-ons and milk:', 'النكهات والمضخات والإضافات والحليب:', 'تام، پەمپ، زیادەکان و شیر:'],
   optFlavourOne: ['Flavour: the customer chooses one', 'النكهة: يختار الزبون واحدة', 'تام: کڕیار یەکێک هەڵدەبژێرێت'],
   optFlavourOneHint: ['One of these is always chosen (the first is chosen to start with). Extra prices: the Pricing tab.', 'تُختار واحدة دائماً (الأولى مختارة مسبقاً). الأسعار الإضافية: تبويب التسعير.', 'هەمیشە یەکێکیان هەڵدەبژێردرێت (یەکەمیان لە سەرەتادا). نرخی زیادە: بەشی نرخ.'],
-  optPumps: ['Flavour pumps: optional, each pump charged', 'مضخات النكهة: اختيارية، كل مضخة بسعرها', 'پەمپی تام: ئارەزوومەندانە، هەر پەمپێک بە نرخی خۆی'],
+  optPumps: ['Extra flavour pump: optional, each pump charged', 'مضخة نكهة إضافية: اختيارية، كل مضخة بسعرها', 'پەمپی تامی زیادە: ئارەزوومەندانە، هەر پەمپێک بە نرخی خۆی'],
   optPumpsHint: ['The customer may add pumps of these flavours.', 'يمكن للزبون إضافة مضخات من هذه النكهات.', 'کڕیار دەتوانێت پەمپی ئەم تامانە زیاد بکات.'],
   optPumpMax: ['Pumps at most', 'أقصى عدد للمضخات', 'زۆرترین پەمپ'],
   optAddons: ['Add-ons', 'الإضافات', 'زیادەکان'],
