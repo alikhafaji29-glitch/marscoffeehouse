@@ -32,6 +32,12 @@ export function Tools() {
           <p className="d-hint">{s('pauseMsgHint')}</p>
         </div>
       </Card>
+      {/* the number customers call (owner, 2026-10-27): filled into the automated WhatsApp location request */}
+      <Card title={s('branchPhone')} sub={s('branchPhoneSub')}>
+        <Field label={s('branchPhone')}>
+          <input type="tel" inputMode="tel" dir="ltr" value={set.phone ?? ''} placeholder="0750 000 0000" onChange={(e) => patch({ phone: e.target.value.replace(/[^\d+ ]/g, '').slice(0, 20) })} />
+        </Field>
+      </Card>
       <Card title={s('reachTitle')} sub={s('reachSub')}>
         <div className="d-seg big" role="radiogroup" aria-label={s('reachTitle')}>
           <button type="button" role="radio" aria-checked={set.reach === 'whatsapp'} className={set.reach === 'whatsapp' ? 'on' : ''} onClick={() => patch({ reach: 'whatsapp' })}><I.whatsapp />{s('reachWhatsapp')}</button>
