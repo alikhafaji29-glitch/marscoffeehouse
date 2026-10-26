@@ -267,6 +267,18 @@ export function importOrders(list: Order[]) {
   guest = [...fresh, ...guest].sort((x, y) => y.at - x.at)
   saveGuest()
 }
+/** the branch had paused orders when this one reached the database (a page that had not heard yet): it is shown as
+ *  cancelled with that reason and never sent again (owner, 2026-10-26) */
+export function markRefused(uid: string) {
+  const { mine, o } = findByUid(uid)
+  if (!o || o.synced) return
+  o.synced = true // nothing to send or follow any more
+  o.status = 'cancelled'
+  o.cancelReason = 'r:paused'
+  o.history = [...(o.history ?? []), { stage: 'cancelled', at: Date.now() }]
+  delete o.held
+  commit(mine)
+}
 /** the backend refused the order for now (the hourly limit); it is sent again on the next check */
 export function markHeld(uid: string, why: NonNullable<Order['held']>) {
   const { mine, o } = findByUid(uid)

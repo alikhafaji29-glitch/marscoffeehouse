@@ -36,7 +36,7 @@ export const branchLabel = (id: string, lang: keyof L3) => { const b = BRANCHES.
 export interface Cotd { on: boolean; price: number; items: string[] }
 export const COTD_DEFAULT: Cotd = { on: true, price: 3500, items: ['Americano', 'Espresso', 'Turkish Coffee', 'Filter Coffee'] } // 3,500 for now; the owner's order (2026-10-23)
 export interface Driver { name: string; phone: string; lang?: Lang } // lang: the WhatsApp message's language (owner, 2026-10-25); missing = the dashboard's
-export interface Settings { reach: 'dashboard' | 'whatsapp'; whatsapp: string; delivery: boolean; pickup: boolean; lead?: number; cotd?: Cotd; drivers?: Driver[] } // lead: minutes before a timed order's time that it moves from Later to Active (LEAD_MIN when missing)
+export interface Settings { reach: 'dashboard' | 'whatsapp'; whatsapp: string; delivery: boolean; pickup: boolean; lead?: number; cotd?: Cotd; drivers?: Driver[]; paused?: boolean; pauseMsg?: L3 } // paused: no new orders, pauseMsg: the apology customers see (owner, 2026-10-26) // lead: minutes before a timed order's time that it moves from Later to Active (LEAD_MIN when missing)
 export interface EventX { id: string; name: L3; theme: string; desc: L3; promo: L3; items: string[]; active: boolean }
 // skip: items of the chosen categories left out of the step (owner, 2026-10-26: whole categories, then untick items)
 export interface OfferGroup { id: string; label: L3; pick: number; mode: 'cats' | 'items'; cats: string[]; items: string[]; skip?: string[] }

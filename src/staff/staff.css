@@ -376,3 +376,8 @@ button.d-chip.on { background: var(--d-ink); color: #fff; }
 .d-cat-items input[type="checkbox"] { width: 1.15rem; height: 1.15rem; accent-color: var(--navy); }
 .d-cat-items li em { font-style: normal; font-size: 0.8rem; color: var(--d-mute); }
 .d-cat-items li small { color: #b3261e; }
+/* Pause orders (2026-10-26) */
+.d-card.d-paused { border-color: #b3261e; box-shadow: 0 0 0 1px #b3261e; }
+.d-card.d-paused .d-switch-row b { color: #b3261e; }
+.d-paused-banner { margin: 0 0 1rem; padding: 0.7rem 1rem; border-radius: 0.8rem; background: #fdecea; color: #8c1d18; font-weight: 600; font-size: 0.9rem; }
+.d-pause-msg { margin-top: 1.1rem; }

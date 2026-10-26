@@ -3,10 +3,11 @@ import { branchName, settingsFor, update, useStaff } from './store'
 import type { Driver, Settings } from './store'
 import { useLang } from '../i18n'
 import type { Lang } from '../i18n'
-import { useS } from './strings'
+import { sIn, useS } from './strings'
 import { backendOn } from '../backend'
 import { LEAD_MIN } from '../orders'
 import { Card, Field, I, Switch } from './ui'
+import { L3Fields } from './Events'
 
 /* Tools, after the live panel's order settings: how a finished order reaches the staff, and which of Delivery /
  * Pickup the customer is offered at checkout. Per branch; saved as soon as it is changed. */
@@ -18,6 +19,19 @@ export function Tools() {
   return (
     <div className="d-narrow">
       <p className="d-lead">{s('toolsLead', { branch: branchName(data.branch) })}</p>
+      {/* stop taking orders for a while, with an apology (owner, 2026-10-26); the database refuses new orders too */}
+      <Card title={s('pauseTitle')} sub={s('pauseSub')} className={set.paused ? 'd-paused' : ''}>
+        <div className="d-switch-row">
+          <span className="d-row-icon"><I.store /></span>
+          <div><b>{set.paused ? s('pauseOn') : s('pauseOff')}</b><small>{set.paused ? s('pauseOnHint') : s('pauseOffHint')}</small></div>
+          <Switch on={!!set.paused} onChange={(v) => patch({ paused: v })} label={s('pauseTitle')} />
+        </div>
+        <div className="d-pause-msg">
+          {/* the boxes start with the default apology (owner, 2026-10-26: "with these messages as default") */}
+          <L3Fields label={s('pauseMsg')} value={set.pauseMsg ?? PAUSE_DEFAULT} onChange={(pauseMsg) => patch({ pauseMsg })} area rows={4} />
+          <p className="d-hint">{s('pauseMsgHint')}</p>
+        </div>
+      </Card>
       <Card title={s('reachTitle')} sub={s('reachSub')}>
         <div className="d-seg big" role="radiogroup" aria-label={s('reachTitle')}>
           <button type="button" role="radio" aria-checked={set.reach === 'whatsapp'} className={set.reach === 'whatsapp' ? 'on' : ''} onClick={() => patch({ reach: 'whatsapp' })}><I.whatsapp />{s('reachWhatsapp')}</button>
@@ -54,6 +68,7 @@ export function Tools() {
   )
 }
 
+const PAUSE_DEFAULT = { en: sIn('en', 'pausedDefault'), ar: sIn('ar', 'pausedDefault'), ku: sIn('ku', 'pausedDefault') }
 const LANGS: [Lang, string][] = [['en', 'English'], ['ar', 'العربية'], ['ku', 'کوردی']]
 
 /* Delivery drivers, each with the language their WhatsApp message goes in (owner, 2026-10-25: "make it per driver,

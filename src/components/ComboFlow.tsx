@@ -15,6 +15,7 @@ import { ItemPic, catLabel, sectionPicOf } from './MenuSection'
 import { MiniCup } from './MiniCup'
 import { PositiveHoursMark } from './PositiveHoursMark'
 import { OrderTracker } from './OrderTracker'
+import { PausedBox } from './PausedBox'
 import { MissingBox, goToMissing } from './MissingBox'
 import type { Missing } from './MissingBox'
 import { TimeWheel } from './TimeWheel'
@@ -171,6 +172,8 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
   }, [onClose])
 
   if (!offer || !groups.length) return null
+  // the branch paused orders (Tools): the apology instead of the steps; an order just placed still shows its thanks
+  if (set.paused && !placedId) return <PausedBox onClose={onClose} />
   const title = offer.name[lang] || offer.name.en
   const fee = offer.feeOn && delivery ? offer.fee : 0 // delivery orders only: pickup pays no service fee (owner, 2026-10-26)
   // the pick steps: every group of combo 1, then of combo 2, …

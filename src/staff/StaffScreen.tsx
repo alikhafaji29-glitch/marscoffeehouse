@@ -271,6 +271,7 @@ export function StaffScreen() {
             {backendOn && remote.error && <p className="d-error" role="alert">{s(remote.error === 'move' ? 'moveFailed' : 'staffConnErr')}</p>}
           </div>
         </header>
+        {settingsFor(data.branch).paused && kind !== 'tools' && <p className="d-paused-banner" role="status"><button type="button" className="link-btn" onClick={() => go('tools')}>{s('pausedBanner')}</button></p>}
         {kind === 'orders' ? <Orders orders={orders} live={backendOn} />
           : kind === 'analytics' ? <Analytics orders={orders} key={data.branch} />
             : kind === 'events' ? <Events />
