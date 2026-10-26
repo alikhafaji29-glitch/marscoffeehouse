@@ -358,6 +358,8 @@ const S = {
   optMilk: ['Milk choice', 'اختيار الحليب', 'هەڵبژاردنی شیر'],
   optMilkHint: ['Regular, Skimmed, Lactose-free (priced as the Skimmed Milk and Free Lactose add-ons).', 'عادي، خالي الدسم، خالٍ من اللاكتوز (بسعر إضافتي Skimmed Milk و Free Lactose).', 'ئاسایی، بێ چەوری، بێ لاکتۆز (بە نرخی زیادەکانی Skimmed Milk و Free Lactose).'],
   optGoFlavours: ['Edit the flavour list (Flavours)', 'تعديل قائمة النكهات (النكهات)', 'دەستکاریکردنی لیستی تامەکان (تامەکان)'],
+  branchPhone: ['Branch phone number (for customers)', 'رقم هاتف الفرع (للزبائن)', 'ژمارەی تەلەفۆنی لق (بۆ کڕیاران)'],
+  branchPhoneSub: ['The number customers call. It is written in the automated WhatsApp message that asks for their location.', 'الرقم الذي يتصل به الزبائن. يُكتب في رسالة واتساب التلقائية التي تطلب موقعهم.', 'ئەو ژمارەیەی کڕیاران پەیوەندی پێوە دەکەن. لە نامە ئۆتۆماتیکییەکەی واتسئاپدا دەنووسرێت کە شوێنەکەیان داوا دەکات.'],
   // pausing orders (2026-10-26)
   pauseTitle: ['Pause orders', 'إيقاف استقبال الطلبات', 'ڕاگرتنی داواکارییەکان'],
   pauseSub: ['Stop new orders for this branch for a while. Customers who try to order see your apology.', 'أوقف الطلبات الجديدة لهذا الفرع لفترة. يرى الزبائن الذين يحاولون الطلب رسالة اعتذارك.', 'بۆ ماوەیەک داواکاریی نوێ بۆ ئەم لقە ڕابگرە. ئەو کڕیارانەی هەوڵی داواکردن دەدەن داوای لێبوردنەکەت دەبینن.'],
