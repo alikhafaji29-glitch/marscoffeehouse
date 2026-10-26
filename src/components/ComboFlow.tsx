@@ -1,5 +1,4 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
-import { PickupSwitch } from './PickupSwitch'
 import { createPortal } from 'react-dom'
 import { useLang } from '../i18n'
 import { unlockAudio } from '../chime'
@@ -129,9 +128,9 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
   const groups = useMemo(() => (offer?.groups ?? []).map((g) => ({ g, cats: choices(g) })).filter((x) => x.cats.length), [offer, data])
   const live = useCountdown(offer ? [hm(offer.start), hm(offer.end)] : undefined).active
   const set = settingsFor()
-  // delivery or pickup: the customer chooses among what the branch offers (Tools); delivery first when it can
-  const [how, setHow] = useState<'delivery' | 'pickup'>(() => (set.delivery ? 'delivery' : 'pickup'))
-  const delivery = set.delivery && (how === 'delivery' || !set.pickup)
+  // Positive Hours is delivery only (owner, 2026-10-26: "remove pick up option from positive hours"; the Pickup switch
+  // of 2026-10-25 is gone here, the cart's checkout keeps it). The pickup paths below stay for orders already placed.
+  const delivery: boolean = true
   const [wantAt, setWantAt] = useState(0) // a pre-order's chosen time (ms); 0 = not chosen yet
   const [arriveAt, setArriveAt] = useState(0) // a live pickup: when the customer will arrive (ms; owner, 2026-10-22)
   const [step, setStep] = useState(0) // 0 = how many, then each combo's groups in turn, then the details, then placed
@@ -403,9 +402,6 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
                 <button type="button" className="combo-add" onClick={() => { setNote(''); setStep(count * groups.length + 1); setCount(count + 1) }}>+ {s('comboAddAnother')}</button>
               )}
               <div className="combo-form">
-                {set.delivery && set.pickup && (
-                  <PickupSwitch on={!delivery} onChange={(p) => { setHow(p ? 'pickup' : 'delivery'); setNote('') }} />
-                )}
                 {!live && (
                   <label data-field="when" className={missing.includes('when') ? 'missing' : ''}><span>{s(delivery ? 'comboWhenDelivery' : 'comboWhenPickup')}</span>
                     <select value={wantAt || ''} onChange={(e) => { setWantAt(Number(e.target.value)); setNote(''); filled('when') }}>
