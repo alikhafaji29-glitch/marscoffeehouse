@@ -52,7 +52,8 @@ const WORDS: Record<string, [string, string]> = { // English -> [Arabic, Kurdish
   'Select flavor': ['اختر النكهة', 'تام هەڵبژێرە'], 'Select type': ['اختر النوع', 'جۆر هەڵبژێرە'],
   'Milk': ['الحليب', 'شیر'], 'Regular milk': ['حليب عادي', 'شیری ئاسایی'], 'Skimmed milk': ['حليب خالي الدسم', 'شیری بێ چەوری'],
   'Lactose-free milk': ['حليب خالٍ من اللاكتوز', 'شیری بێ لاکتۆز'],
-  'Flavour pumps': ['مضخات النكهة', 'پەمپی تام'], 'Add-ons': ['إضافات', 'زیادەکان'],
+  'Extra flavour pump': ['مضخة نكهة إضافية', 'پەمپی تامی زیادە'], // was "Flavour pumps" (owner, 2026-10-27: "rename it to extra flavour pump")
+  'Add-ons': ['إضافات', 'زیادەکان'],
   'Extra espresso shot': ['شوت إسبريسو إضافي', 'شۆتی ئێسپرێسۆی زیادە'], 'Whipped cream': ['كريمة مخفوقة', 'کرێمی کوتراو'], 'Cold foam': ['رغوة باردة', 'کەفی سارد'],
 }
 const word = (s: string, lang: Lang) => (lang === 'en' ? s : WORDS[s]?.[lang === 'ar' ? 0 : 1] ?? s)
@@ -116,7 +117,7 @@ export function groupsFor(item: MenuItem, lang: Lang): CustGroup[] {
   const pumpPrice = addOn('Add Flavors')
   const pumps = o.pumps.filter(inStock)
   if (pumps.length && pumpPrice !== undefined) {
-    groups.push({ id: 'pumps', title: word('Flavour pumps', lang), kind: 'count', max: o.pumpMax ?? 3, options: pumps.map((f) => ({ id: f, label: label(f), line: `${line(f)} pump`, price: pumpPrice || undefined })) })
+    groups.push({ id: 'pumps', title: word('Extra flavour pump', lang), kind: 'count', max: o.pumpMax ?? 3, options: pumps.map((f) => ({ id: f, label: label(f), line: `${line(f)} pump`, price: pumpPrice || undefined })) })
   }
   // add-ons, on / off: the item's chosen Add-ons items the branch sells and has in stock now
   const extrasOn: CustOption[] = []
