@@ -270,7 +270,8 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
     if (live && !delivery && arriveAt < clockNow().getTime()) miss.push('arrive')
     if (nm.length < 2) miss.push('name')
     if (normPhone(phone).length < 10) miss.push('phone')
-    if (delivery && !location) miss.push('place') // the shared pin is required for delivery (owner, 2026-10-23); the address is extra
+    // delivery needs the shared pin or a typed address, either one (owner, 2026-10-26; the pin alone was required since 2026-10-23)
+    if (delivery && !location && address.trim().length < 5) miss.push('where')
     if (miss.length) { setMissing(miss); setMissOpen(true); return }
     const arrive = live && !delivery ? arriveAt : 0 // a pre-order's pickup time is its chosen time
     const res = placeOfferOrder({ total, items: lines, name: nm, phone: phone.trim(), address: delivery ? address.trim() : undefined, location: delivery && location ? location : undefined, offer: { name: offer.name.en, price: offer.price, count: count > 1 ? count : undefined, fee: fee || undefined, pre: !live || undefined, wantAt: !live ? wantAt : undefined }, note: staffNote.trim() || undefined, arriveAt: arrive || undefined })
@@ -421,9 +422,9 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
                 <label data-field="phone" className={missing.includes('phone') ? 'missing' : ''}><span>{t('deliveryPhone')}</span><input type="tel" inputMode="tel" dir="ltr" value={phone} onChange={(e) => { setPhone(e.target.value); setNote(''); filled('phone') }} autoComplete="tel" placeholder="0750 000 0000" /></label>
                 {delivery
                   ? <>
-                    <div data-field="place" className={'place-fields' + (missing.includes('place') ? ' missing' : '')}>
-                      <label><span>{t('deliveryAddress')}</span><textarea rows={2} value={address} onChange={(e) => { setAddress(e.target.value); setNote('') }} placeholder={t('addressHint')} autoComplete="street-address" /></label>
-                      <ShareLocation value={location} onChange={(p) => { setLocation(p); setNote(''); if (p) filled('place') }} />
+                    <div data-field="where" className={'place-fields' + (missing.includes('where') ? ' missing' : '')}>
+                      <label><span>{t('deliveryAddress')}</span><textarea rows={2} value={address} onChange={(e) => { setAddress(e.target.value); setNote(''); if (e.target.value.trim().length >= 5) filled('where') }} placeholder={t('addressHint')} autoComplete="street-address" /></label>
+                      <ShareLocation value={location} onChange={(p) => { setLocation(p); setNote(''); if (p) filled('where') }} />
                     </div>
                   </>
                   : <p className="combo-hint">{s('comboPickupNote')}</p>}
