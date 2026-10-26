@@ -18,7 +18,12 @@ export interface MenuItem {
   hidden?: boolean // this branch does not sell it (menuAdmin.ts): left out of the menu, the picks and the combos
   flavorExtra?: Record<string, number> // what a flavour adds to the price, when it adds anything (menuAdmin.ts)
   flavors?: string[] // e.g. Vanilla, Hazelnut… for Latte with Flavor; Plain, Medium, Sweet for Turkish Coffee (menuAdmin.ts)
+  opts?: ItemOpts // what else it offers, as staff chose (menuAdmin.ts); missing = the rules in customize.ts
 }
+
+/** an item's extra choices, chosen by staff per item (owner, 2026-10-26): flavour pumps from the branch's flavour list
+ *  (ids), how many pumps at most, add-ons (names of Add-ons items, priced and stocked there), and the milk choice */
+export interface ItemOpts { pumps: string[]; pumpMax?: number; addons: string[]; milk: boolean }
 
 export interface MenuCategory {
   id: string

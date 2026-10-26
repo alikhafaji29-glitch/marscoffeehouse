@@ -7,6 +7,8 @@ import { ALL_ITEMS as ALL, MENU } from '../menu'
 import type { Badge, MenuItem } from '../menu'
 import { addCategory, addItem, basePrice, branchCats, canReset, catKind, editCategory, moveCategory, isAddedCat, isChanged, itemState, menuSaveFailed, moveItem, moveToCategory, nameOf, outCount, removeCategory, removeItem, removePhoto, uploadPhoto, resetMenu, resetPrice, saveItem, setOut, setPrice, useMenuVersion, photoOf, photoStyle, fitStyle } from '../menuAdmin'
 import type { PhotoFit } from '../menuAdmin'
+import { addonItems, flavourList, optsOf } from '../customize'
+import type { ItemOpts } from '../menu'
 import type { CatKind, NutritionEntry } from '../menuAdmin'
 import { DESC, TINT, categoryOf, isIced } from '../menuMeta'
 import { catLabel } from '../components/MenuSection'
@@ -184,11 +186,13 @@ export function ItemEditor({ name, go }: { name: string; go: (page: string) => v
   // the sizes as being edited: one row = a single price; `k` keeps a row's nutrition with it while its name changes
   const [rows, setRows] = useState<SizeRow[]>(() => (!st ? [] : st.sizes.length ? st.sizes.map((z, i) => ({ k: z, label: z, price: String(st.prices[i] ?? '') })) : [{ k: '', label: '', price: String(st.prices[0] ?? '') }]))
   const seq = useRef(0)
-  const [flav, setFlav] = useState<string[]>(() => st?.flavors ?? []) // the flavours as being edited
-  const [newFlav, setNewFlav] = useState('')
+  const [flav, setFlav] = useState<string[]>(() => st?.flavors ?? []) // the "choose one" flavours as being edited
+  // pumps, add-ons, milk (owner, 2026-10-26); an item never set starts from what it offered until now
+  const [opts, setOpts] = useState<ItemOpts>(() => (item ? optsOf(item) : { pumps: [], addons: [], milk: false }))
+  const [opts0] = useState(() => JSON.stringify(item ? optsOf(item) : null))
   const flavors = flav.length ? flav : ['']
   const [delSure, setDelSure] = useState(false)
-  const [tab, setTab] = useState<'details' | 'pricing' | 'nutrition'>('details')
+  const [tab, setTab] = useState<'details' | 'options' | 'pricing' | 'nutrition'>('details')
   const [dl, setDl] = useState<Lang>(lang)
   const [names, setNames] = useState<L3>(() => ({ en: st?.names.en || name, ar: st?.names.ar ?? '', ku: st?.names.ku ?? '' }))
   const [desc, setDesc] = useState<L3>(() => st?.desc ?? { en: '', ar: '', ku: '' })
@@ -229,14 +233,21 @@ export function ItemEditor({ name, go }: { name: string; go: (page: string) => v
       </>
     )
   }
-  const addFlavour = () => {
-    const f = newFlav.trim().replace(/\s+/g, ' ').slice(0, 30)
-    setNewFlav('')
-    if (!f || flav.length >= MAX_FLAVOURS || flav.some((x) => x.toLowerCase() === f.toLowerCase())) return
+  // a "choose one" flavour on / off, from the branch's flavour list (Dashboard → Flavours)
+  const toggleFlavour = (f: string) => {
+    if (flav.includes(f)) { setFlav(flav.filter((x) => x !== f)); return }
+    if (flav.length >= MAX_FLAVOURS) return
     // the first flavour takes over the facts entered for the item without flavours
     if (!flav.length) setNut((n) => ({ ...n, ...Object.fromEntries(rows.filter((r) => n[vkey(r.k, '')]).map((r) => [vkey(r.k, f), n[vkey(r.k, '')]])) }))
     setFlav([...flav, f])
   }
+  const flip = (list: string[], x: string) => (list.includes(x) ? list.filter((y) => y !== x) : [...list, x])
+  const library = flavourList()
+  const flavourName = (id: string) => { const f = library.find((x) => x.id === id); return f?.name[lang]?.trim() || f?.name.en?.trim() || id }
+  const oneChoices = [...library.map((f) => f.id), ...flav.filter((f) => !library.some((x) => x.id === f))]
+  const pumpChoices = [...library.map((f) => f.id), ...opts.pumps.filter((f) => !library.some((x) => x.id === f))]
+  const addonChoices = [...addonItems().map((i) => i.name), ...opts.addons.filter((a) => !addonItems().some((i) => i.name === a))]
+  const outOf = (id: string) => !!library.find((x) => x.id === id)?.out
   const del = () => { if (!delSure) { setDelSure(true); return } removeItem(name); back() }
   const addSize = () => {
     setBad(false)
@@ -255,7 +266,7 @@ export function ItemEditor({ name, go }: { name: string; go: (page: string) => v
       return Object.keys(facts).length ? ({ size: sized ? labels[i] : '', flavor: f, ...facts } as NutritionEntry) : null
     })).filter((e): e is NutritionEntry => !!e)
     const flavorExtra = Object.fromEntries(flav.map((f) => [f, Number((extra[f] ?? '').replace(/[^\d]/g, ''))] as const).filter(([, n]) => n > 0))
-    saveItem(name, { prices: nums, sizes: sized ? labels : [], inStock, available, tag, flavors: flav, flavorExtra, names: { en: names.en.trim() || name, ar: names.ar.trim(), ku: names.ku.trim() }, desc: { en: desc.en.trim(), ar: desc.ar.trim(), ku: desc.ku.trim() }, nutrition, ...(photoX !== (st.photoX ?? 0) && { photoX }), ...(photoY !== (st.photoY ?? 0) && { photoY }), ...(photoZoom !== (st.photoZoom ?? 100) && { photoZoom }) })
+    saveItem(name, { prices: nums, sizes: sized ? labels : [], inStock, available, tag, flavors: flav, flavorExtra, names: { en: names.en.trim() || name, ar: names.ar.trim(), ku: names.ku.trim() }, desc: { en: desc.en.trim(), ar: desc.ar.trim(), ku: desc.ku.trim() }, nutrition, ...((st.opts || JSON.stringify(opts) !== opts0) && { opts }), ...(photoX !== (st.photoX ?? 0) && { photoX }), ...(photoY !== (st.photoY ?? 0) && { photoY }), ...(photoZoom !== (st.photoZoom ?? 100) && { photoZoom }) })
     if (category !== cat && cats.includes(category)) { moveToCategory(name, category); go('cat:' + category); return }
     back()
   }
@@ -269,7 +280,7 @@ export function ItemEditor({ name, go }: { name: string; go: (page: string) => v
       </div>
       <section className="d-card d-editor">
         <div className="d-tabs" role="tablist">
-          {(['details', 'pricing', 'nutrition'] as const).map((x) => <button key={x} role="tab" aria-selected={tab === x} className={tab === x ? 'on' : ''} onClick={() => setTab(x)}>{s(x === 'details' ? 'tabDetails' : x === 'pricing' ? 'tabPricing' : 'tabNutrition')}</button>)}
+          {(['details', 'options', 'pricing', 'nutrition'] as const).map((x) => <button key={x} role="tab" aria-selected={tab === x} className={tab === x ? 'on' : ''} onClick={() => setTab(x)}>{s(x === 'details' ? 'tabDetails' : x === 'options' ? 'tabOptions' : x === 'pricing' ? 'tabPricing' : 'tabNutrition')}</button>)}
         </div>
         {tab === 'details' && (
           <div className="d-editor-details">
@@ -320,14 +331,9 @@ export function ItemEditor({ name, go }: { name: string; go: (page: string) => v
               <Field label={s('tag')} wide>
                 <select value={tag} onChange={(e) => setTag(e.target.value as Badge | '')}>{TAGS.map((x) => <option key={x.id} value={x.id}>{s(x.key)}</option>)}</select>
               </Field>
-              <div className="d-field wide d-flavours">
-                <span>{s('flavours')}</span>
-                <div className="d-chips">
-                  {flav.map((f) => <span key={f} className="d-chip">{f}<button type="button" aria-label={`${s('remove')} ${f}`} onClick={() => setFlav(flav.filter((x) => x !== f))}><I.close /></button></span>)}
-                  {flav.length < MAX_FLAVOURS && <input value={newFlav} maxLength={30} placeholder={s('flavourAdd')} aria-label={s('flavourAdd')} onChange={(e) => setNewFlav(e.target.value)} onBlur={addFlavour} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addFlavour() } }} />}
-                </div>
-                <small>{s('flavoursHint')}</small>
-              </div>
+              <p className="d-hint d-options-note">
+                {s('optionsNote')} <button type="button" className="link-btn" onClick={() => setTab('options')}>{s('tabOptions')}</button>
+              </p>
               <div className="d-switch-row">
                 <Switch on={inStock} onChange={setInStock} label={t('staffInStock')} />
                 <div><b>{inStock ? t('staffInStock') : t('staffOutOfStock')}</b><small>{s('stockHint')}</small></div>
@@ -337,6 +343,44 @@ export function ItemEditor({ name, go }: { name: string; go: (page: string) => v
                 <div><b>{available ? s('soldHere') : s('notSoldHere')}</b><small>{s('soldHereHint')}</small></div>
               </div>
             </div>
+          </div>
+        )}
+        {tab === 'options' && (
+          <div className="d-form d-options">
+            <section>
+              <p className="d-form-title">{s('optFlavourOne')} · {flav.length}</p>
+              <p className="d-hint">{s('optFlavourOneHint')}</p>
+              {!oneChoices.length && <p className="d-hint">{s('flavoursEmpty')}</p>}
+              <div className="d-ticks">
+                {oneChoices.map((f) => <label key={f} className={outOf(f) ? 'out' : ''}><input type="checkbox" checked={flav.includes(f)} disabled={!flav.includes(f) && flav.length >= MAX_FLAVOURS} onChange={() => toggleFlavour(f)} /><span>{flavourName(f)}</span></label>)}
+              </div>
+            </section>
+            <section>
+              <p className="d-form-title">{s('optPumps')} · {opts.pumps.length}</p>
+              <p className="d-hint">{s('optPumpsHint')}</p>
+              <div className="d-ticks">
+                {pumpChoices.map((f) => <label key={f} className={outOf(f) ? 'out' : ''}><input type="checkbox" checked={opts.pumps.includes(f)} onChange={() => setOpts({ ...opts, pumps: flip(opts.pumps, f) })} /><span>{flavourName(f)}</span></label>)}
+              </div>
+              {opts.pumps.length > 0 && (
+                <label className="d-pump-max"><span>{s('optPumpMax')}</span>
+                  <select value={opts.pumpMax ?? 3} onChange={(e) => setOpts({ ...opts, pumpMax: Number(e.target.value) })}>{[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{n}</option>)}</select>
+                </label>
+              )}
+            </section>
+            <section>
+              <p className="d-form-title">{s('optAddons')} · {opts.addons.length}</p>
+              <p className="d-hint">{s('optAddonsHint')}</p>
+              <div className="d-ticks">
+                {addonChoices.map((a) => <label key={a}><input type="checkbox" checked={opts.addons.includes(a)} onChange={() => setOpts({ ...opts, addons: flip(opts.addons, a) })} /><span>{nameOf(a, lang)}</span></label>)}
+              </div>
+            </section>
+            <section>
+              <div className="d-switch-row">
+                <Switch on={opts.milk} onChange={(milk) => setOpts({ ...opts, milk })} label={s('optMilk')} />
+                <div><b>{s('optMilk')}</b><small>{s('optMilkHint')}</small></div>
+              </div>
+            </section>
+            <p className="d-hint"><button type="button" className="link-btn" onClick={() => go('flavours')}>{s('optGoFlavours')}</button></p>
           </div>
         )}
         {tab === 'pricing' && (

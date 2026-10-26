@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react'
 import { ALL_ITEMS, CURATED, MENU, ORDER_MENU } from './menu'
-import type { Badge, MenuCategory, MenuItem } from './menu'
+import type { Badge, ItemOpts, MenuCategory, MenuItem } from './menu'
 import seed from './menuData.json'
 import { backendKey, backendOn, backendUrl, getClient } from './backend'
 import { PHOTO } from './menuMeta'
@@ -48,6 +48,7 @@ export interface ItemState {
   desc: L3
   flavors: string[]
   flavorExtra?: Record<string, number> // IQD a flavour adds to every size's price; a flavour not named adds nothing
+  opts?: ItemOpts // pumps, add-ons, milk as staff chose them (2026-10-26); missing = the rules in customize.ts
   nutrition: NutritionEntry[]
   gone?: boolean // demo only: staff deleted it on this device
 }
@@ -58,7 +59,7 @@ type Branches<T> = Record<BranchId, T> // read a branch's part with at(): a new 
 type SeedRow = { c: string; s: number; nm: Partial<L3>; p: number[]; z: string[]; t: string | null; o: number; d: string; f: string[]; n: [string, string, Nutrition][] }
 interface DbRow {
   branch: BranchId; name: string; category: string; names: Partial<L3> | null; sort: number | null; available: boolean; in_stock: boolean; prices: number[]; sizes: string[]; tag: Badge | null
-  description: Partial<L3> | null; flavors: string[] | null; nutrition: NutritionEntry[] | null; photo?: string | null; photo_x?: number | null; photo_y?: number | null; photo_zoom?: number | null; flavor_extras?: Record<string, number> | null
+  description: Partial<L3> | null; flavors: string[] | null; nutrition: NutritionEntry[] | null; photo?: string | null; photo_x?: number | null; photo_y?: number | null; photo_zoom?: number | null; opts?: ItemOpts | null; flavor_extras?: Record<string, number> | null
 }
 interface DbBranch { id: string; names: Partial<L3> | null; active: boolean; sort: number | null }
 interface DbCat { branch: BranchId; id: string; kind: CatKind; names: Partial<L3> | null; sort: number | null }
@@ -79,6 +80,7 @@ const fromDb = (r: DbRow): ItemState => ({
   cat: r.category, names: l3(r.names), sort: r.sort ?? 0, available: r.available, inStock: r.in_stock, prices: r.prices, sizes: r.sizes ?? [], tag: r.tag ?? '', desc: l3(r.description),
   flavors: r.flavors ?? [], nutrition: r.nutrition ?? [], ...(r.photo && { photo: r.photo }), ...(r.photo_x && { photoX: r.photo_x }), ...(r.photo_y && { photoY: r.photo_y }), ...(r.photo_zoom && r.photo_zoom !== 100 && { photoZoom: r.photo_zoom }),
   ...(r.flavor_extras && Object.keys(r.flavor_extras).length > 0 && { flavorExtra: r.flavor_extras }),
+  ...(r.opts && { opts: r.opts }),
 })
 const toBranch = (r: DbBranch): Branch => ({ id: r.id, name: r.names?.en || r.id, names: l3(r.names), active: r.active, sort: r.sort ?? 0 })
 const BASE: Branches<Record<string, ItemState>> = { // the two branches the live menus were read for; a branch added later has none
@@ -191,6 +193,7 @@ function apply() {
     it.badge = st.tag || undefined
     it.flavors = st.flavors
     it.flavorExtra = st.flavorExtra
+    it.opts = st.opts
   }
   // each category in the branch's own order (an item the branch does not sell goes last; it is not shown anyway)
   const place = (i: MenuItem) => (i.hidden ? 100000 : itemState(i.name, branch)?.sort ?? 50000) + (CATALOGUE.get(i.name) ?? 0) / 1000
@@ -216,7 +219,7 @@ async function pull(): Promise<boolean> {
   try {
     const get = (path: string) => fetch(`${backendUrl}/rest/v1/${path}`, { headers: { apikey: backendKey! } })
     const [res, cres, bres, gres] = await Promise.all([
-      get('menu_items?select=branch,name,category,names,sort,available,in_stock,prices,sizes,tag,description,flavors,nutrition,photo,photo_x,photo_y,photo_zoom,flavor_extras'),
+      get('menu_items?select=branch,name,category,names,sort,available,in_stock,prices,sizes,tag,description,flavors,nutrition,photo,photo_x,photo_y,photo_zoom,opts,flavor_extras'),
       get('menu_categories?select=branch,id,kind,names,sort').catch(() => null),
       get('branches?select=id,names,active,sort&order=sort.asc,id.asc').catch(() => null),
       get('branch_config?select=branch,settings,offers').catch(() => null), // each branch's settings and offers
@@ -275,6 +278,7 @@ const toDb = (p: Partial<ItemState>) => ({
   ...(p.sizes && { sizes: p.sizes }), ...(p.sort !== undefined && { sort: p.sort }), ...(p.cat !== undefined && { category: p.cat }), ...(p.photo !== undefined && { photo: p.photo || null }),
   ...(p.photoX !== undefined && { photo_x: p.photoX || null }), ...(p.photoY !== undefined && { photo_y: p.photoY || null }),
   ...(p.photoZoom !== undefined && { photo_zoom: p.photoZoom && p.photoZoom !== 100 ? p.photoZoom : null }),
+  ...(p.opts !== undefined && { opts: p.opts ?? null }),
 })
 const setFailed = (bad: boolean) => { if (failed !== bad || bad) { failed = bad; apply() } }
 /** change an item for the dashboard's branch: in the database when the backend is on, otherwise on this device */
