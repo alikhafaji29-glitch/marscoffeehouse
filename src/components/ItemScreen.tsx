@@ -118,9 +118,10 @@ export function ItemScreen({ item, gift = false, deal, onClose, onAdded }: { ite
             <>
               <p className="item-label">{t('size')}</p>
               <div className="size-cards" role="radiogroup" aria-label={t('size')}>
-                {item.sizes.map((s, i, all) => (
+                {/* the size itself (8oz, 12oz…), no "Small / Big" (owner, 2026-10-26: "show only how much oz") */}
+                {item.sizes.map((s, i) => (
                   <button key={s} type="button" role="radio" aria-checked={i === sizeIdx} className={'opt-card' + (i === sizeIdx ? ' on' : '')} onClick={() => setSizeIdx(i)}>
-                    <span className="opt-head"><span className="opt-radio">{i === sizeIdx && <IconCheck />}</span><strong>{t(i === 0 ? 'sizeSmall' : i === all.length - 1 ? 'sizeBig' : 'sizeMedium')}</strong><em dir="ltr">{s}</em></span>
+                    <span className="opt-head"><span className="opt-radio">{i === sizeIdx && <IconCheck />}</span><strong dir="ltr">{s}</strong></span>
                     <span className="opt-price" dir="ltr">{iqd((item.price as number[])[i])} IQD</span>
                   </button>
                 ))}
