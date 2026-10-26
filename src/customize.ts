@@ -1,7 +1,10 @@
 import type { Lang } from './i18n'
-import { ALL_ITEMS } from './menu'
-import type { MenuItem } from './menu'
+import { ALL_ITEMS, MENU } from './menu'
+import type { ItemOpts, MenuItem } from './menu'
 import { categoryOf } from './menuMeta'
+import { activeBranch, nameOf } from './menuAdmin'
+import { settingsFor } from './staff/store'
+import type { FlavourDef } from './staff/store'
 
 /*
  * What a customer can choose on an item's page, exactly as on the live menu (marscoffeehouse.com, checked 2026-10-13):
@@ -24,6 +27,12 @@ import { categoryOf } from './menuMeta'
  * - Add-ons: Extra espresso shot ("Espresso Shot"), Whipped cream, Cold foam, on/off.
  * Which drinks: pumps on the milk drinks and the black coffees (Americano, Iced Americano, Filter Coffee); the shot on
  * the milk coffees and the black coffees; whipped cream and cold foam on the milk drinks.
+ *
+ * Chosen per item since 2026-10-26 (owner: "the owner chooses which item has add ons, and which have flavours, and
+ * chooses what add ons and what flavours"): Dashboard → Flavours keeps the branch's flavour list (names in three
+ * languages, in / out of stock); Edit Item → Options sets the item's "choose one" flavours, its flavour pumps (which,
+ * and how many at most), its add-ons (any item of the Add-ons category; prices and stock stay there) and the milk
+ * choice. An item staff have not set keeps the rules above (`legacyOpts`), so nothing changed until they edit it.
  */
 export interface CustOption { id: string; label: string; price?: number; line?: string } // line = the words on the order line (English, for the staff); label otherwise
 export interface CustGroup {
@@ -57,13 +66,45 @@ const madeWithMilk = (item: MenuItem) => (MILK_CATS.includes(categoryOf(item.nam
 /** a milk add-on of the branch being looked at: its price, or undefined when the branch does not sell it now */
 const addOn = (name: string) => { const it = ALL_ITEMS.find((i) => i.name === name); return it && !it.hidden && !it.soldOut ? (Array.isArray(it.price) ? it.price[0] : it.price) : undefined }
 
+const NOT_ADDONS = ['Add Flavors', 'Skimmed Milk', 'Free Lactose'] // offered as the pumps and the milk choice instead
+const ADDON_WORDS: Record<string, string> = { 'Espresso Shot': 'Extra espresso shot', 'Whipped Cream': 'Whipped cream', 'Cold Foam': 'Cold foam' }
+/** the Add-ons category's items that can be offered on an item (the branch's own; any new one staff add there too) */
+export const addonItems = (): MenuItem[] => (MENU.find((c) => c.id === 'extra')?.items ?? []).filter((i) => !i.hidden && !NOT_ADDONS.includes(i.name))
+
+/** the branch's flavour list: staff's (Dashboard → Flavours), or, until they edit it, every flavour the menu uses now */
+export function flavourList(): FlavourDef[] {
+  const own = settingsFor(activeBranch()).flavours
+  if (own) return own
+  const seen = new Set<string>()
+  const out: FlavourDef[] = []
+  const add = (f: string) => { if (!seen.has(f)) { seen.add(f); out.push({ id: f, name: { en: f, ar: f, ku: f } }) } }
+  ALL_ITEMS.find((i) => i.name === 'Add Flavors')?.flavors?.forEach(add)
+  for (const i of ALL_ITEMS) if (!i.hidden) i.flavors?.forEach(add)
+  return out
+}
+
+/** what an item offered before staff could choose (the rules above): the starting point of Edit Item → Options */
+export function legacyOpts(item: MenuItem): ItemOpts {
+  const pumpsOk = madeWithMilk(item) || BLACK_COFFEE.includes(item.name)
+  const addons: string[] = []
+  if (milkCoffee(item) || BLACK_COFFEE.includes(item.name)) addons.push('Espresso Shot')
+  if (madeWithMilk(item)) addons.push('Whipped Cream', 'Cold Foam')
+  return { pumps: pumpsOk ? [...(ALL_ITEMS.find((i) => i.name === 'Add Flavors')?.flavors ?? [])] : [], pumpMax: 3, addons, milk: madeWithMilk(item) }
+}
+export const optsOf = (item: MenuItem): ItemOpts => item.opts ?? legacyOpts(item)
+
 /** the choices shown on an item's page, for the branch being looked at: its flavours, and the milk for a milk drink */
 export function groupsFor(item: MenuItem, lang: Lang): CustGroup[] {
   const groups: CustGroup[] = []
-  const flavors = item.flavors ?? []
+  const o = optsOf(item)
+  const list = new Map(flavourList().map((f) => [f.id, f]))
+  const inStock = (id: string) => !list.get(id)?.out
+  const label = (id: string) => list.get(id)?.name[lang]?.trim() || list.get(id)?.name.en?.trim() || id
+  const line = (id: string) => list.get(id)?.name.en?.trim() || id // the staff's order line, in English
+  const flavors = (item.flavors ?? []).filter(inStock)
   // the live site calls Turkish Coffee's Plain / Medium / Sweet "Select Type"
-  if (flavors.length) groups.push({ id: 'flavor', title: word(flavors.includes('Plain') ? 'Select type' : 'Select flavor', lang), kind: 'choice', defaultId: flavors[0], always: true, options: flavors.map((f) => ({ id: f, label: f, price: item.flavorExtra?.[f] || undefined })) }) // a flavour's name is the same in every language on the live menu
-  if (madeWithMilk(item)) {
+  if (flavors.length) groups.push({ id: 'flavor', title: word(flavors.includes('Plain') ? 'Select type' : 'Select flavor', lang), kind: 'choice', defaultId: flavors[0], always: true, options: flavors.map((f) => ({ id: f, label: label(f), line: line(f), price: item.flavorExtra?.[f] || undefined })) })
+  if (o.milk) {
     const skimmed = addOn('Skimmed Milk')
     const lactose = addOn('Free Lactose')
     const opts: CustOption[] = [{ id: 'regular', label: word('Regular milk', lang), line: 'Regular milk' }]
@@ -71,18 +112,20 @@ export function groupsFor(item: MenuItem, lang: Lang): CustGroup[] {
     if (lactose !== undefined) opts.push({ id: 'lactose', label: word('Lactose-free milk', lang), line: 'Lactose-free milk', price: lactose || undefined })
     if (opts.length > 1) groups.push({ id: 'milk', title: word('Milk', lang), kind: 'choice', defaultId: 'regular', options: opts })
   }
-  // flavour pumps: the flavours of the branch's "Add Flavors", each pump at its price
-  const pumps = ALL_ITEMS.find((i) => i.name === 'Add Flavors')
+  // flavour pumps: the item's chosen flavours, each pump at the price of the branch's "Add Flavors"
   const pumpPrice = addOn('Add Flavors')
-  if ((madeWithMilk(item) || BLACK_COFFEE.includes(item.name)) && pumps?.flavors?.length && pumpPrice !== undefined) {
-    groups.push({ id: 'pumps', title: word('Flavour pumps', lang), kind: 'count', max: 3, options: pumps.flavors.map((f) => ({ id: f, label: f, line: `${f} pump`, price: pumpPrice || undefined })) })
+  const pumps = o.pumps.filter(inStock)
+  if (pumps.length && pumpPrice !== undefined) {
+    groups.push({ id: 'pumps', title: word('Flavour pumps', lang), kind: 'count', max: o.pumpMax ?? 3, options: pumps.map((f) => ({ id: f, label: label(f), line: `${line(f)} pump`, price: pumpPrice || undefined })) })
   }
-  // add-ons, on / off
+  // add-ons, on / off: the item's chosen Add-ons items the branch sells and has in stock now
   const extrasOn: CustOption[] = []
-  const add = (name: string, en: string, on: boolean) => { const p = addOn(name); if (on && p !== undefined) extrasOn.push({ id: name, label: word(en, lang), line: en, price: p || undefined }) }
-  add('Espresso Shot', 'Extra espresso shot', milkCoffee(item) || BLACK_COFFEE.includes(item.name))
-  add('Whipped Cream', 'Whipped cream', madeWithMilk(item))
-  add('Cold Foam', 'Cold foam', madeWithMilk(item))
+  for (const name of o.addons) {
+    const p = addOn(name)
+    if (p === undefined) continue
+    const en = ADDON_WORDS[name]
+    extrasOn.push({ id: name, label: en ? word(en, lang) : nameOf(name, lang), line: en ?? name, price: p || undefined })
+  }
   if (extrasOn.length) groups.push({ id: 'addons', title: word('Add-ons', lang), kind: 'toggle', optional: true, options: extrasOn })
   return groups
 }
