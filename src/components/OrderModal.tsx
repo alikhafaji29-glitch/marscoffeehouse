@@ -12,6 +12,7 @@ import { TimeWheel } from './TimeWheel'
 import { MissingBox, goToMissing } from './MissingBox'
 import type { Missing } from './MissingBox'
 import { settingsFor } from '../staff/store'
+import { PausedBox } from './PausedBox'
 import { arrivalSlots, timeText } from '../orders'
 import { clockNow } from '../clock'
 import { useS } from '../staff/strings'
@@ -125,6 +126,9 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
       </div>
     )
   }
+
+  // the branch paused orders (Tools): the apology instead of the form; an order already placed still shows its receipt
+  if (set.paused && !paid) return <PausedBox onClose={onClose} />
 
   return (
     <div className="modal-overlay" onClick={onClose}>

@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { applyRemoteStatus, dropClerk, importOrders, markGone, markHeld, markSynced, myOrders, setOrderPlacedHook } from './account'
+import { applyRemoteStatus, dropClerk, importOrders, markGone, markHeld, markRefused, markSynced, myOrders, setOrderPlacedHook } from './account'
 import type { Order } from './account'
 import { backendOn, clerkUserId, ensureUser, getClerkClient, getClient } from './backend'
 import { isActive, recentlyCancelled } from './orders'
@@ -49,7 +49,9 @@ async function push(sb: SupabaseClient, o: Order) {
     console.warn('[backend] Clerk session not accepted, order sent as a guest order:', error.message)
   } else {
     // P0001: the database's limit of 10 orders an hour from one device; the customer is told, and it is tried again
-    if (error.code === 'P0001') markHeld(o.uid!, 'limit')
+    // P0010: the branch paused orders (Tools) before this page heard: shown as cancelled, not tried again
+    if (error.code === 'P0010') markRefused(o.uid!)
+    else if (error.code === 'P0001') markHeld(o.uid!, 'limit')
     console.warn('[backend] order not sent yet:', error.message)
   }
 }

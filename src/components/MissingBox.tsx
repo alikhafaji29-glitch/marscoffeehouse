@@ -7,10 +7,11 @@ import type { SKey } from '../staff/strings'
  * "Almost there!" (owner, 2026-10-22: customers did not notice they had not written their location): when an order
  * cannot be placed, a window says exactly what is missing; OK takes the customer to the first missing field, and the
  * missing fields are outlined until filled. Used by the Positive Hours order and the cart's checkout. For delivery the
- * shared map pin is required (owner, 2026-10-23); the written address is an optional extra.
+ * shared map pin is required (owner, 2026-10-23); the written address is an optional extra. Positive Hours takes either
+ * (owner, 2026-10-26): `where` = neither a typed address nor the pin.
  */
-export type Missing = 'name' | 'phone' | 'place' | 'when' | 'arrive'
-const WORDS: Record<Missing, SKey> = { name: 'missName', phone: 'missPhone', place: 'missPlace', when: 'missWhen', arrive: 'missArrive' }
+export type Missing = 'name' | 'phone' | 'place' | 'where' | 'when' | 'arrive'
+const WORDS: Record<Missing, SKey> = { name: 'missName', phone: 'missPhone', place: 'missPlace', where: 'missWhere', when: 'missWhen', arrive: 'missArrive' }
 
 /** the first missing field, brought into view and focused */
 export function goToMissing(first: Missing | undefined) {

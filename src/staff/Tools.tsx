@@ -7,6 +7,7 @@ import { useS } from './strings'
 import { backendOn } from '../backend'
 import { LEAD_MIN } from '../orders'
 import { Card, Field, I, Switch } from './ui'
+import { L3Fields } from './Events'
 
 /* Tools, after the live panel's order settings: how a finished order reaches the staff, and which of Delivery /
  * Pickup the customer is offered at checkout. Per branch; saved as soon as it is changed. */
@@ -18,6 +19,18 @@ export function Tools() {
   return (
     <div className="d-narrow">
       <p className="d-lead">{s('toolsLead', { branch: branchName(data.branch) })}</p>
+      {/* stop taking orders for a while, with an apology (owner, 2026-10-26); the database refuses new orders too */}
+      <Card title={s('pauseTitle')} sub={s('pauseSub')} className={set.paused ? 'd-paused' : ''}>
+        <div className="d-switch-row">
+          <span className="d-row-icon"><I.store /></span>
+          <div><b>{set.paused ? s('pauseOn') : s('pauseOff')}</b><small>{set.paused ? s('pauseOnHint') : s('pauseOffHint')}</small></div>
+          <Switch on={!!set.paused} onChange={(v) => patch({ paused: v })} label={s('pauseTitle')} />
+        </div>
+        <div className="d-pause-msg">
+          <L3Fields label={s('pauseMsg')} value={set.pauseMsg ?? { en: '', ar: '', ku: '' }} onChange={(pauseMsg) => patch({ pauseMsg })} area />
+          <p className="d-hint">{s('pauseMsgHint')}</p>
+        </div>
+      </Card>
       <Card title={s('reachTitle')} sub={s('reachSub')}>
         <div className="d-seg big" role="radiogroup" aria-label={s('reachTitle')}>
           <button type="button" role="radio" aria-checked={set.reach === 'whatsapp'} className={set.reach === 'whatsapp' ? 'on' : ''} onClick={() => patch({ reach: 'whatsapp' })}><I.whatsapp />{s('reachWhatsapp')}</button>
