@@ -3,7 +3,7 @@ import { branchName, settingsFor, update, useStaff } from './store'
 import type { Driver, Settings } from './store'
 import { useLang } from '../i18n'
 import type { Lang } from '../i18n'
-import { useS } from './strings'
+import { sIn, useS } from './strings'
 import { backendOn } from '../backend'
 import { LEAD_MIN } from '../orders'
 import { Card, Field, I, Switch } from './ui'
@@ -27,7 +27,8 @@ export function Tools() {
           <Switch on={!!set.paused} onChange={(v) => patch({ paused: v })} label={s('pauseTitle')} />
         </div>
         <div className="d-pause-msg">
-          <L3Fields label={s('pauseMsg')} value={set.pauseMsg ?? { en: '', ar: '', ku: '' }} onChange={(pauseMsg) => patch({ pauseMsg })} area />
+          {/* the boxes start with the default apology (owner, 2026-10-26: "with these messages as default") */}
+          <L3Fields label={s('pauseMsg')} value={set.pauseMsg ?? PAUSE_DEFAULT} onChange={(pauseMsg) => patch({ pauseMsg })} area rows={4} />
           <p className="d-hint">{s('pauseMsgHint')}</p>
         </div>
       </Card>
@@ -67,6 +68,7 @@ export function Tools() {
   )
 }
 
+const PAUSE_DEFAULT = { en: sIn('en', 'pausedDefault'), ar: sIn('ar', 'pausedDefault'), ku: sIn('ku', 'pausedDefault') }
 const LANGS: [Lang, string][] = [['en', 'English'], ['ar', 'العربية'], ['ku', 'کوردی']]
 
 /* Delivery drivers, each with the language their WhatsApp message goes in (owner, 2026-10-25: "make it per driver,

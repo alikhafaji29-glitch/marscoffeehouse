@@ -13,14 +13,14 @@ import { Field, I, Modal, Switch } from './ui'
  * (its name, its items) and its promo text shows as a strip on top of the menu. One event runs at a time. */
 
 /** three inputs for one text: English, Arabic, Kurdish */
-export function L3Fields({ label, value, onChange, area }: { label: string; value: L3; onChange: (v: L3) => void; area?: boolean }) {
+export function L3Fields({ label, value, onChange, area, rows = 2 }: { label: string; value: L3; onChange: (v: L3) => void; area?: boolean; rows?: number }) {
   const langs: [keyof L3, string, 'ltr' | 'rtl'][] = [['en', 'English', 'ltr'], ['ar', 'العربية', 'rtl'], ['ku', 'کوردی', 'rtl']]
   return (
     <div className="d-form-row three">
       {langs.map(([k, n, dir]) => (
         <Field key={k} label={`${label} (${n})`}>
           {area
-            ? <textarea rows={2} dir={dir} value={value[k]} onChange={(e) => onChange({ ...value, [k]: e.target.value })} />
+            ? <textarea rows={rows} dir={dir} value={value[k]} onChange={(e) => onChange({ ...value, [k]: e.target.value })} />
             : <input dir={dir} value={value[k]} onChange={(e) => onChange({ ...value, [k]: e.target.value })} />}
         </Field>
       ))}

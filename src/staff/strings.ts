@@ -342,7 +342,7 @@ const S = {
   pauseOnHint: ['No new orders reach this branch. Orders already placed stay as they are.', 'لا تصل طلبات جديدة إلى هذا الفرع. الطلبات الموجودة تبقى كما هي.', 'هیچ داواکارییەکی نوێ ناگاتە ئەم لقە. داواکارییە هەبووەکان وەک خۆیان دەمێننەوە.'],
   pauseOffHint: ['Switch on to stop new orders, for example when the branch is too busy or closing early.', 'شغّله لإيقاف الطلبات الجديدة، مثلاً عند الازدحام الشديد أو الإغلاق المبكر.', 'بیکەرەوە بۆ ڕاگرتنی داواکاریی نوێ، بۆ نموونە کاتێک لقەکە زۆر قەرەباڵغە یان زوو دادەخرێت.'],
   pauseMsg: ['Apology message', 'رسالة الاعتذار', 'نامەی داوای لێبوردن'],
-  pauseMsgHint: ['Leave empty to use: "Sorry, we are not taking orders right now. Please try again a little later."', 'اتركها فارغة لاستخدام: «نعتذر، لا نستقبل الطلبات حالياً. يرجى المحاولة بعد قليل.»', 'بە بەتاڵی بیهێڵەرەوە بۆ بەکارهێنانی: «ببورە، لە ئێستادا داواکاری وەرناگرین. تکایە کەمێکی تر هەوڵ بدەرەوە.»'],
+  pauseMsgHint: ['Customers see this when they try to order. A box left empty shows the default message.', 'يرى الزبائن هذه الرسالة عند محاولة الطلب. الخانة الفارغة تعرض الرسالة الافتراضية.', 'کڕیاران ئەمە دەبینن کاتێک هەوڵی داواکردن دەدەن. خانەی بەتاڵ نامە بنەڕەتییەکە پیشان دەدات.'],
   pausedTitle: ['Sorry!', 'نعتذر!', 'ببورە!'],
   pausedDefault: ['Sorry, we are not taking orders right now. Please try again a little later.', 'نعتذر، لا نستقبل الطلبات حالياً. يرجى المحاولة بعد قليل.', 'ببورە، لە ئێستادا داواکاری وەرناگرین. تکایە کەمێکی تر هەوڵ بدەرەوە.'],
   pausedBanner: ['Orders are paused for this branch: customers cannot order. Switch it off in Tools.', 'الطلبات متوقفة لهذا الفرع: لا يستطيع الزبائن الطلب. أوقفها من الأدوات.', 'داواکارییەکان بۆ ئەم لقە ڕاگیراون: کڕیاران ناتوانن داوا بکەن. لە ئامرازەکان بیکوژێنەرەوە.'],
