@@ -2321,3 +2321,8 @@ body.ph-on .band-pill, body.ph-on .header-order-in { display: none; }
 .staff-wa-replies { margin-top: 0.55rem; padding: 0.5rem 0.65rem; border-radius: 0.6rem; background: #f3f8f4; border: 1px solid rgba(30, 140, 70, 0.25); }
 .staff-wa-replies ul { margin: 0.25rem 0 0; padding: 0; list-style: none; display: grid; gap: 0.2rem; font-size: 0.88rem; }
 .staff-wa-replies q { quotes: '“' '”'; }
+.staff-askloc-pick { flex-basis: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; padding: 0.55rem 0.65rem; border-radius: 0.7rem; background: #f3f8f4; border: 1px solid rgba(30, 140, 70, 0.3); }
+.staff-askloc-pick p { flex-basis: 100%; margin: 0 0 0.1rem; font-size: 0.85rem; font-weight: 600; color: var(--navy); }
+.staff-askloc-lang { display: inline-flex; flex-direction: column; align-items: center; min-height: 40px; padding: 0.4rem 0.9rem; border-radius: 999px; border: 1.5px solid #1e8c46; background: #fff; color: #14602f; font: inherit; font-weight: 600; cursor: pointer; }
+.staff-askloc-lang.ordered { background: #1e8c46; color: #fff; }
+.staff-askloc-lang small { font-size: 0.68rem; font-weight: 400; opacity: 0.9; }

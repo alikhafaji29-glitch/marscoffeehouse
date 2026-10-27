@@ -618,6 +618,8 @@ const S = {
   usePinFailed: ['The pin could not be added. Check the connection and try again.', 'تعذّرت إضافة الموقع. تحقّق من الاتصال وحاول مجدداً.', 'شوێنەکە زیاد نەکرا. پەیوەندییەکە بپشکنە و دووبارە هەوڵ بدەرەوە.'],
   pinFromWa: ['Location sent by the customer on WhatsApp', 'أرسل الزبون الموقع عبر واتساب', 'کڕیار شوێنەکەی بە واتسئاپ ناردووە'],
   askLoc: ['Ask for location (WhatsApp)', 'طلب الموقع (واتساب)', 'داواکردنی شوێن (واتسئاپ)'],
+  askLocLang: ['Send the message in which language?', 'بأي لغة تُرسل الرسالة؟', 'نامەکە بە کام زمان بنێردرێت؟'],
+  askLocOrderedIn: ['ordered in this language', 'طلب بهذه اللغة', 'بەم زمانە داوای کردووە'],
   askLocAgain: ['Ask for location again', 'اطلب الموقع مرة أخرى', 'دووبارە داوای شوێن بکە'],
   askLocAsked: ['Location asked on WhatsApp at {t}. It shows here when the customer sends it.', 'طُلب الموقع عبر واتساب الساعة {t}. يظهر هنا عندما يرسله الزبون.', 'شوێن بە واتسئاپ داواکرا لە {t}. کاتێک کڕیار دەینێرێت لێرە دەردەکەوێت.'],
   askLocFailed: ['Not sent: {why}', 'لم يُرسل: {why}', 'نەنێردرا: {why}'],

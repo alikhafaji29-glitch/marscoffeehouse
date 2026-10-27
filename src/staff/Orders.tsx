@@ -58,9 +58,12 @@ function AskLocation({ o }: { o: Order }) {
   const s = useS()
   const [busy, setBusy] = useState(false)
   const [note, setNote] = useState('')
-  const ask = async () => {
-    setBusy(true); setNote('')
-    const r = await askLocation(o)
+  // the button first asks which language to send in (owner, 2026-10-28: "when pressing send msg, ask the user the
+  // language"); the language the customer ordered in is marked
+  const [picking, setPicking] = useState(false)
+  const ask = async (L: 'en' | 'ar' | 'ku') => {
+    setPicking(false); setBusy(true); setNote('')
+    const r = await askLocation(o, L)
     setBusy(false)
     if (r.ok) return
     setNote(r.reason === 'no_backend' ? s('askLocDemo') : r.reason === 'no_branch_phone' ? s('askLocNoPhone') : s('askLocFailed', { why: r.message || r.reason || '?' }))
@@ -69,7 +72,19 @@ function AskLocation({ o }: { o: Order }) {
   return (
     <div className="staff-askloc">
       {asked && <p className="staff-askloc-asked">{s('askLocAsked', { t: timeText(asked, lang) })}</p>}
-      <button type="button" className="staff-wa" disabled={busy} onClick={() => void ask()}><I.whatsapp />{busy ? s('waSending') : asked ? s('askLocAgain') : s('askLoc')}</button>
+      {!picking && <button type="button" className="staff-wa" disabled={busy} onClick={() => { setPicking(true); setNote('') }}><I.whatsapp />{busy ? s('waSending') : asked ? s('askLocAgain') : s('askLoc')}</button>}
+      {picking && (
+        <div className="staff-askloc-pick" role="group" aria-label={s('askLocLang')}>
+          <p>{s('askLocLang')}</p>
+          {(['en', 'ar', 'ku'] as const).map((L) => (
+            <button key={L} type="button" className={'staff-askloc-lang' + (o.lang === L ? ' ordered' : '')} onClick={() => void ask(L)}>
+              {L === 'en' ? 'English' : L === 'ar' ? 'العربية' : 'کوردی'}
+              {o.lang === L && <small>{s('askLocOrderedIn')}</small>}
+            </button>
+          ))}
+          <button type="button" className="link-btn" onClick={() => setPicking(false)}>{s('cancel')}</button>
+        </div>
+      )}
       {note && <small className="staff-sent staff-wa-failed" role="alert">{note}</small>}
     </div>
   )

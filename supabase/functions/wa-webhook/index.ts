@@ -20,7 +20,8 @@
 //                 only accepts your location … call {branch phone}"
 //   only closed orders (delivered / cancelled) → once per order "this order is already closed …"
 // The replies are free text: allowed because the customer has just written (Meta's 24-hour window). They use WA_TOKEN and
-// WA_PHONE_ID like send-whatsapp, in the language the customer ordered in, and go into the WhatsApp log too.
+// WA_PHONE_ID like send-whatsapp, in the language the request went in (orders.wa.lang, chosen by staff; else the one
+// the customer ordered in), and go into the WhatsApp log too.
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import type { SupabaseClient } from 'npm:@supabase/supabase-js@2'
 
@@ -50,7 +51,7 @@ type Incoming = {
 type OrderRow = {
   uid: string; code: string; branch: string; status: string; lang: string | null; customer_phone: string | null; delivery_phone: string | null
   location: { lat: number; lng: number } | null; location_from: string | null
-  wa: { asked_at?: string; reminded?: boolean; closed_replied?: boolean; replies?: Reply[]; seen?: string[] } | null
+  wa: { asked_at?: string; lang?: string; reminded?: boolean; closed_replied?: boolean; replies?: Reply[]; seen?: string[] } | null
 }
 type Reply = { kind: string; text?: string; lat?: number; lng?: number; at: string }
 
@@ -121,7 +122,7 @@ async function incoming(db: SupabaseClient, m: Incoming) {
   if (answer) {
     const { data: cfg } = await db.from('branch_config').select('settings').eq('branch', o.branch).maybeSingle()
     const phone = String((cfg?.settings as { phone?: string } | null)?.phone ?? '')
-    await reply(db, o, m.from, say(answer[0], o.lang, { order: `#${o.code}`, phone }), answer[1])
+    await reply(db, o, m.from, say(answer[0], wa.lang ?? o.lang, { order: `#${o.code}`, phone }), answer[1])
   }
 }
 

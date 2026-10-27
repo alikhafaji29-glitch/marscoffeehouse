@@ -33,9 +33,10 @@
 //
 // kind "location_request" (owner, 2026-10-26; template approved 2026-10-28; HANDOFF decision 223): the dashboard's "Ask
 // for location" on a delivery order without a pin. Goes to the CUSTOMER (the order's own phone, never a number from the
-// browser) as the template mars_location_request, in the language the customer ordered in (orders.lang; Kurdish filed
-// as fa, then Arabic): {{1}} "#code"  {{2}} branch  {{3}} the branch phone from Tools (branch_config settings.phone).
-// orders.wa.asked_at is set, so wa-webhook knows which order a location that comes back belongs to.
+// browser) as the template mars_location_request, in the language staff chose when sending (owner, 2026-10-28), else the
+// one the customer ordered in (orders.lang); Kurdish filed as fa, then Arabic: {{1}} "#code"  {{2}} branch  {{3}} the branch phone from Tools (branch_config settings.phone).
+// orders.wa.asked_at is set, so wa-webhook knows which order a location that comes back belongs to, and orders.wa.lang,
+// so its automatic replies use the same language.
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
 const GRAPH = Deno.env.get('WA_GRAPH_VERSION') ?? 'v23.0'
@@ -152,14 +153,15 @@ Deno.serve(async (req: Request) => {
     const { data: cfg } = await admin.from('branch_config').select('settings').eq('branch', o.branch).maybeSingle()
     const branchPhone = String((cfg?.settings as { phone?: string } | null)?.phone ?? '').trim()
     if (!branchPhone) return json(200, { ok: false, reason: 'no_branch_phone' })
-    const ctl = templateLang(o.lang ?? body.lang)
+    const chosen = body.lang === 'ar' || body.lang === 'ku' || body.lang === 'en' ? body.lang : o.lang ?? 'en'
+    const ctl = templateLang(chosen)
     for (const lang of ctl === 'fa' ? ['fa', 'ar'] : [ctl]) {
       const parameters = [`#${o.code}`, BRANCH[lang][o.branch] ?? o.branch, branchPhone].map((t) => ({ type: 'text', text: flat(t) }))
       sent = await post({ type: 'template', template: { name: 'mars_location_request', language: { code: lang }, components: [{ type: 'body', parameters }] } })
       if (sent.res.messages?.length) { used = `mars_location_request/${lang}`; break }
     }
     if (sent.res.messages?.length) {
-      const { error } = await admin.from('orders').update({ wa: { ...(o.wa ?? {}), asked_at: new Date().toISOString(), asked_by: u.user.id } }).eq('uid', o.uid)
+      const { error } = await admin.from('orders').update({ wa: { ...(o.wa ?? {}), asked_at: new Date().toISOString(), asked_by: u.user.id, lang: chosen } }).eq('uid', o.uid)
       if (error) console.warn('[send-whatsapp] asked_at not saved:', error.message)
     }
   } else {
