@@ -55,11 +55,13 @@ function moodApi(): Plugin {
 // missing parts added, for Chrome 49 and up. The customer site at / is untouched; the tablet app opens /old/#staff.
 // It shares the photos and videos of the main copy (absolute /assets/ paths), so it has no public folder of its own.
 // MARS_OLD=1 does the same in another mode (the demo build, for testing).
-// The gap polyfill (below) does not know a grid from a flex box: on a grid its children could not take a tap (the
-// cancel-reason box on /old/#staff, 2026-10-27: the box only, "pointer-events: var(--parent-has-fgp) auto" fell back to
-// the box's none). A polyfilled box's children always take taps.
-const tapsThrough = { postcssPlugin: 'mars-fgp-taps', OnceExit(root: { walkDecls: (prop: string, fn: (d: { value: string }) => void) => void }) {
-  root.walkDecls('pointer-events', (d) => { if (/^var\(--parent-has-fgp\)\s+auto$/.test(d.value)) d.value = 'auto' })
+// The gap polyfill (below) turns taps off on every box it spaces ("pointer-events: none") and back on for the box's
+// children, so the box's negative margins do not swallow taps meant for what is next to it. That left a button with
+// only text in it untappable (Send route on WhatsApp) and the children of a grid too (the cancel-reason box on
+// /old/#staff, 2026-10-27). Both of its pointer-events lines are dropped: everything takes taps as on the main site;
+// at worst a strip as wide as the gap at a spaced box's top/left edge takes a tap meant for what is above it.
+const tapsThrough = { postcssPlugin: 'mars-fgp-taps', OnceExit(root: { walkDecls: (prop: string, fn: (d: { value: string; remove: () => void }) => void) => void }) {
+  root.walkDecls('pointer-events', (d) => { if (/^var\(--(parent-)?has-fgp\)\s+(none|auto)$/.test(d.value)) d.remove() })
 } }
 
 export default defineConfig(({ mode }) => {
