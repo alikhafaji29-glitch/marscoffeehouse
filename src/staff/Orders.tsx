@@ -18,6 +18,7 @@ import { ALL_ITEMS } from '../menu'
 import { nameOf } from '../menuAdmin'
 import { backendOn } from '../backend'
 import { I } from './ui'
+import { Dispatch } from './Dispatch'
 
 /*
  * Orders: the incoming orders and the buttons that move each one through the tracking stages the customer sees
@@ -100,6 +101,27 @@ function PreviousPins({ o }: { o: Order }) {
   )
 }
 
+/** an order as the plain WhatsApp text (the fallback when no template can be sent), in language L */
+export function orderText(o: Order, L: Lang): string {
+  const lines = [`Mars CoffeeHouse · ${branchName(o.branch)} · #${o.id}`, '']
+  if (o.customer) lines.push(`${sIn(L, 'waCustomer')}: ${o.customer.name} · ${phoneOf(o)}`)
+  if (o.delivery?.address) lines.push(`${sIn(L, 'waAddress')}: ${o.delivery.address}`)
+  // the plain map link of the customer's pin (owner chose it over a directions link, 2026-10-23); WhatsApp links cannot carry a location pin
+  if (o.delivery?.location) lines.push(`${sIn(L, 'waLocation')}: ${mapsLink(o.delivery.location)}`)
+  lines.push('')
+  for (const g of groupLines(o.items)) { if (g.combo) lines.push(sIn(L, 'comboN', { n: g.combo })); for (const x of g.lines) lines.push('• ' + x) }
+  if (o.note) lines.push('', `${dict[L].orderNote}: ${o.note}`)
+  lines.push('', o.pay === 'wallet' ? dict[L].paidByWallet : sIn(L, 'waCollect', { n: iqd(o.total) }))
+  return lines.join('\n')
+}
+/** this device remembers who an order went to, for the "Sent to …" line on its card */
+export function markSent(o: Order, name: string, api?: boolean) {
+  const all = readSent()
+  all[o.uid ?? o.id] = { name, at: Date.now(), ...(api && { api }) }
+  try { localStorage.setItem(SENT_KEY, JSON.stringify(all)) } catch { /* ignore */ }
+  return all[o.uid ?? o.id]
+}
+
 function SendToDriver({ o }: { o: Order }) {
   const { t, lang } = useLang()
   const s = useS()
@@ -109,26 +131,10 @@ function SendToDriver({ o }: { o: Order }) {
   const key = o.uid ?? o.id
   const [sent, setSent] = useState(() => readSent()[key])
   // the message in the driver's language (Other…: the dashboard's)
-  const text = (L: Lang = lang) => {
-    const lines = [`Mars CoffeeHouse · ${branchName(o.branch)} · #${o.id}`, '']
-    if (o.customer) lines.push(`${sIn(L, 'waCustomer')}: ${o.customer.name} · ${phoneOf(o)}`)
-    if (o.delivery?.address) lines.push(`${sIn(L, 'waAddress')}: ${o.delivery.address}`)
-    // the plain map link of the customer's pin (owner chose it over a directions link, 2026-10-23); WhatsApp links cannot carry a location pin
-    if (o.delivery?.location) lines.push(`${sIn(L, 'waLocation')}: ${mapsLink(o.delivery.location)}`)
-    lines.push('')
-    for (const g of groupLines(o.items)) { if (g.combo) lines.push(sIn(L, 'comboN', { n: g.combo })); for (const x of g.lines) lines.push('• ' + x) }
-    if (o.note) lines.push('', `${dict[L].orderNote}: ${o.note}`)
-    lines.push('', o.pay === 'wallet' ? dict[L].paidByWallet : sIn(L, 'waCollect', { n: iqd(o.total) }))
-    return lines.join('\n')
-  }
+  const text = (L: Lang = lang) => orderText(o, L)
   const [busy, setBusy] = useState(false)
   const [failed, setFailed] = useState('')
-  const remember = (name: string, api?: boolean) => {
-    const all = readSent()
-    all[key] = { name, at: Date.now(), ...(api && { api }) }
-    try { localStorage.setItem(SENT_KEY, JSON.stringify(all)) } catch { /* ignore */ }
-    setSent(all[key])
-  }
+  const remember = (name: string, api?: boolean) => setSent(markSent(o, name, api))
   const send = async (name: string, phone?: string, L: Lang = lang) => {
     setFailed('')
     if (phone && o.uid) {
@@ -470,10 +476,17 @@ export function Orders({ orders: everything, live = false }: { orders: Order[]; 
   const shown = tab === 'active' ? active : tab === 'later' ? later : tab === 'all' ? orders : orders.filter((o) => (o.status ?? 'received') === tab && !isLater(o, now, lead))
   const counts = STAGES.map((st) => orders.filter((o) => (o.status ?? 'received') === st && !isLater(o, now, lead)).length)
   const cancelledCount = orders.filter((o) => isCancelled(o) && !mergedInto(o)).length // a merged order was not lost
+  // delivery orders that are ready (Done) and not on their way yet: the routes window plans them (owner, 2026-10-27)
+  const ready = everything.filter((o) => o.fulfil === 'delivery' && o.status === 'done')
+  const [routing, setRouting] = useState(false)
   return (
     <>
       <p className="d-lead">{s('ordersLead')}</p>
       <OrderFilterBar f={f} />
+      {ready.length > 0 && (
+        <button type="button" className="d-btn solid staff-plan-btn" onClick={() => setRouting(true)}><I.bike />{s('planRoutes', { n: ready.length })}</button>
+      )}
+      {routing && <Dispatch orders={ready} onClose={() => setRouting(false)} />}
       {/* the stage counters are tabs too: tap one to see just that stage, tap it again to go back to Active */}
       <div className="staff-counts" role="tablist" aria-label={s('navOrders')}>
         {STAGES.map((st, i) => (

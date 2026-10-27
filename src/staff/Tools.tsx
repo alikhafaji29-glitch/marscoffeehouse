@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { branchName, settingsFor, update, useStaff } from './store'
-import type { Driver, Settings } from './store'
+import type { Driver, Settings, Shop } from './store'
+import { parsePlace } from './routes'
 import { useLang } from '../i18n'
 import type { Lang } from '../i18n'
 import { sIn, useS } from './strings'
@@ -38,6 +39,7 @@ export function Tools() {
           <input type="tel" inputMode="tel" dir="ltr" value={set.phone ?? ''} placeholder="0750 000 0000" onChange={(e) => patch({ phone: e.target.value.replace(/[^\d+ ]/g, '').slice(0, 20) })} />
         </Field>
       </Card>
+      <Shops />
       <Card title={s('reachTitle')} sub={s('reachSub')}>
         <div className="d-seg big" role="radiogroup" aria-label={s('reachTitle')}>
           <button type="button" role="radio" aria-checked={set.reach === 'whatsapp'} className={set.reach === 'whatsapp' ? 'on' : ''} onClick={() => patch({ reach: 'whatsapp' })}><I.whatsapp />{s('reachWhatsapp')}</button>
@@ -115,6 +117,55 @@ function Drivers() {
         <button type="button" className="d-btn solid" disabled={!dirty} onClick={save}>{s('driversSave')}</button>
         {dirty ? <small className="d-hint">{s('driversUnsaved')}</small> : done && <small className="d-hint" role="status">{s('driversSaved')}</small>}
       </div>
+    </Card>
+  )
+}
+
+/* Where the branch's shops are (owner, 2026-10-27): delivery routes start there. Kirkuk has two; with more than one, the
+ * routes window asks which shop the drivers leave from. A Google Maps link or "lat, lng" can be pasted. */
+function Shops() {
+  const s = useS()
+  const data = useStaff()
+  const shops = settingsFor(data.branch).shops ?? []
+  const [drafts, setDrafts] = useState<Record<number, string>>({})
+  const [finding, setFinding] = useState(-1)
+  const save = (next: Shop[]) => update((st) => ({ settings: { ...st.settings, [st.branch]: { ...settingsFor(st.branch), shops: next } } }))
+  const edit = (i: number, p: Partial<Shop>) => save(shops.map((x, j) => (j === i ? { ...x, ...p } : x)))
+  const place = (i: number, text: string) => {
+    setDrafts({ ...drafts, [i]: text })
+    const pt = parsePlace(text)
+    if (pt) edit(i, pt)
+  }
+  const here = (i: number) => {
+    if (!navigator.geolocation) return
+    setFinding(i)
+    navigator.geolocation.getCurrentPosition(
+      (p) => { setFinding(-1); edit(i, { lat: +p.coords.latitude.toFixed(6), lng: +p.coords.longitude.toFixed(6) }); setDrafts({ ...drafts, [i]: '' }) },
+      () => setFinding(-1),
+      { enableHighAccuracy: true, timeout: 15000 },
+    )
+  }
+  return (
+    <Card title={s('shopsTitle')} sub={s('shopsSub')}>
+      {shops.map((sh, i) => {
+        const draft = drafts[i]
+        const bad = draft !== undefined && draft.trim() !== '' && !parsePlace(draft)
+        return (
+          <div key={i} className="d-shop">
+            <Field label={s('shopName')}><input value={sh.name} maxLength={40} onChange={(e) => edit(i, { name: e.target.value })} /></Field>
+            <Field label={s('shopPlace')} hint={bad ? s('shopPlaceBad') : `${sh.lat.toFixed(5)}, ${sh.lng.toFixed(5)}`}>
+              <input dir="ltr" value={draft ?? ''} placeholder={`${sh.lat}, ${sh.lng}`} onChange={(e) => place(i, e.target.value)} />
+            </Field>
+            <div className="d-shop-acts">
+              <a className="d-btn text small" href={`https://www.google.com/maps?q=${sh.lat},${sh.lng}`} target="_blank" rel="noreferrer">{s('openInMaps')}</a>
+              <button type="button" className="d-btn text small" disabled={finding === i} onClick={() => here(i)}>{finding === i ? s('locFinding') : s('shopHere')}</button>
+              <button type="button" className="d-btn text small danger" onClick={() => save(shops.filter((_, j) => j !== i))}>{s('remove')}</button>
+            </div>
+          </div>
+        )
+      })}
+      {!shops.length && <p className="d-hint">{s('shopsNone')}</p>}
+      <button type="button" className="d-btn" onClick={() => save([...shops, { name: branchName(data.branch), lat: 0, lng: 0 }])}><I.plus />{s('shopAdd')}</button>
     </Card>
   )
 }
