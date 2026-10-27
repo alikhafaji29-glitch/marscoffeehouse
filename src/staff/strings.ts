@@ -393,6 +393,8 @@ const S = {
   dispPhone: ["Driver's phone", 'رقم السائق', 'ژمارەی شۆفێر'],
   dispWa: ['Send route on WhatsApp', 'إرسال المسار عبر واتساب', 'ناردنی ڕێگا بە واتسئاپ'],
   dispWaDone: ['WhatsApp opened for {phone}: tap send there.', 'فُتح واتساب للرقم {phone}: اضغط إرسال هناك.', 'واتسئاپ بۆ {phone} کرایەوە: لەوێ ناردن دابگرە.'],
+  dispWaSent: ['Sent to {phone}: {ok} of {n}, in stop order.', 'أُرسل إلى {phone}: {ok} من {n}، بترتيب المحطات.', 'نێردرا بۆ {phone}: {ok} لە {n}، بە ڕیزی وەستانەکان.'],
+  dispWaFailed: ['Not sent: #{code} ({why})', 'لم يُرسل: #{code} ({why})', 'نەنێردرا: #{code} ({why})'],
   dispWaHead: ['Route {r} · {n} stops', 'المسار {r} · {n} محطات', 'ڕێگای {r} · {n} وەستان'],
   dispWaLink: ['Route in Google Maps', 'المسار في خرائط Google', 'ڕێگا لە Google Maps'],
   dispSendDriver: ['Send driver', 'إرسال السائق', 'ناردنی شۆفێر'],

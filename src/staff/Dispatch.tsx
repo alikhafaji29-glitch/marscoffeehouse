@@ -4,7 +4,7 @@ import type { Lang } from '../i18n'
 import type { Order } from '../account'
 import { waNumber } from '../account'
 import { branchName, settingsFor, useStaff } from './store'
-import { moveOrder } from './remote'
+import { moveOrder, sendWhatsApp } from './remote'
 import { sIn, useS } from './strings'
 import { Modal } from './ui'
 import { km, orderStops, planRoutes, routeLink } from './routes'
@@ -16,9 +16,10 @@ import { markSent, orderText } from './Orders'
  * suggested (routes.ts) and staff move an order between routes if they know better. "Send driver" moves every order
  * of the route to On the way; no WhatsApp from here (owner, 2026-10-27: "no need for it, instead put send driver"), the
  * card's buttons still send one. "Open route" / "Copy route link" give a Google Maps link through the stops.
- * The driver's phone + "Send route on WhatsApp" (owner, 2026-10-27) opens WhatsApp on this device with the whole route
- * written in (the Maps link, then each stop as the card would send it), to that number; staff tap send there. Not through
- * the WhatsApp API: Meta lets a business send free text only to someone who wrote to it in the last 24 hours.
+ * The driver's phone + "Send route on WhatsApp" (owner, 2026-10-27, "option 1"): every order of the route goes from the
+ * business number to that phone, one after another in stop order, as the card's driver buttons send it (the approved
+ * message with the map pin on top; a pinless order without the pin). Where the WhatsApp sending is not set up (the
+ * demo), WhatsApp opens on this device with the whole route written in instead, as the cards do.
  * Kirkuk has two shops: staff pick where they leave from.
  */
 type Stop = { o: Order; key: string; pt?: Pt }
@@ -49,7 +50,8 @@ export function Dispatch({ orders: given, onClose }: { orders: Order[]; onClose:
   const [sent, setSent] = useState<Record<number, number>>({}) // route → how many orders went On the way
   const [copied, setCopied] = useState(-1)
   const [phones, setPhones] = useState<Record<number, string>>({})
-  const [waSent, setWaSent] = useState<Record<number, string>>({})
+  const [waSent, setWaSent] = useState<Record<number, { phone: string; ok: number; n: number; failed: { code: string; why: string }[]; opened?: boolean }>>({})
+  const [waBusy, setWaBusy] = useState(-1)
 
   const chosen = orders.filter((o) => picked.has(keyOf(o)))
   const pinned: Stop[] = chosen.filter((o) => ptOf(o)).map((o) => ({ o, key: keyOf(o), pt: ptOf(o)! }))
@@ -80,12 +82,29 @@ export function Dispatch({ orders: given, onClose }: { orders: Order[]; onClose:
     for (const { o } of routes[r].stops) moveOrder(o, 'onway')
     setSent({ ...sent, [r]: routes[r].stops.length })
   }
-  const sendWa = (r: number) => {
+  const sendWa = async (r: number) => {
     const phone = phones[r] ?? ''
-    const w = window.open(`https://wa.me/${waNumber(phone)}?text=${encodeURIComponent(routeText(lang, branch, r, routes[r].stops, routes[r].link))}`, '_blank')
-    if (w) w.opener = null
-    for (const { o } of routes[r].stops) markSent(o, phone) // the cards show "Sent to 0750…"
-    setWaSent({ ...waSent, [r]: phone })
+    const stops = routes[r].stops
+    const failed: { code: string; why: string }[] = []
+    let ok = 0
+    setWaBusy(r)
+    for (const { o } of stops) {
+      // one after another, so they arrive in stop order
+      const res = o.uid ? await sendWhatsApp(o.uid, waNumber(phone), orderText(o, lang), lang, phone) : { ok: false, reason: 'no_backend' }
+      if (res.ok) { markSent(o, phone, true); ok++; continue }
+      if (res.reason === 'not_configured' || res.reason === 'no_backend' || res.reason === 'unreachable') {
+        // no WhatsApp sending here: the whole route written into WhatsApp on this device, staff tap send
+        const w = window.open(`https://wa.me/${waNumber(phone)}?text=${encodeURIComponent(routeText(lang, branch, r, stops, routes[r].link))}`, '_blank')
+        if (w) w.opener = null
+        for (const x of stops) markSent(x.o, phone)
+        setWaSent({ ...waSent, [r]: { phone, ok: 0, n: stops.length, failed: [], opened: true } })
+        setWaBusy(-1)
+        return
+      }
+      failed.push({ code: o.id, why: res.message || res.reason || '?' })
+    }
+    setWaSent({ ...waSent, [r]: { phone, ok, n: stops.length, failed } })
+    setWaBusy(-1)
   }
   const copy = async (r: number) => {
     try { await navigator.clipboard.writeText(routes[r].link); setCopied(r); setTimeout(() => setCopied(-1), 2000) } catch { /* no clipboard: Open route still works */ }
@@ -164,10 +183,11 @@ export function Dispatch({ orders: given, onClose }: { orders: Order[]; onClose:
                       {rt.stops.length > 0 && (
                         <div className="disp-wa">
                           <input type="tel" dir="ltr" inputMode="tel" maxLength={20} placeholder={s('dispPhone')} aria-label={s('dispPhone')} value={phones[r] ?? ''} onChange={(e) => setPhones({ ...phones, [r]: e.target.value })} />
-                          <button type="button" className="staff-wa" disabled={(phones[r] ?? '').replace(/\D/g, '').length < 8} onClick={() => sendWa(r)}>{s('dispWa')}</button>
+                          <button type="button" className="staff-wa" disabled={waBusy >= 0 || (phones[r] ?? '').replace(/\D/g, '').length < 8} onClick={() => void sendWa(r)}>{waBusy === r ? s('waSending') : s('dispWa')}</button>
                         </div>
                       )}
-                      {waSent[r] && <p className="d-hint">{s('dispWaDone', { phone: waSent[r] })}</p>}
+                      {waSent[r] && <p className="d-hint">{waSent[r].opened ? s('dispWaDone', { phone: waSent[r].phone }) : s('dispWaSent', { phone: waSent[r].phone, ok: waSent[r].ok, n: waSent[r].n })}</p>}
+                      {waSent[r]?.failed.map((f) => <p key={f.code} className="staff-wa-failed">{s('dispWaFailed', { code: f.code, why: f.why })}</p>)}
                       {sure === r && (
                         <div className="staff-prev-confirm" role="alertdialog">
                           <p>{s('dispSendSure', { n: rt.stops.length, r: r + 1 })}</p>
