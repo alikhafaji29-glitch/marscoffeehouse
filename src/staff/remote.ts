@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from 'react'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { setOrderStatus } from '../account'
-import type { Order } from '../account'
+import { localPreviousPins, setOrderPinLocal, setOrderStatus } from '../account'
+import type { GeoPoint, Order } from '../account'
 import { backendOn, getClient } from '../backend'
 import type { Stage } from '../orders'
 import { fromRow } from '../sync'
@@ -168,4 +168,27 @@ export async function readWaLog(branch: string, day: Date): Promise<WaLogRow[] |
     id: r.id, code: r.order_code, driver: r.driver, to: r.to_number, template: r.template, status: r.status,
     error: r.error ?? undefined, at: Date.parse(r.created_at), deliveredAt: ms(r.delivered_at), readAt: ms(r.read_at), failedAt: ms(r.failed_at),
   }))
+}
+
+/* A delivery order without a pin can take the pin of the same customer's earlier order at this branch, once staff
+ * have confirmed with the customer that it is the same place (owner, 2026-10-27). The database checks it is the same
+ * customer and branch (order_previous_pins / order_use_pin); the demo looks in this browser's orders. */
+export type PrevPin = { code: string; at: number; address?: string; location: GeoPoint }
+export async function previousPins(o: Order): Promise<PrevPin[] | null> {
+  if (!backendOn) return localPreviousPins(o)
+  const sb = await getClient()
+  if (!sb || !o.uid) return null
+  const { data, error } = await sb.rpc('order_previous_pins', { p_uid: o.uid })
+  if (error) { console.warn('[backend] previous pins not read:', error.message); return null }
+  type Row = { code: string; created_at: string; address: string | null; location: GeoPoint }
+  return (data as Row[]).map((r) => ({ code: r.code, at: Date.parse(r.created_at), address: r.address || undefined, location: r.location }))
+}
+export async function applyPreviousPin(o: Order, pin: PrevPin): Promise<boolean> {
+  if (!backendOn) { setOrderPinLocal(o.id, pin.location, pin.code); return true }
+  const sb = await getClient()
+  if (!sb || !o.uid || !o.delivery) return false
+  const { error } = await sb.rpc('order_use_pin', { p_uid: o.uid, p_from: pin.code })
+  if (error) { console.warn('[backend] pin not added:', error.message); return false }
+  upsert({ ...o, delivery: { ...o.delivery, location: pin.location }, locationFrom: pin.code }) // at once on screen; the live channel confirms
+  return true
 }

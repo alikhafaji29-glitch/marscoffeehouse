@@ -17,6 +17,7 @@ export interface OrderRow {
   customer_name: string | null; customer_phone: string | null; delivery_phone: string | null; address: string | null
   location: { lat: number; lng: number; acc?: number } | null; gift_to: string | null
   offer: NonNullable<Order['offer']> | null; points: number; note: string | null; arrive_at: string | null
+  location_from?: string | null
 }
 export const toRow = (o: Order) => ({
   uid: o.uid!, code: o.id, branch: o.branch ?? 'erbil', total: o.total, items: o.items, pay: o.pay ?? 'pickup', fulfil: o.fulfil ?? 'pickup',
@@ -33,6 +34,7 @@ export const fromRow = (r: OrderRow): Order => ({
   delivery: r.fulfil === 'delivery' ? { phone: r.delivery_phone ?? r.customer_phone ?? '', address: r.address ?? '', location: r.location ?? undefined } : undefined,
   giftTo: r.gift_to ?? undefined, branch: r.branch, offer: r.offer ?? undefined, note: r.note ?? undefined,
   arriveAt: r.arrive_at ? Date.parse(r.arrive_at) : undefined,
+  ...(r.location_from && { locationFrom: r.location_from }),
 })
 
 let listening = false
