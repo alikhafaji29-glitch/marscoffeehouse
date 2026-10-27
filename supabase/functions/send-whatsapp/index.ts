@@ -74,11 +74,11 @@ const BRANCH: Record<string, Record<string, string>> = {
 }
 /** the template language for the dashboard's language: Kurdish is filed under Persian (WhatsApp has no Kurdish) */
 const templateLang = (lang?: string) => (lang === 'ku' ? 'fa' : lang === 'ar' ? 'ar' : 'en')
-// a replenishment (a free order sent to make up for another, 2026-10-28): the driver collects nothing
+// a gift (a replenishment: a free order sent to make up for another, 2026-10-28): the driver collects nothing
 const COLLECT: Record<string, { wallet: string; cur: string; free: string }> = {
-  en: { wallet: 'Paid by wallet', cur: 'IQD', free: 'Free replenishment: collect nothing' },
-  ar: { wallet: 'مدفوع بالمحفظة', cur: 'دينار', free: 'تعويض مجاني: لا تستلم أي مبلغ' },
-  fa: { wallet: 'بە جزدان پارەی دراوە', cur: 'دینار', free: 'قەرەبووی بێبەرامبەر: هیچ پارەیەک وەرمەگرە' },
+  en: { wallet: 'Paid by wallet', cur: 'IQD', free: 'Free gift: collect nothing' },
+  ar: { wallet: 'مدفوع بالمحفظة', cur: 'دينار', free: 'هدية مجانية: لا تستلم أي مبلغ' },
+  fa: { wallet: 'بە جزدان پارەی دراوە', cur: 'دینار', free: 'دیاری بێبەرامبەر: هیچ پارەیەک وەرمەگرە' },
 }
 
 Deno.serve(async (req: Request) => {

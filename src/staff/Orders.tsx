@@ -96,9 +96,10 @@ function DiscountBox({ o }: { o: Order }) {
 
 /* Replenishment (owner, 2026-10-28: "if something happens to the order, or the order arrived late, or any other reason,
  * they resend the order to the client as a replenishment gift for free"; baristas too; the items of the order, with the
- * option to add from the menu; no message to the customer). On an order that is Done, on its way or delivered. It makes
+ * option to add from the menu; no message to the customer). Shown as "Gift" (owner, 2026-10-28: "rename Replenishment to
+ * gift, put the option on cancelled orders too, and on received orders and preparing, all stages"), on any order. It makes
  * a new free order for the same customer, address and pin (order_replenish), which starts at Request received like any
- * order, says "Replenishment · free" on its card, receipt and driver message, and the driver collects nothing. */
+ * order, says "Gift · free" on its card, receipt and driver message, and the driver collects nothing. */
 function ReplenishBox({ o }: { o: Order }) {
   const { lang } = useLang()
   const s = useS()
@@ -502,7 +503,7 @@ export function OrderCard({ o, lead = LEAD_MIN, all = [] }: { o: Order; lead?: n
         <button type="button" className="staff-print" onClick={() => printReceipt(o, receipt(o))}><PrintIcon />{s('printReceipt')}</button>
         {o.fulfil === 'delivery' && !cancelled && isActive(o) && <SendToDriver o={o} />}
       </div>
-      {!o.replenish && !cancelled && ['done', 'onway', 'delivered'].includes(o.status ?? 'received') && <ReplenishBox o={o} />}
+      {!o.replenish && <ReplenishBox o={o} />}
       {cancelled && <p className="staff-cancel-reason"><b>{t('cancelReason')}:</b> {reasonText(o.cancelReason, t)}</p>}
       {!cancelled && <ol className="staff-steps" aria-label={t('trackOrder')}>
         {stages.map((st, i) => (
