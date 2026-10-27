@@ -1,27 +1,42 @@
 import { useMemo, useState } from 'react'
+import { useLang } from '../i18n'
+import type { Lang } from '../i18n'
 import type { Order } from '../account'
-import { settingsFor, useStaff } from './store'
+import { waNumber } from '../account'
+import { branchName, settingsFor, useStaff } from './store'
 import { moveOrder } from './remote'
-import { useS } from './strings'
+import { sIn, useS } from './strings'
 import { Modal } from './ui'
 import { km, orderStops, planRoutes, routeLink } from './routes'
 import type { Pt } from './routes'
+import { markSent, orderText } from './Orders'
 
 /*
  * Delivery routes (owner, 2026-10-27): staff tick the ready orders and say how many drivers are going; the routes are
  * suggested (routes.ts) and staff move an order between routes if they know better. "Send driver" moves every order
  * of the route to On the way; no WhatsApp from here (owner, 2026-10-27: "no need for it, instead put send driver"), the
  * card's buttons still send one. "Open route" / "Copy route link" give a Google Maps link through the stops.
+ * The driver's phone + "Send route on WhatsApp" (owner, 2026-10-27) opens WhatsApp on this device with the whole route
+ * written in (the Maps link, then each stop as the card would send it), to that number; staff tap send there. Not through
+ * the WhatsApp API: Meta lets a business send free text only to someone who wrote to it in the last 24 hours.
  * Kirkuk has two shops: staff pick where they leave from.
  */
 type Stop = { o: Order; key: string; pt?: Pt }
 const keyOf = (o: Order) => o.uid ?? o.id
 const ptOf = (o: Order): Pt | undefined => (o.delivery?.location ? { lat: o.delivery.location.lat, lng: o.delivery.location.lng } : undefined)
 const fmtKm = (n: number) => (n < 1 ? `${Math.round(n * 1000)} m` : `${n.toFixed(1)} km`)
+/** the route as one WhatsApp message: which route, the Maps link, then every stop in order */
+function routeText(L: Lang, branch: string, r: number, stops: Stop[], link: string): string {
+  const lines = [`Mars CoffeeHouse · ${branchName(branch)} · ${sIn(L, 'dispWaHead', { r: r + 1, n: stops.length })}`]
+  if (link) lines.push(`${sIn(L, 'dispWaLink')}: ${link}`)
+  stops.forEach(({ o }, i) => lines.push('', `${i + 1}) #${o.id}`, ...orderText(o, L).split('\n').slice(2).filter(Boolean)))
+  return lines.join('\n')
+}
 
 export function Dispatch({ orders: given, onClose }: { orders: Order[]; onClose: () => void }) {
   // the orders as they were when the window opened: sending moves them to On the way, and the other routes must not reshuffle
   const [orders] = useState(given)
+  const { lang } = useLang()
   const s = useS()
   const branch = useStaff().branch
   const set = settingsFor(branch)
@@ -33,6 +48,8 @@ export function Dispatch({ orders: given, onClose }: { orders: Order[]; onClose:
   const [sure, setSure] = useState(-1)
   const [sent, setSent] = useState<Record<number, number>>({}) // route → how many orders went On the way
   const [copied, setCopied] = useState(-1)
+  const [phones, setPhones] = useState<Record<number, string>>({})
+  const [waSent, setWaSent] = useState<Record<number, string>>({})
 
   const chosen = orders.filter((o) => picked.has(keyOf(o)))
   const pinned: Stop[] = chosen.filter((o) => ptOf(o)).map((o) => ({ o, key: keyOf(o), pt: ptOf(o)! }))
@@ -62,6 +79,13 @@ export function Dispatch({ orders: given, onClose }: { orders: Order[]; onClose:
     setSure(-1)
     for (const { o } of routes[r].stops) moveOrder(o, 'onway')
     setSent({ ...sent, [r]: routes[r].stops.length })
+  }
+  const sendWa = (r: number) => {
+    const phone = phones[r] ?? ''
+    const w = window.open(`https://wa.me/${waNumber(phone)}?text=${encodeURIComponent(routeText(lang, branch, r, routes[r].stops, routes[r].link))}`, '_blank')
+    if (w) w.opener = null
+    for (const { o } of routes[r].stops) markSent(o, phone) // the cards show "Sent to 0750…"
+    setWaSent({ ...waSent, [r]: phone })
   }
   const copy = async (r: number) => {
     try { await navigator.clipboard.writeText(routes[r].link); setCopied(r); setTimeout(() => setCopied(-1), 2000) } catch { /* no clipboard: Open route still works */ }
@@ -137,6 +161,13 @@ export function Dispatch({ orders: given, onClose }: { orders: Order[]; onClose:
                           <button type="button" className="d-btn solid small" disabled={done} onClick={() => setSure(r)}>{s('dispSendDriver')}</button>
                         </div>
                       )}
+                      {rt.stops.length > 0 && (
+                        <div className="disp-wa">
+                          <input type="tel" dir="ltr" inputMode="tel" maxLength={20} placeholder={s('dispPhone')} aria-label={s('dispPhone')} value={phones[r] ?? ''} onChange={(e) => setPhones({ ...phones, [r]: e.target.value })} />
+                          <button type="button" className="staff-wa" disabled={(phones[r] ?? '').replace(/\D/g, '').length < 8} onClick={() => sendWa(r)}>{s('dispWa')}</button>
+                        </div>
+                      )}
+                      {waSent[r] && <p className="d-hint">{s('dispWaDone', { phone: waSent[r] })}</p>}
                       {sure === r && (
                         <div className="staff-prev-confirm" role="alertdialog">
                           <p>{s('dispSendSure', { n: rt.stops.length, r: r + 1 })}</p>
