@@ -30,6 +30,13 @@
 //
 // Every send is written to public.wa_messages (owner, 2026-10-25: "wa msgs log"; HANDOFF decision 205) with Meta's
 // message id, or as failed with Meta's reason; wa-webhook then marks it delivered / read / failed.
+//
+// kind "location_request" (owner, 2026-10-26; template approved 2026-10-28; HANDOFF decision 223): the dashboard's "Ask
+// for location" on a delivery order without a pin. Goes to the CUSTOMER (the order's own phone, never a number from the
+// browser) as the template mars_location_request, in the language staff chose when sending (owner, 2026-10-28), else the
+// one the customer ordered in (orders.lang); Kurdish filed as fa, then Arabic: {{1}} "#code"  {{2}} branch  {{3}} the branch phone from Tools (branch_config settings.phone).
+// orders.wa.asked_at is set, so wa-webhook knows which order a location that comes back belongs to, and orders.wa.lang,
+// so its automatic replies use the same language.
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
 const GRAPH = Deno.env.get('WA_GRAPH_VERSION') ?? 'v23.0'
@@ -46,6 +53,7 @@ const cors = (o: string | null) => ({
 type OrderRow = {
   uid: string; code: string; branch: string; customer_name: string | null; customer_phone: string | null; delivery_phone: string | null
   address: string | null; location: { lat: number; lng: number } | null; items: string[]; total: number; pay: string | null
+  fulfil: string; status: string; gift_to: string | null; lang: string | null; wa: Record<string, unknown> | null
 }
 
 /** Iraqi numbers as WhatsApp wants them: 0750 123 4567 → 9647501234567 */
@@ -80,9 +88,10 @@ Deno.serve(async (req: Request) => {
 
   const auth = req.headers.get('authorization') ?? ''
   if (!auth.startsWith('Bearer ')) return json(401, { ok: false, reason: 'not_signed_in' })
-  let body: { order_uid?: string; to?: string; text?: string; lang?: string; driver?: string }
+  let body: { order_uid?: string; to?: string; text?: string; lang?: string; driver?: string; kind?: string }
   try { body = await req.json() } catch { return json(400, { ok: false, reason: 'bad_request' }) }
-  if (!body.order_uid || !body.to) return json(400, { ok: false, reason: 'bad_request' })
+  const askLoc = body.kind === 'location_request'
+  if (!body.order_uid || (!body.to && !askLoc)) return json(400, { ok: false, reason: 'bad_request' })
 
   // everything below is read as the caller, so the database's row rules apply
   // the project's public key: the one the platform provides, else the publishable key the site sent with the call
@@ -96,14 +105,20 @@ Deno.serve(async (req: Request) => {
   const { data: staff } = await sb.from('staff').select('branch').eq('user_id', u.user.id).maybeSingle()
   if (!staff) return json(403, { ok: false, reason: 'not_staff' })
   const { data: o } = await sb.from('orders')
-    .select('uid,code,branch,customer_name,customer_phone,delivery_phone,address,location,items,total,pay')
+    .select('uid,code,branch,customer_name,customer_phone,delivery_phone,address,location,items,total,pay,fulfil,status,gift_to,lang,wa')
     .eq('uid', body.order_uid).maybeSingle<OrderRow>()
   if (!o || (staff.branch && staff.branch !== o.branch)) return json(404, { ok: false, reason: 'no_order' })
 
   const token = Deno.env.get('WA_TOKEN')
   const phoneId = Deno.env.get('WA_PHONE_ID')
   if (!token || !phoneId) return json(200, { ok: false, reason: 'not_configured' })
-  const to = waNumber(body.to)
+  const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false, autoRefreshToken: false } })
+  if (askLoc) {
+    if (o.fulfil !== 'delivery' || o.gift_to) return json(400, { ok: false, reason: 'not_delivery' })
+    if (o.location) return json(400, { ok: false, reason: 'has_location' })
+    if (o.status === 'delivered' || o.status === 'cancelled') return json(400, { ok: false, reason: 'closed' })
+  }
+  const to = waNumber(askLoc ? (o.delivery_phone || o.customer_phone || '') : body.to!)
   if (to.length < 10 || to.length > 15) return json(400, { ok: false, reason: 'bad_number' })
 
   const template = Deno.env.get('WA_TEMPLATE') || 'mars_delivery_order'
@@ -134,7 +149,22 @@ Deno.serve(async (req: Request) => {
   }
   let sent: Sent = { r: new Response(null, { status: 500 }), res: {} }
   let used = ''
-  {
+  if (askLoc) {
+    const { data: cfg } = await admin.from('branch_config').select('settings').eq('branch', o.branch).maybeSingle()
+    const branchPhone = String((cfg?.settings as { phone?: string } | null)?.phone ?? '').trim()
+    if (!branchPhone) return json(200, { ok: false, reason: 'no_branch_phone' })
+    const chosen = body.lang === 'ar' || body.lang === 'ku' || body.lang === 'en' ? body.lang : o.lang ?? 'en'
+    const ctl = templateLang(chosen)
+    for (const lang of ctl === 'fa' ? ['fa', 'ar'] : [ctl]) {
+      const parameters = [`#${o.code}`, BRANCH[lang][o.branch] ?? o.branch, branchPhone].map((t) => ({ type: 'text', text: flat(t) }))
+      sent = await post({ type: 'template', template: { name: 'mars_location_request', language: { code: lang }, components: [{ type: 'body', parameters }] } })
+      if (sent.res.messages?.length) { used = `mars_location_request/${lang}`; break }
+    }
+    if (sent.res.messages?.length) {
+      const { error } = await admin.from('orders').update({ wa: { ...(o.wa ?? {}), asked_at: new Date().toISOString(), asked_by: u.user.id, lang: chosen } }).eq('uid', o.uid)
+      if (error) console.warn('[send-whatsapp] asked_at not saved:', error.message)
+    }
+  } else {
     // the pin version first, then the plain one; Kurdish (fa) then Arabic, until Meta takes one
     const names = pin ? [SHORT, `${template}_loc`, template] : [template]
     const langs = tl === 'fa' ? ['fa', 'ar'] : [tl]
@@ -148,19 +178,18 @@ Deno.serve(async (req: Request) => {
       }
     }
   }
-  // no template accepted yet (in review, or refused): the text, then the pin, as before
-  if (!sent.res.messages?.length) {
+  // no template accepted yet (in review, or refused): the text, then the pin, as before (not for the customer's request)
+  if (!sent.res.messages?.length && !askLoc) {
     sent = await post({ type: 'text', text: { body: (body.text ?? '').slice(0, 4000) || `Mars order #${o.code}`, preview_url: true } })
     // the pin right after the text, as WhatsApp shows a shared location
     if (sent.res.messages?.length && pin) await post({ type: 'location', location: pin })
   }
   const { r, res } = sent
   // the log, written with the service role (staff may only read it)
-  const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false, autoRefreshToken: false } })
   const ok = r.ok && !!res.messages?.length
   const { error: logErr } = await admin.from('wa_messages').insert({
     wamid: ok ? res.messages![0].id : null, order_uid: o.uid, order_code: o.code, branch: o.branch, to_number: to,
-    driver: (body.driver ?? '').slice(0, 60), template: used || 'text', status: ok ? 'sent' : 'failed', sent_by: u.user.id,
+    driver: askLoc ? 'customer' : (body.driver ?? '').slice(0, 60), template: used || 'text', status: ok ? 'sent' : 'failed', sent_by: u.user.id,
     ...(!ok && { error: (res.error?.message ?? `HTTP ${r.status}`).slice(0, 500), failed_at: new Date().toISOString() }),
   })
   if (logErr) console.warn('[send-whatsapp] log not written:', logErr.message)

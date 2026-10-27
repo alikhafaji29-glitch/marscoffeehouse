@@ -38,7 +38,9 @@ export interface Order {
   customer?: { name: string; phone: string }
   fulfil?: 'pickup' | 'delivery'
   delivery?: Delivery // phone to call + address, delivery orders only
-  locationFrom?: string // the pin was taken from this earlier order of the same customer, after staff checked with them (2026-10-27)
+  locationFrom?: string // the pin was taken from this earlier order of the same customer, after staff checked with them (2026-10-27); 'wa': the customer sent it on WhatsApp
+  lang?: 'en' | 'ar' | 'ku' // the site's language when it was placed: WhatsApp messages to the customer use it (2026-10-28)
+  wa?: { askedAt?: number; replies?: WaReply[] } // staff asked for the location on WhatsApp; what the customer sent back that was not a location
   giftTo?: string // a drink sent to a friend: their number (delivery goes to them, the sender paid)
   branch?: string // the branch picked on the Order screen (staff/store.ts); missing = the first branch
   offer?: { name: string; price: number; count?: number; fee?: number; pre?: boolean; wantAt?: number } // a combo from the dashboard's Offers (Positive Hours); count = how many combos (1 when missing); pre = placed outside its hours; wantAt = the time the customer chose for a pre-order (ms)
@@ -48,6 +50,8 @@ export interface Order {
   gone?: boolean // this device only: the database no longer has it (deleted by the café or the owner): not followed, not shown
   held?: 'limit' // this device only: the backend refused it for now (10 orders an hour from one device); retried
 }
+/** something a customer sent on WhatsApp after the location request: a text, a voice note, a photo… or a second pin */
+export interface WaReply { kind: string; text?: string; lat?: number; lng?: number; at: number }
 export interface GeoPoint { lat: number; lng: number; acc?: number } // acc: the phone's own accuracy estimate, metres
 export interface Delivery { phone: string; address: string; location?: GeoPoint } // location: the pin from "Share my location"
 export interface Account {

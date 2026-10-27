@@ -110,6 +110,14 @@ export function StaffScreen() {
     if (ok && autoPrint) fresh.filter((o) => (o.branch ?? BRANCHES[0].id) === data.branch && isActive(o)).forEach((o) => { void printReceipt(o, receipt(o)) })
     known.current = ids
   }, [all, ok, sound]) // eslint-disable-line react-hooks/exhaustive-deps
+  // a chime when a customer's location arrives on WhatsApp after "Ask for location" (2026-10-28)
+  const waPins = all.filter((o) => o.locationFrom === 'wa' && o.delivery?.location).map((o) => `${o.uid ?? o.id}:${o.delivery!.location!.lat},${o.delivery!.location!.lng}`).join('|')
+  const knownWaPins = useRef<string | null>(null)
+  useEffect(() => {
+    const before = knownWaPins.current
+    if (before !== null && ok && sound && waPins.split('|').some((p) => p && !before.split('|').includes(p))) chime()
+    knownWaPins.current = waPins
+  }, [waPins]) // eslint-disable-line react-hooks/exhaustive-deps
   // and a chime when an order waiting under Later comes due (its time within `lead` minutes) and moves to Active
   const laterKey = orders.filter((o) => isLater(o, now, lead)).map((o) => o.uid ?? o.id).join(',')
   const wasLater = useRef<string[] | null>(null)
