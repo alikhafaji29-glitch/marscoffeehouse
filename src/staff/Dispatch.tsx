@@ -1,22 +1,18 @@
 import { useMemo, useState } from 'react'
-import { useLang } from '../i18n'
 import type { Order } from '../account'
-import { waNumber } from '../account'
 import { settingsFor, useStaff } from './store'
-import type { Driver } from './store'
-import { moveOrder, sendWhatsApp } from './remote'
+import { moveOrder } from './remote'
 import { useS } from './strings'
 import { Modal } from './ui'
 import { km, orderStops, planRoutes, routeLink } from './routes'
 import type { Pt } from './routes'
-import { markSent, orderText } from './Orders'
 
 /*
  * Delivery routes (owner, 2026-10-27): staff tick the ready orders and say how many drivers are going; the routes are
- * suggested (routes.ts) and staff move an order between routes if they know better, then send each route to the
- * delivery company taking it (Zhin, wadi app… from Tools → Delivery drivers): every order of the route goes to that
- * company's WhatsApp in stop order, as with the card's buttons, and moves to On the way. "Open route" / "Copy route
- * link" give a Google Maps link through the stops for the rider. Kirkuk has two shops: staff pick where they leave from.
+ * suggested (routes.ts) and staff move an order between routes if they know better. "Send driver" moves every order
+ * of the route to On the way; no WhatsApp from here (owner, 2026-10-27: "no need for it, instead put send driver"), the
+ * card's buttons still send one. "Open route" / "Copy route link" give a Google Maps link through the stops.
+ * Kirkuk has two shops: staff pick where they leave from.
  */
 type Stop = { o: Order; key: string; pt?: Pt }
 const keyOf = (o: Order) => o.uid ?? o.id
@@ -26,19 +22,16 @@ const fmtKm = (n: number) => (n < 1 ? `${Math.round(n * 1000)} m` : `${n.toFixed
 export function Dispatch({ orders: given, onClose }: { orders: Order[]; onClose: () => void }) {
   // the orders as they were when the window opened: sending moves them to On the way, and the other routes must not reshuffle
   const [orders] = useState(given)
-  const { lang } = useLang()
   const s = useS()
   const branch = useStaff().branch
   const set = settingsFor(branch)
   const shops = (set.shops ?? []).filter((sh) => sh.lat || sh.lng)
-  const drivers: Driver[] = (set.drivers ?? []).filter((d) => d.phone.replace(/\D/g, '').length >= 8)
   const [picked, setPicked] = useState<Set<string>>(() => new Set(orders.map(keyOf)))
   const [count, setCount] = useState(() => Math.min(2, Math.max(1, orders.length)))
   const [shopIdx, setShopIdx] = useState<number | null>(shops.length === 1 ? 0 : null)
   const [moves, setMoves] = useState<Record<string, number>>({})
-  const [sure, setSure] = useState<{ route: number; driver: Driver } | null>(null)
-  const [busy, setBusy] = useState(-1)
-  const [results, setResults] = useState<Record<number, { name: string; ok: number; n: number; failed: { code: string; why: string }[] }>>({})
+  const [sure, setSure] = useState(-1)
+  const [sent, setSent] = useState<Record<number, number>>({}) // route → how many orders went On the way
   const [copied, setCopied] = useState(-1)
 
   const chosen = orders.filter((o) => picked.has(keyOf(o)))
@@ -63,24 +56,12 @@ export function Dispatch({ orders: given, onClose }: { orders: Order[]; onClose:
     return { stops: [...withPin, ...noPin] as Stop[], legs, total: legs.reduce((a, b) => a + b, 0), link: start ? routeLink(start, withPin.map((x) => x.pt)) : '' }
   })
   const unrouted = [...pinned, ...loose].filter((x) => routeOf(x) < 0 || routeOf(x) >= count)
-  const reset = () => { setMoves({}); setSure(null) }
+  const reset = () => { setMoves({}); setSure(-1) }
 
-  const send = async (r: number, d: Driver) => {
-    setSure(null)
-    setBusy(r)
-    const L = d.lang ?? lang
-    const name = d.name || d.phone
-    const failed: { code: string; why: string }[] = []
-    let ok = 0
-    const stops = routes[r].stops
-    for (const { o } of stops) {
-      // the same message as the card's driver button, one after another so they arrive in stop order
-      const res = o.uid ? await sendWhatsApp(o.uid, waNumber(d.phone), orderText(o, L), L, name) : { ok: false, reason: 'no_backend' }
-      if (res.ok || res.reason === 'no_backend') { markSent(o, name, res.ok); moveOrder(o, 'onway'); ok++ }
-      else failed.push({ code: o.id, why: res.message || res.reason || '?' })
-    }
-    setResults({ ...results, [r]: { name, ok, n: stops.length, failed } })
-    setBusy(-1)
+  const send = (r: number) => {
+    setSure(-1)
+    for (const { o } of routes[r].stops) moveOrder(o, 'onway')
+    setSent({ ...sent, [r]: routes[r].stops.length })
   }
   const copy = async (r: number) => {
     try { await navigator.clipboard.writeText(routes[r].link); setCopied(r); setTimeout(() => setCopied(-1), 2000) } catch { /* no clipboard: Open route still works */ }
@@ -121,13 +102,12 @@ export function Dispatch({ orders: given, onClose }: { orders: Order[]; onClose:
           )}
         </section>
         {!shops.length && <p className="d-hint">{s('dispNoShop')}</p>}
-        {!drivers.length && <p className="d-hint">{s('dispNoDrivers')}</p>}
         {needShop ? <p className="d-error">{s('dispFromFirst')}</p>
           : !chosen.length ? <p className="d-hint">{s('dispNothing')}</p>
             : (
               <div className="disp-routes">
                 {routes.map((rt, r) => {
-                  const res = results[r]
+                  const done = sent[r] !== undefined
                   return (
                     <section key={r} className="disp-route">
                       <header>
@@ -142,7 +122,7 @@ export function Dispatch({ orders: given, onClose }: { orders: Order[]; onClose:
                               <small>{x.o.delivery?.address || '—'}{x.pt ? ` · ${i === 0 ? s('dispFromShop') : s('dispFromPrev')} ${fmtKm(rt.legs[i])}` : ` · ${s('dispNoPinShort')}`}</small>
                             </span>
                             {count > 1 && (
-                              <select aria-label={s('dispMoveTo')} value={r} onChange={(e) => { setMoves({ ...moves, [x.key]: Number(e.target.value) }); setSure(null) }}>
+                              <select aria-label={s('dispMoveTo')} value={r} disabled={done} onChange={(e) => { setMoves({ ...moves, [x.key]: Number(e.target.value) }); setSure(-1) }}>
                                 {Array.from({ length: count }, (_, j) => <option key={j} value={j}>{s('dispRoute', { n: j + 1 })}</option>)}
                                 <option value={-1}>{s('dispNotAssigned')}</option>
                               </select>
@@ -154,20 +134,17 @@ export function Dispatch({ orders: given, onClose }: { orders: Order[]; onClose:
                         <div className="disp-acts">
                           {rt.link && <a className="d-btn text small" href={rt.link} target="_blank" rel="noreferrer">{s('dispOpenRoute')}</a>}
                           {rt.link && <button type="button" className="d-btn text small" onClick={() => void copy(r)}>{copied === r ? s('dispCopied') : s('dispCopy')}</button>}
-                          {drivers.map((d, i) => (
-                            <button key={i} type="button" className="staff-wa" disabled={busy >= 0 || !!res} onClick={() => setSure({ route: r, driver: d })}>{busy === r ? s('waSending') : s('dispSendTo', { name: d.name || d.phone })}</button>
-                          ))}
+                          <button type="button" className="d-btn solid small" disabled={done} onClick={() => setSure(r)}>{s('dispSendDriver')}</button>
                         </div>
                       )}
-                      {sure?.route === r && (
+                      {sure === r && (
                         <div className="staff-prev-confirm" role="alertdialog">
-                          <p>{s('dispSendSure', { n: rt.stops.length, r: r + 1, name: sure.driver.name || sure.driver.phone })}</p>
-                          <button type="button" className="staff-prev-yes" onClick={() => void send(r, sure.driver)}>{s('dispSend')}</button>
-                          <button type="button" className="link-btn" onClick={() => setSure(null)}>{s('cancel')}</button>
+                          <p>{s('dispSendSure', { n: rt.stops.length, r: r + 1 })}</p>
+                          <button type="button" className="staff-prev-yes" onClick={() => send(r)}>{s('dispSendDriver')}</button>
+                          <button type="button" className="link-btn" onClick={() => setSure(-1)}>{s('cancel')}</button>
                         </div>
                       )}
-                      {res && <p className="d-hint">{s('dispSent', { name: res.name, ok: res.ok, n: res.n })}</p>}
-                      {res?.failed.map((f) => <p key={f.code} className="staff-wa-failed">{s('dispFailed', { code: f.code, why: f.why })}</p>)}
+                      {done && <p className="d-hint">{s('dispSent', { n: sent[r] })}</p>}
                     </section>
                   )
                 })}
