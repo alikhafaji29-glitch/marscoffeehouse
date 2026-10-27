@@ -571,6 +571,8 @@ const S = {
   prevPins: ['Previous pins of this customer', 'المواقع السابقة لهذا الزبون', 'شوێنە پێشووەکانی ئەم کڕیارە'],
   prevPinsLoading: ['Looking for earlier pins…', 'جارٍ البحث عن مواقع سابقة…', 'گەڕان بەدوای شوێنە پێشووەکان…'],
   prevPinsNone: ['No earlier pins for this customer at this branch.', 'لا توجد مواقع سابقة لهذا الزبون في هذا الفرع.', 'هیچ شوێنێکی پێشووی ئەم کڕیارە لەم لقەدا نییە.'],
+  prevTyped: ['Typed address', 'العنوان المكتوب', 'ناونیشانی نووسراو'],
+  prevNoTyped: ['No address typed with this pin', 'لم يُكتب عنوان مع هذا الموقع', 'هیچ ناونیشانێک لەگەڵ ئەم شوێنە نەنووسرابوو'],
   prevPinsClose: ['Close', 'إغلاق', 'داخستن'],
   usePinBtn: ['Use this pin', 'استخدام هذا الموقع', 'ئەم شوێنە بەکاربهێنە'],
   usePinConfirm: ['Have you confirmed with the customer that this order goes to this same place?', 'هل تأكدت مع الزبون أن هذا الطلب يُوصل إلى المكان نفسه؟', 'ئایا لەگەڵ کڕیارەکە دڵنیا بوویتەوە کە ئەم داواکارییە بۆ هەمان شوێن دەچێت؟'],
