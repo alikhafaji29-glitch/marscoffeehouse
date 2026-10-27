@@ -128,6 +128,16 @@ export function moveOrder(o: Order, stage: Stage) {
  *  with a reason when it cannot: no backend, the function not there yet ('unreachable'), not set up ('not_configured'),
  *  or Meta refused ('meta', with Meta's message); the caller then opens WhatsApp instead */
 export type WaResult = { ok: boolean; reason?: string; message?: string }
+/** "Ask for location": the approved template to the customer's own number, in their language (send-whatsapp works it out) */
+export async function askLocation(o: Order): Promise<WaResult> {
+  const sb = backendOn && o.uid ? await getClient() : null
+  if (!sb) return { ok: false, reason: 'no_backend' }
+  const { data, error } = await sb.functions.invoke('send-whatsapp', { body: { order_uid: o.uid, kind: 'location_request' } })
+  if (error) return { ok: false, reason: 'unreachable', message: error.message }
+  const r = (data as WaResult) ?? { ok: false, reason: 'unreachable' }
+  if (r.ok) upsert({ ...o, wa: { ...o.wa, askedAt: Date.now() } }) // at once on screen; the live channel confirms
+  return r
+}
 export async function sendWhatsApp(orderUid: string, to: string, text: string, lang: string, driver = ''): Promise<WaResult> {
   const sb = backendOn ? await getClient() : null
   if (!sb) return { ok: false, reason: 'no_backend' }

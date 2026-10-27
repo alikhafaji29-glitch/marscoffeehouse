@@ -18,6 +18,12 @@ export interface OrderRow {
   location: { lat: number; lng: number; acc?: number } | null; gift_to: string | null
   offer: NonNullable<Order['offer']> | null; points: number; note: string | null; arrive_at: string | null
   location_from?: string | null
+  lang?: 'en' | 'ar' | 'ku' | null
+  wa?: { asked_at?: string; replies?: { kind: string; text?: string; lat?: number; lng?: number; at: string }[] } | null
+}
+/** the site's language on this device (i18n keeps it here) */
+const siteLang = (): 'en' | 'ar' | 'ku' => {
+  try { const l = localStorage.getItem('mars-lang'); return l === 'ar' || l === 'ku' ? l : 'en' } catch { return 'en' }
 }
 export const toRow = (o: Order) => ({
   uid: o.uid!, code: o.id, branch: o.branch ?? 'erbil', total: o.total, items: o.items, pay: o.pay ?? 'pickup', fulfil: o.fulfil ?? 'pickup',
@@ -25,6 +31,7 @@ export const toRow = (o: Order) => ({
   delivery_phone: o.delivery?.phone ?? null, address: o.delivery?.address ?? null, location: o.delivery?.location ?? null,
   gift_to: o.giftTo ?? null, offer: o.offer ?? null, points: o.points, note: o.note ?? null,
   arrive_at: o.arriveAt ? new Date(o.arriveAt).toISOString() : null,
+  lang: o.lang ?? siteLang(),
 })
 export const fromRow = (r: OrderRow): Order => ({
   id: r.code, uid: r.uid, synced: true, at: Date.parse(r.created_at), total: r.total, items: r.items, points: r.points, pay: r.pay,
@@ -35,6 +42,8 @@ export const fromRow = (r: OrderRow): Order => ({
   giftTo: r.gift_to ?? undefined, branch: r.branch, offer: r.offer ?? undefined, note: r.note ?? undefined,
   arriveAt: r.arrive_at ? Date.parse(r.arrive_at) : undefined,
   ...(r.location_from && { locationFrom: r.location_from }),
+  ...(r.lang && { lang: r.lang }),
+  ...(r.wa?.asked_at && { wa: { askedAt: Date.parse(r.wa.asked_at), replies: (r.wa.replies ?? []).map((x) => ({ ...x, at: Date.parse(x.at) })) } }),
 })
 
 let listening = false

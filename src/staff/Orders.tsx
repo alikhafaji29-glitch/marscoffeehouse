@@ -10,7 +10,7 @@ import type { ReceiptText } from './receipt'
 import type { Stage } from '../orders'
 import { IconCheck, IconPin } from '../components/Icons'
 import { mapsLink } from '../components/ShareLocation'
-import { applyPreviousPin, cancelOrder, mergeOrders, moveOrder, previousPins, sendWhatsApp } from './remote'
+import { applyPreviousPin, askLocation, cancelOrder, mergeOrders, moveOrder, previousPins, sendWhatsApp } from './remote'
 import type { PrevPin } from './remote'
 import { sIn, useS } from './strings'
 import type { SKey } from './strings'
@@ -49,6 +49,52 @@ const SENT_KEY = 'mars-staff-sent'
 const readSent = (): Record<string, { name: string; at: number; api?: boolean }> => { try { return JSON.parse(localStorage.getItem(SENT_KEY) || '{}') } catch { return {} } }
 /* An order without a pin: the same customer's earlier pins at this branch, to add one after confirming with the
  * customer that it is the same place (owner, 2026-10-27: "for sure that's after they make sure it's the same location") */
+/* "Ask for location (WhatsApp)" (owner, 2026-10-26; template approved 2026-10-28): on a delivery order without a pin,
+ * the approved automated message goes to the customer's own number in the language they ordered in. When they send their
+ * location, wa-webhook puts it on this order (the card shows the map link and "sent by the customer on WhatsApp", and the
+ * dashboard chimes); what they send that is not a location is listed under the address. */
+function AskLocation({ o }: { o: Order }) {
+  const { lang } = useLang()
+  const s = useS()
+  const [busy, setBusy] = useState(false)
+  const [note, setNote] = useState('')
+  const ask = async () => {
+    setBusy(true); setNote('')
+    const r = await askLocation(o)
+    setBusy(false)
+    if (r.ok) return
+    setNote(r.reason === 'no_backend' ? s('askLocDemo') : r.reason === 'no_branch_phone' ? s('askLocNoPhone') : s('askLocFailed', { why: r.message || r.reason || '?' }))
+  }
+  const asked = o.wa?.askedAt
+  return (
+    <div className="staff-askloc">
+      {asked && <p className="staff-askloc-asked">{s('askLocAsked', { t: timeText(asked, lang) })}</p>}
+      <button type="button" className="staff-wa" disabled={busy} onClick={() => void ask()}><I.whatsapp />{busy ? s('waSending') : asked ? s('askLocAgain') : s('askLoc')}</button>
+      {note && <small className="staff-sent staff-wa-failed" role="alert">{note}</small>}
+    </div>
+  )
+}
+/** what the customer sent on WhatsApp that was not used as the order's location */
+function WaReplies({ o }: { o: Order }) {
+  const { lang } = useLang()
+  const s = useS()
+  const list = o.wa?.replies ?? []
+  if (!list.length) return null
+  const what = (k: string) => (k === 'audio' || k === 'voice' ? s('waKindAudio') : k === 'image' ? s('waKindImage') : k === 'video' ? s('waKindVideo') : k === 'location' ? s('waKindLocation') : s('waKindOther', { kind: k }))
+  return (
+    <div className="staff-wa-replies">
+      <span className="staff-sec-label">{s('waReplies')}</span>
+      <ul>
+        {list.map((r, i) => (
+          <li key={i}>
+            <b dir="ltr">{timeText(r.at, lang)}</b>{' · '}
+            {r.kind === 'text' && r.text ? <q>{r.text}</q> : r.lat !== undefined && r.lng !== undefined ? <a href={mapsLink({ lat: r.lat, lng: r.lng })} target="_blank" rel="noreferrer">{what('location')}</a> : <>{what(r.kind)}{r.text && <> · <q>{r.text}</q></>}</>}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
 const pinDate = (t: number) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ' · ' + new Date(t).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
 function PreviousPins({ o }: { o: Order }) {
   const s = useS()
@@ -284,8 +330,10 @@ export function OrderCard({ o, lead = LEAD_MIN, all = [] }: { o: Order; lead?: n
           <span className="staff-sec-label">{o.giftTo ? `${t('giftFor')} ${o.giftTo}` : s('secDeliverTo')}</span>
           {o.delivery.address && <p className="staff-address">{o.delivery.address}</p>}
           {o.delivery.location && <a className="staff-map" href={mapsLink(o.delivery.location)} target="_blank" rel="noreferrer"><IconPin />{s('openInMaps')}</a>}
-          {o.delivery.location && o.locationFrom && <small className="staff-pin-from">{s('pinFrom', { code: o.locationFrom })}</small>}
+          {o.delivery.location && o.locationFrom && <small className="staff-pin-from">{o.locationFrom === 'wa' ? s('pinFromWa') : s('pinFrom', { code: o.locationFrom })}</small>}
           {!o.delivery.location && !cancelled && isActive(o) && !o.giftTo && <PreviousPins o={o} />}
+          {!o.delivery.location && !cancelled && isActive(o) && !o.giftTo && <AskLocation o={o} />}
+          <WaReplies o={o} />
         </div>
       )}
       <p className="staff-total"><b dir="ltr">{iqd(o.total)} IQD</b> · {o.pay === 'wallet' ? t('paidByWallet') : o.fulfil === 'delivery' ? t('payOnDelivery') : t('payAtPickup')}{o.offer?.fee ? <> · {s('inclFee', { n: iqd(o.offer.fee) })}</> : null}</p>
