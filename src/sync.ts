@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { applyRemoteStatus, dropClerk, importOrders, markGone, markHeld, markRefused, markSynced, myOrders, setOrderPlacedHook } from './account'
-import type { Order } from './account'
+import type { Discount, Order, ReplenishReason } from './account'
 import { backendOn, clerkUserId, ensureUser, getClerkClient, getClient } from './backend'
 import { isActive, recentlyCancelled } from './orders'
 import type { Status } from './orders'
@@ -20,6 +20,8 @@ export interface OrderRow {
   location_from?: string | null
   lang?: 'en' | 'ar' | 'ku' | null
   wa?: { asked_at?: string; replies?: { kind: string; text?: string; lat?: number; lng?: number; at: string }[] } | null
+  discount?: Discount | null
+  replenish?: { of_uid?: string; of_code: string; reason: ReplenishReason; note?: string | null } | null
 }
 /** the site's language on this device (i18n keeps it here) */
 const siteLang = (): 'en' | 'ar' | 'ku' => {
@@ -43,6 +45,8 @@ export const fromRow = (r: OrderRow): Order => ({
   arriveAt: r.arrive_at ? Date.parse(r.arrive_at) : undefined,
   ...(r.location_from && { locationFrom: r.location_from }),
   ...(r.lang && { lang: r.lang }),
+  ...(r.discount && { discount: { kind: r.discount.kind, value: r.discount.value, amount: r.discount.amount, before: r.discount.before } }),
+  ...(r.replenish && { replenish: { ofUid: r.replenish.of_uid, ofCode: r.replenish.of_code, reason: r.replenish.reason, ...(r.replenish.note && { note: r.replenish.note }) } }),
   ...(r.wa?.asked_at && { wa: { askedAt: Date.parse(r.wa.asked_at), replies: (r.wa.replies ?? []).map((x) => ({ ...x, at: Date.parse(x.at) })) } }),
 })
 

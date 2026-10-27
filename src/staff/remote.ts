@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from 'react'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { localPreviousPins, setOrderPinLocal, setOrderStatus } from '../account'
-import type { GeoPoint, Order } from '../account'
+import { localPreviousPins, replenishLocal, setOrderDiscountLocal, setOrderPinLocal, setOrderStatus } from '../account'
+import type { GeoPoint, Order, ReplenishReason } from '../account'
 import { backendOn, getClient } from '../backend'
 import type { Stage } from '../orders'
 import { fromRow } from '../sync'
@@ -128,6 +128,26 @@ export function moveOrder(o: Order, stage: Stage) {
  *  with a reason when it cannot: no backend, the function not there yet ('unreachable'), not set up ('not_configured'),
  *  or Meta refused ('meta', with Meta's message); the caller then opens WhatsApp instead */
 export type WaResult = { ok: boolean; reason?: string; message?: string }
+/** a discount on an active order (order_set_discount; 2026-10-28): '' when saved, else why not */
+export async function setDiscount(o: Order, kind: 'pct' | 'fixed' | 'none', value = 0): Promise<string> {
+  if (!backendOn || !o.uid) return setOrderDiscountLocal(o.id, kind, value) ? '' : 'invalid'
+  const sb = await getClient()
+  if (!sb) return 'offline'
+  const { data, error } = await sb.rpc('order_set_discount', { p_uid: o.uid, p_kind: kind, p_value: value })
+  if (error) return error.message
+  const before = o.discount?.before ?? o.total
+  upsert({ ...o, total: data as number, discount: kind === 'none' ? undefined : { kind, value, amount: before - (data as number), before } }) // at once; the live channel confirms
+  return ''
+}
+/** a free replenishment for this order's customer (order_replenish; 2026-10-28): the new order's code, or why not */
+export async function replenishOrder(o: Order, items: string[], reason: ReplenishReason, note: string): Promise<{ code?: string; error?: string }> {
+  if (!backendOn || !o.uid) return { code: replenishLocal(o, items, reason, note.trim() || undefined) }
+  const sb = await getClient()
+  if (!sb) return { error: 'offline' }
+  const { data, error } = await sb.rpc('order_replenish', { p_uid: o.uid, p_items: items, p_reason: reason, p_note: note.trim() || null })
+  if (error) return { error: error.message }
+  return { code: data as string } // the new order arrives through the live channel
+}
 /** "Ask for location": the approved template to the customer's own number, in the language staff chose */
 export async function askLocation(o: Order, lang: 'en' | 'ar' | 'ku'): Promise<WaResult> {
   const sb = backendOn && o.uid ? await getClient() : null
