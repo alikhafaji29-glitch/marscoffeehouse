@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { dict, useLang } from '../i18n'
 import type { Lang, TKey } from '../i18n'
 import { iqd, waNumber } from '../account'
@@ -51,18 +51,25 @@ const readSent = (): Record<string, { name: string; at: number; api?: boolean }>
 const pinDate = (t: number) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ' · ' + new Date(t).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
 function PreviousPins({ o }: { o: Order }) {
   const s = useS()
-  const [pins, setPins] = useState<PrevPin[] | null | 'loading'>(null)
+  // looked up once when the card shows; the button only appears when there is an earlier pin (owner, 2026-10-27: "yet they
+  // don't have, why you show this message?")
+  const [pins, setPins] = useState<PrevPin[] | null>(null)
+  const [open, setOpen] = useState(false)
   const [sure, setSure] = useState('')
   const [failed, setFailed] = useState(false)
-  const open = async () => { setPins('loading'); setPins((await previousPins(o)) ?? []) }
+  const key = o.uid ?? o.id
+  useEffect(() => {
+    let live = true
+    void previousPins(o).then((p) => { if (live) setPins(p ?? []) })
+    return () => { live = false }
+  }, [key]) // eslint-disable-line react-hooks/exhaustive-deps
   const use = async (p: PrevPin) => {
     setFailed(false)
     if (!(await applyPreviousPin(o, p))) { setFailed(true); return }
-    setSure(''); setPins(null)
+    setSure(''); setOpen(false)
   }
-  if (pins === null) return <button type="button" className="link-btn staff-prev-open" onClick={() => void open()}><IconPin />{s('prevPins')}</button>
-  if (pins === 'loading') return <small className="staff-prev-note">{s('prevPinsLoading')}</small>
-  if (!pins.length) return <small className="staff-prev-note">{s('prevPinsNone')}</small>
+  if (!pins?.length) return null // still looking, or none: nothing on the card
+  if (!open) return <button type="button" className="link-btn staff-prev-open" onClick={() => setOpen(true)}><IconPin />{s('prevPins')} ({pins.length})</button>
   return (
     <div className="staff-prev">
       <p className="staff-prev-title">{s('prevPins')}</p>
@@ -85,7 +92,7 @@ function PreviousPins({ o }: { o: Order }) {
         ))}
       </ul>
       {failed && <small className="staff-wa-failed" role="alert">{s('usePinFailed')}</small>}
-      <button type="button" className="link-btn" onClick={() => { setPins(null); setSure('') }}>{s('prevPinsClose')}</button>
+      <button type="button" className="link-btn" onClick={() => { setOpen(false); setSure('') }}>{s('prevPinsClose')}</button>
     </div>
   )
 }
