@@ -38,6 +38,7 @@ export interface Order {
   customer?: { name: string; phone: string }
   fulfil?: 'pickup' | 'delivery'
   delivery?: Delivery // phone to call + address, delivery orders only
+  locationFrom?: string // the pin was taken from this earlier order of the same customer, after staff checked with them (2026-10-27)
   giftTo?: string // a drink sent to a friend: their number (delivery goes to them, the sender paid)
   branch?: string // the branch picked on the Order screen (staff/store.ts); missing = the first branch
   offer?: { name: string; price: number; count?: number; fee?: number; pre?: boolean; wantAt?: number } // a combo from the dashboard's Offers (Positive Hours); count = how many combos (1 when missing); pre = placed outside its hours; wantAt = the time the customer chose for a pre-order (ms)
@@ -186,6 +187,25 @@ function placeOrder(total: number, items: string[], pay: 'wallet' | 'pickup', de
   })
   onPlaced?.()
   return { ok: true, points, reward, orderId }
+}
+/** DEMO (no backend): the same customer's earlier pins at this order's branch, newest first, 5 at most (2026-10-27) */
+const last9 = (p?: string) => (p ?? '').replace(/\D/g, '').slice(-9)
+export function localPreviousPins(o: Order): { code: string; at: number; address?: string; location: GeoPoint }[] {
+  const ph = last9(o.delivery?.phone ?? o.customer?.phone)
+  if (ph.length < 9) return []
+  return [...(account?.orders ?? []), ...guest]
+    .filter((p) => p.id !== o.id && (p.branch ?? 'erbil') === (o.branch ?? 'erbil') && p.delivery?.location && last9(p.delivery.phone ?? p.customer?.phone) === ph)
+    .sort((a, b) => b.at - a.at).slice(0, 5)
+    .map((p) => ({ code: p.id, at: p.at, address: p.delivery?.address || undefined, location: p.delivery!.location! }))
+}
+/** DEMO: put that pin on the order */
+export function setOrderPinLocal(id: string, location: GeoPoint, from: string) {
+  const mine = account?.orders.find((x) => x.id === id)
+  const o = mine ?? guest.find((x) => x.id === id)
+  if (!o?.delivery) return
+  o.delivery = { ...o.delivery, location }
+  o.locationFrom = from
+  if (mine) { account = { ...account! }; save() } else { guest = [...guest]; saveGuest() }
 }
 /** Staff dashboard: move an order to a stage. Works whether or not the customer is signed in on this device. */
 export function setOrderStatus(id: string, stage: Status, reason?: string) {

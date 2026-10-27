@@ -10,7 +10,8 @@ import type { ReceiptText } from './receipt'
 import type { Stage } from '../orders'
 import { IconCheck, IconPin } from '../components/Icons'
 import { mapsLink } from '../components/ShareLocation'
-import { cancelOrder, mergeOrders, moveOrder, sendWhatsApp } from './remote'
+import { applyPreviousPin, cancelOrder, mergeOrders, moveOrder, previousPins, sendWhatsApp } from './remote'
+import type { PrevPin } from './remote'
 import { sIn, useS } from './strings'
 import type { SKey } from './strings'
 import { ALL_ITEMS } from '../menu'
@@ -45,6 +46,50 @@ const phoneOf = (o: Order) => o.delivery?.phone ?? o.customer?.phone ?? ''
  */
 const SENT_KEY = 'mars-staff-sent'
 const readSent = (): Record<string, { name: string; at: number; api?: boolean }> => { try { return JSON.parse(localStorage.getItem(SENT_KEY) || '{}') } catch { return {} } }
+/* An order without a pin: the same customer's earlier pins at this branch, to add one after confirming with the
+ * customer that it is the same place (owner, 2026-10-27: "for sure that's after they make sure it's the same location") */
+const pinDate = (t: number) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ' · ' + new Date(t).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+function PreviousPins({ o }: { o: Order }) {
+  const s = useS()
+  const [pins, setPins] = useState<PrevPin[] | null | 'loading'>(null)
+  const [sure, setSure] = useState('')
+  const [failed, setFailed] = useState(false)
+  const open = async () => { setPins('loading'); setPins((await previousPins(o)) ?? []) }
+  const use = async (p: PrevPin) => {
+    setFailed(false)
+    if (!(await applyPreviousPin(o, p))) { setFailed(true); return }
+    setSure(''); setPins(null)
+  }
+  if (pins === null) return <button type="button" className="link-btn staff-prev-open" onClick={() => void open()}><IconPin />{s('prevPins')}</button>
+  if (pins === 'loading') return <small className="staff-prev-note">{s('prevPinsLoading')}</small>
+  if (!pins.length) return <small className="staff-prev-note">{s('prevPinsNone')}</small>
+  return (
+    <div className="staff-prev">
+      <p className="staff-prev-title">{s('prevPins')}</p>
+      <ul>
+        {pins.map((p) => (
+          <li key={p.code}>
+            <div className="staff-prev-row">
+              <span><b dir="ltr">{pinDate(p.at)}</b> · #{p.code}{p.address && <> · {p.address}</>}</span>
+              <a href={mapsLink(p.location)} target="_blank" rel="noreferrer">{s('openInMaps')}</a>
+              {sure !== p.code && <button type="button" className="staff-prev-use" onClick={() => { setSure(p.code); setFailed(false) }}>{s('usePinBtn')}</button>}
+            </div>
+            {sure === p.code && (
+              <div className="staff-prev-confirm" role="alertdialog">
+                <p>{s('usePinConfirm')}</p>
+                <button type="button" className="staff-prev-yes" onClick={() => void use(p)}>{s('usePinYes')}</button>
+                <button type="button" className="link-btn" onClick={() => setSure('')}>{s('cancel')}</button>
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+      {failed && <small className="staff-wa-failed" role="alert">{s('usePinFailed')}</small>}
+      <button type="button" className="link-btn" onClick={() => { setPins(null); setSure('') }}>{s('prevPinsClose')}</button>
+    </div>
+  )
+}
+
 function SendToDriver({ o }: { o: Order }) {
   const { t, lang } = useLang()
   const s = useS()
@@ -223,6 +268,8 @@ export function OrderCard({ o, lead = LEAD_MIN, all = [] }: { o: Order; lead?: n
           <span className="staff-sec-label">{o.giftTo ? `${t('giftFor')} ${o.giftTo}` : s('secDeliverTo')}</span>
           {o.delivery.address && <p className="staff-address">{o.delivery.address}</p>}
           {o.delivery.location && <a className="staff-map" href={mapsLink(o.delivery.location)} target="_blank" rel="noreferrer"><IconPin />{s('openInMaps')}</a>}
+          {o.delivery.location && o.locationFrom && <small className="staff-pin-from">{s('pinFrom', { code: o.locationFrom })}</small>}
+          {!o.delivery.location && !cancelled && isActive(o) && !o.giftTo && <PreviousPins o={o} />}
         </div>
       )}
       <p className="staff-total"><b dir="ltr">{iqd(o.total)} IQD</b> · {o.pay === 'wallet' ? t('paidByWallet') : o.fulfil === 'delivery' ? t('payOnDelivery') : t('payAtPickup')}{o.offer?.fee ? <> · {s('inclFee', { n: iqd(o.offer.fee) })}</> : null}</p>
