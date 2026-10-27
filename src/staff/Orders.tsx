@@ -476,8 +476,9 @@ export function Orders({ orders: everything, live = false }: { orders: Order[]; 
   const shown = tab === 'active' ? active : tab === 'later' ? later : tab === 'all' ? orders : orders.filter((o) => (o.status ?? 'received') === tab && !isLater(o, now, lead))
   const counts = STAGES.map((st) => orders.filter((o) => (o.status ?? 'received') === st && !isLater(o, now, lead)).length)
   const cancelledCount = orders.filter((o) => isCancelled(o) && !mergedInto(o)).length // a merged order was not lost
-  // delivery orders that are ready (Done) and not on their way yet: the routes window plans them (owner, 2026-10-27)
-  const ready = everything.filter((o) => o.fulfil === 'delivery' && o.status === 'done')
+  // delivery orders that are ready (Done) and not on their way yet: the routes window plans them (owner, 2026-10-27).
+  // Only those of the day (and search) shown: an order of an earlier day left at Done was planned with today's (owner)
+  const ready = orders.filter((o) => o.fulfil === 'delivery' && o.status === 'done')
   const [routing, setRouting] = useState(false)
   return (
     <>

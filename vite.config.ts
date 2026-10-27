@@ -55,6 +55,13 @@ function moodApi(): Plugin {
 // missing parts added, for Chrome 49 and up. The customer site at / is untouched; the tablet app opens /old/#staff.
 // It shares the photos and videos of the main copy (absolute /assets/ paths), so it has no public folder of its own.
 // MARS_OLD=1 does the same in another mode (the demo build, for testing).
+// The gap polyfill (below) does not know a grid from a flex box: on a grid its children could not take a tap (the
+// cancel-reason box on /old/#staff, 2026-10-27: the box only, "pointer-events: var(--parent-has-fgp) auto" fell back to
+// the box's none). A polyfilled box's children always take taps.
+const tapsThrough = { postcssPlugin: 'mars-fgp-taps', OnceExit(root: { walkDecls: (prop: string, fn: (d: { value: string }) => void) => void }) {
+  root.walkDecls('pointer-events', (d) => { if (/^var\(--parent-has-fgp\)\s+auto$/.test(d.value)) d.value = 'auto' })
+} }
+
 export default defineConfig(({ mode }) => {
   const old = mode === 'old' || process.env.MARS_OLD === '1'
   return {
@@ -64,7 +71,7 @@ export default defineConfig(({ mode }) => {
       base: '/old/',
       publicDir: false,
       build: { outDir: 'dist/old', cssTarget: 'chrome61' },
-      css: { postcss: { plugins: [flexGapPolyfill()] } }, // flex `gap` came in Chrome 84: margins instead
+      css: { postcss: { plugins: [flexGapPolyfill(), tapsThrough] } }, // flex `gap` came in Chrome 84: margins instead
       define: { 'import.meta.env.VITE_CLERK_PUBLISHABLE_KEY': '""' }, // no Clerk: its script needs a new engine, and the staff dashboard does not use it
     }),
   }

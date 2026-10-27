@@ -505,8 +505,6 @@ const S = {
   comboAllSections: ['All sections', 'كل الأقسام', 'هەموو بەشەکان'],
   menuItemsN: ['{n} items', '{n} أصناف', '{n} دانە'],
   menuItem1: ['1 item', 'صنف واحد', '1 دانە'],
-  comboDrink1: ['1 drink', 'مشروب واحد', '1 خواردنەوە'],
-  comboDrinksN: ['{n} drinks', '{n} مشروبات', '{n} خواردنەوە'],
   fbReceivedTitle: ['How was your order?', 'كيف كان طلبك؟', 'داواکارییەکەت چۆن بوو؟'],
   fbReceivedSub: ['Order #{id}. Tap what fits, a word is enough.', 'الطلب #{id}. اختر ما يناسب، وكلمة تكفي.', 'داواکاری #{id}. ئەوەی گونجاوە هەڵبژێرە، وشەیەک بەسە.'],
   fbCancelledTitle: ['Sorry about your order', 'نعتذر عن طلبك', 'ببورە بۆ داواکارییەکەت'],
