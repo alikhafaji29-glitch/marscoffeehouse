@@ -2313,3 +2313,4 @@ body.ph-on .band-pill, body.ph-on .header-order-in { display: none; }
 .staff-prev-confirm { margin-top: 0.4rem; padding: 0.5rem 0.6rem; border-radius: 0.6rem; background: #fff6e8; display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.7rem; }
 .staff-prev-confirm p { margin: 0; flex: 1 1 100%; font-size: 0.85rem; font-weight: 600; }
 .staff-pin-from { display: block; margin-top: 0.25rem; color: rgba(16, 32, 58, 0.6); font-size: 0.8rem; }
+.staff-prev-addr { display: block; margin-top: 0.15rem; color: rgba(16, 32, 58, 0.75); font-size: 0.84rem; }

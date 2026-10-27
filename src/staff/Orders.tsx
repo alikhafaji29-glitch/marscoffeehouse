@@ -77,7 +77,10 @@ function PreviousPins({ o }: { o: Order }) {
         {pins.map((p) => (
           <li key={p.code}>
             <div className="staff-prev-row">
-              <span><b dir="ltr">{pinDate(p.at)}</b> · #{p.code}{p.address && <> · {p.address}</>}</span>
+              <span><b dir="ltr">{pinDate(p.at)}</b> · #{p.code}
+                {/* what the customer typed with that pin, on its own line (owner, 2026-10-27) */}
+                <small className="staff-prev-addr">{p.address ? <>{s('prevTyped')}: <b>{p.address}</b></> : s('prevNoTyped')}</small>
+              </span>
               <a href={mapsLink(p.location)} target="_blank" rel="noreferrer">{s('openInMaps')}</a>
               {sure !== p.code && <button type="button" className="staff-prev-use" onClick={() => { setSure(p.code); setFailed(false) }}>{s('usePinBtn')}</button>}
             </div>
