@@ -1515,7 +1515,7 @@ export function LangProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     localStorage.setItem('mars-lang', lang)
-    document.documentElement.lang = lang
+    document.documentElement.lang = lang === 'ku' ? 'ckb' : lang // Sorani Kurdish (see index.html)
     document.documentElement.dir = RTL.includes(lang) ? 'rtl' : 'ltr'
   }, [lang])
 

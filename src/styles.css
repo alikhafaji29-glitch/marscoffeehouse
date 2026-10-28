@@ -26,7 +26,7 @@ body {
 }
 
 [dir='rtl'] body { font-family: 'Crimson Text', 'Cairo', 'Vazirmatn', Georgia, serif; } /* Latin and numbers in Crimson, Arabic letters in Cairo */
-:root[lang='ku'] body { font-family: 'Crimson Text', 'Vazirmatn', 'Cairo', Georgia, serif; } /* Kurdish letters in Vazirmatn */
+:root[lang='ku'] body, :root[lang='ckb'] body { font-family: 'Crimson Text', 'Vazirmatn', 'Cairo', Georgia, serif; } /* Kurdish letters in Vazirmatn */
 
 /* ---------- header ---------- */
 .header {
