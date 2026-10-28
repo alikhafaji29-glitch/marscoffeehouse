@@ -2,7 +2,7 @@ import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useLang } from '../i18n'
 import { unlockAudio } from '../chime'
-import { iqd, normPhone, placeOfferOrder, saveContact, savedContact, useAccount, useMyOrders } from '../account'
+import { iqd, latinDigits, placeOfferOrder, saveContact, savedContact, useAccount, useMyOrders, validPhone } from '../account'
 import type { GeoPoint } from '../account'
 import { ALL_ITEMS as ALL, MENU } from '../menu'
 import type { MenuItem } from '../menu'
@@ -299,14 +299,14 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
     if (!live && !wantAt) miss.push('when')
     if (live && !delivery && arriveAt < clockNow().getTime()) miss.push('arrive')
     if (nm.length < 2) miss.push('name')
-    if (normPhone(phone).length < 10) miss.push('phone')
+    if (!validPhone(phone)) miss.push('phone')
     // delivery needs the shared pin or a typed address, either one (owner, 2026-10-26; the pin alone was required since 2026-10-23)
     if (delivery && !location && address.trim().length < 5) miss.push('where')
     if (miss.length) { setMissing(miss); setMissOpen(true); return }
     const arrive = live && !delivery ? arriveAt : 0 // a pre-order's pickup time is its chosen time
-    const res = placeOfferOrder({ total, items: lines, name: nm, phone: phone.trim(), address: delivery ? address.trim() : undefined, location: delivery && location ? location : undefined, offer: { name: offer.name.en, price: offer.price, count: count > 1 ? count : undefined, fee: fee || undefined, pre: !live || undefined, wantAt: !live ? wantAt : undefined }, note: staffNote.trim() || undefined, arriveAt: arrive || undefined })
+    const res = placeOfferOrder({ total, items: lines, name: nm, phone: latinDigits(phone.trim()), address: delivery ? address.trim() : undefined, location: delivery && location ? location : undefined, offer: { name: offer.name.en, price: offer.price, count: count > 1 ? count : undefined, fee: fee || undefined, pre: !live || undefined, wantAt: !live ? wantAt : undefined }, note: staffNote.trim() || undefined, arriveAt: arrive || undefined })
     if (!res.ok) return
-    saveContact({ name: nm, phone: phone.trim(), address: address.trim() })
+    saveContact({ name: nm, phone: latinDigits(phone.trim()), address: address.trim() })
     setPlacedId(res.orderId)
     setStep(DONE)
   }
