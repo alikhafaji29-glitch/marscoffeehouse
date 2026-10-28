@@ -54,7 +54,9 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
     if (how !== 'delivery' && arriveAt < clockNow().getTime()) miss.push('arrive')
     if (guestMode && name.trim().length < 2) miss.push('name')
     if ((guestMode || how === 'delivery') && normPhone(phone).length < 10) miss.push('phone')
-    if (how === 'delivery' && !location) miss.push('place') // the shared pin is required for delivery (owner, 2026-10-23); the address is extra
+    // delivery needs the shared pin or a typed address, either one, as in Positive Hours (owner, 2026-10-29: "orders from
+    // menu requires location, not like positive hours"; the pin alone was required since 2026-10-23)
+    if (how === 'delivery' && !location && address.trim().length < 5) miss.push('where')
     if (miss.length) { setMissing(miss); setMissOpen(true); return false }
     return true
   }
@@ -162,12 +164,12 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
                       <span>{t('deliveryPhone')}</span>
                       <input type="tel" inputMode="tel" dir="ltr" value={phone} onChange={(e) => { setPhone(e.target.value); setNote(''); filled('phone') }} autoComplete="tel" />
                     </label>}
-                    <div data-field="place" className={'place-fields' + (missing.includes('place') ? ' missing' : '')}>
+                    <div data-field="where" className={'place-fields' + (missing.includes('where') ? ' missing' : '')}>
                     <label>
                       <span>{t('deliveryAddress')}</span>
-                      <textarea rows={2} value={address} onChange={(e) => { setAddress(e.target.value); setNote('') }} placeholder={t('addressHint')} autoComplete="street-address" />
+                      <textarea rows={2} value={address} onChange={(e) => { setAddress(e.target.value); setNote(''); if (e.target.value.trim().length >= 5) filled('where') }} placeholder={t('addressHint')} autoComplete="street-address" />
                     </label>
-                    <ShareLocation value={location} onChange={(p) => { setLocation(p); setNote(''); if (p) filled('place') }} />
+                    <ShareLocation value={location} onChange={(p) => { setLocation(p); setNote(''); if (p) filled('where') }} />
                     </div>
                   </div>
                 )}
