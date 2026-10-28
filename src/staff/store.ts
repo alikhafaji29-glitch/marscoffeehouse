@@ -35,7 +35,10 @@ export const branchLabel = (id: string, lang: keyof L3) => { const b = BRANCHES.
 /** Coffee of the day (owner, 2026-10-22): a Home slide; any of `items` at one price for its smallest size */
 export interface Cotd { on: boolean; price: number; items: string[] }
 export const COTD_DEFAULT: Cotd = { on: true, price: 3500, items: ['Americano', 'Espresso', 'Turkish Coffee', 'Filter Coffee'] } // 3,500 for now; the owner's order (2026-10-23)
-export interface Driver { name: string; phone: string; lang?: Lang } // lang: the WhatsApp message's language (owner, 2026-10-25); missing = the dashboard's
+export interface Driver { name: string; phone: string; lang?: Lang; share?: CourierShare } // lang: the WhatsApp message's language (owner, 2026-10-25); missing = the dashboard's
+/** what a delivery company keeps of each delivered order (owner, 2026-10-28: "put it as an option"): a fixed amount, a
+ *  percentage of what the customer paid, or the delivery fee on the order; the Deliveries report works it out */
+export interface CourierShare { kind: 'fixed' | 'pct' | 'fee'; value: number }
 /** a flavour of the branch's list (Dashboard → Flavours, owner 2026-10-26): `id` is the English name it was made with and
  *  never changes (items and orders keep it); `name` is what customers see; `out` = out of stock, hidden on item pages */
 export interface FlavourDef { id: string; name: L3; out?: boolean }

@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { localPreviousPins, replenishLocal, setOrderDiscountLocal, setOrderPinLocal, setOrderStatus } from '../account'
+import { localPreviousPins, replenishLocal, setOrderCourierLocal, setOrderDiscountLocal, setOrderPinLocal, setOrderStatus } from '../account'
 import type { GeoPoint, Order, ReplenishReason } from '../account'
 import { backendOn, getClient } from '../backend'
 import type { Stage } from '../orders'
@@ -128,6 +128,27 @@ export function moveOrder(o: Order, stage: Stage) {
  *  with a reason when it cannot: no backend, the function not there yet ('unreachable'), not set up ('not_configured'),
  *  or Meta refused ('meta', with Meta's message); the caller then opens WhatsApp instead */
 export type WaResult = { ok: boolean; reason?: string; message?: string }
+/** the delivery company that took an order (order_set_courier; 2026-10-28); '' = none */
+export function setCourier(o: Order, courier: string) {
+  if ((o.courier ?? '') === courier) return
+  if (!backendOn || !o.uid) { setOrderCourierLocal(o.id, courier); return }
+  upsert({ ...o, courier: courier || undefined }) // at once; the live channel confirms
+  void getClient().then(async (sb) => {
+    if (!sb) return
+    const { error } = await sb.rpc('order_set_courier', { p_uid: o.uid, p_courier: courier })
+    if (error) console.warn('[backend] delivery company not saved:', error.message)
+  })
+}
+/** delivered delivery orders of a branch placed between two times, for the Deliveries report (2026-10-28): straight from
+ *  the database, since the dashboard itself keeps only the latest orders; null = could not read */
+export async function deliveredOrders(branch: string, from: number, to: number): Promise<Order[] | null> {
+  const sb = await getClient()
+  if (!sb) return null
+  const { data, error } = await sb.from('orders').select('*').eq('branch', branch).eq('fulfil', 'delivery').eq('status', 'delivered')
+    .gte('created_at', new Date(from).toISOString()).lt('created_at', new Date(to).toISOString()).order('created_at').limit(3000)
+  if (error) { console.warn('[backend] deliveries not read:', error.message); return null }
+  return (data as OrderRow[]).map(fromRow)
+}
 /** a discount on an active order (order_set_discount; 2026-10-28): '' when saved, else why not */
 export async function setDiscount(o: Order, kind: 'pct' | 'fixed' | 'none', value = 0): Promise<string> {
   if (!backendOn || !o.uid) return setOrderDiscountLocal(o.id, kind, value) ? '' : 'invalid'

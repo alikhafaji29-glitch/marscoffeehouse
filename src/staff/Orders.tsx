@@ -11,7 +11,7 @@ import type { ReceiptText } from './receipt'
 import type { Stage } from '../orders'
 import { IconCheck, IconPin } from '../components/Icons'
 import { mapsLink } from '../components/ShareLocation'
-import { applyPreviousPin, askLocation, cancelOrder, mergeOrders, moveOrder, previousPins, replenishOrder, sendWhatsApp, setDiscount } from './remote'
+import { applyPreviousPin, askLocation, cancelOrder, mergeOrders, moveOrder, previousPins, replenishOrder, sendWhatsApp, setCourier, setDiscount } from './remote'
 import type { PrevPin } from './remote'
 import { sIn, useS } from './strings'
 import type { SKey } from './strings'
@@ -50,6 +50,23 @@ const SENT_KEY = 'mars-staff-sent'
 const readSent = (): Record<string, { name: string; at: number; api?: boolean }> => { try { return JSON.parse(localStorage.getItem(SENT_KEY) || '{}') } catch { return {} } }
 /* An order without a pin: the same customer's earlier pins at this branch, to add one after confirming with the
  * customer that it is the same place (owner, 2026-10-27: "for sure that's after they make sure it's the same location") */
+/** the delivery company that took the order (2026-10-28): set by the Zhin / wadi app buttons, or chosen here for an order
+ *  sent another way (Other…, a phone call, a route); the Deliveries report counts it for that company */
+function CourierPick({ o }: { o: Order }) {
+  const s = useS()
+  const viewing = useStaff().branch
+  const names = (settingsFor(o.branch ?? viewing).drivers ?? []).map((d) => d.name || d.phone).filter(Boolean)
+  const list = o.courier && !names.includes(o.courier) ? [...names, o.courier] : names
+  return (
+    <label className={'staff-courier' + (o.courier ? '' : ' none')}>
+      <span>{s('courierLabel')}</span>
+      <select value={o.courier ?? ''} onChange={(e) => setCourier(o, e.target.value)}>
+        <option value="">{s('courierNone')}</option>
+        {list.map((n) => <option key={n} value={n}>{n}</option>)}
+      </select>
+    </label>
+  )
+}
 /** "Discount 50%" / "Discount 2,000 IQD" */
 const discText = (o: Order, s: ReturnType<typeof useS>) => (o.discount ? (o.discount.kind === 'pct' ? s('discPct', { n: o.discount.value }) : s('discFixed', { n: iqd(o.discount.value) })) : '')
 
@@ -326,7 +343,11 @@ function SendToDriver({ o }: { o: Order }) {
   const text = (L: Lang = lang) => orderText(o, L)
   const [busy, setBusy] = useState(false)
   const [failed, setFailed] = useState('')
-  const remember = (name: string, api?: boolean) => setSent(markSent(o, name, api))
+  const remember = (name: string, api?: boolean) => {
+    setSent(markSent(o, name, api))
+    // sent to one of the branch's delivery companies: the order is theirs in the Deliveries report (2026-10-28)
+    if (drivers.some((d) => (d.name || d.phone) === name)) setCourier(o, name)
+  }
   const send = async (name: string, phone?: string, L: Lang = lang) => {
     setFailed('')
     if (phone && o.uid) {
@@ -503,6 +524,7 @@ export function OrderCard({ o, lead = LEAD_MIN, all = [] }: { o: Order; lead?: n
         <button type="button" className="staff-print" onClick={() => printReceipt(o, receipt(o))}><PrintIcon />{s('printReceipt')}</button>
         {o.fulfil === 'delivery' && !cancelled && isActive(o) && <SendToDriver o={o} />}
       </div>
+      {o.fulfil === 'delivery' && !cancelled && <CourierPick o={o} />}
       {!o.replenish && <ReplenishBox o={o} />}
       {cancelled && <p className="staff-cancel-reason"><b>{t('cancelReason')}:</b> {reasonText(o.cancelReason, t)}</p>}
       {!cancelled && <ol className="staff-steps" aria-label={t('trackOrder')}>

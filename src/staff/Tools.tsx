@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { branchName, settingsFor, update, useStaff } from './store'
-import type { Driver, Settings, Shop } from './store'
+import type { CourierShare, Driver, Settings, Shop } from './store'
 import { parsePlace } from './routes'
 import { useLang } from '../i18n'
 import type { Lang } from '../i18n'
@@ -108,6 +108,20 @@ function Drivers() {
               {LANGS.map(([v, name]) => <option key={v} value={v}>{name}</option>)}
             </select>
           </Field>
+          {/* what the company keeps of each delivered order, for the Deliveries report (owner, 2026-10-28) */}
+          <Field label={s('shareKind')}>
+            <select value={d.share?.kind ?? ''} onChange={(e) => edit(i, { share: e.target.value ? { kind: e.target.value as CourierShare['kind'], value: e.target.value === 'fee' ? 0 : d.share?.value ?? 0 } : undefined })}>
+              <option value="">{s('shareNone')}</option>
+              <option value="fixed">{s('shareFixed')}</option>
+              <option value="pct">{s('sharePct')}</option>
+              <option value="fee">{s('shareFee')}</option>
+            </select>
+          </Field>
+          {d.share && d.share.kind !== 'fee' && (
+            <Field label={d.share.kind === 'pct' ? s('shareValuePct') : s('shareValueIqd')}>
+              <input dir="ltr" inputMode="numeric" value={d.share.value || ''} placeholder={d.share.kind === 'pct' ? '10' : '2000'} onChange={(e) => { const n = Number(e.target.value.replace(/[^\d]/g, '').slice(0, 7)) || 0; edit(i, { share: { kind: d.share!.kind, value: d.share!.kind === 'pct' ? Math.min(n, 100) : n } }) }} />
+            </Field>
+          )}
           <button type="button" className="d-btn line" onClick={() => { setDone(false); setDraft(draft.filter((_, j) => j !== i)) }}>{s('driverRemove')}</button>
         </div>
       ))}

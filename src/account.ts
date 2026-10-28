@@ -43,6 +43,7 @@ export interface Order {
   wa?: { askedAt?: number; replies?: WaReply[] } // staff asked for the location on WhatsApp; what the customer sent back that was not a location
   discount?: Discount // staff gave a discount before sending it out (2026-10-28): `total` is already the price after it
   replenish?: Replenish // a free order staff sent to make up for this customer's earlier order (2026-10-28)
+  courier?: string // the delivery company that took it (2026-10-28): set when staff send it to one, or chosen on the card
   giftTo?: string // a drink sent to a friend: their number (delivery goes to them, the sender paid)
   branch?: string // the branch picked on the Order screen (staff/store.ts); missing = the first branch
   offer?: { name: string; price: number; count?: number; fee?: number; pre?: boolean; wantAt?: number } // a combo from the dashboard's Offers (Positive Hours); count = how many combos (1 when missing); pre = placed outside its hours; wantAt = the time the customer chose for a pre-order (ms)
@@ -217,6 +218,15 @@ export function setOrderPinLocal(id: string, location: GeoPoint, from: string) {
   if (!o?.delivery) return
   o.delivery = { ...o.delivery, location }
   o.locationFrom = from
+  if (mine) { account = { ...account! }; save() } else { guest = [...guest]; saveGuest() }
+}
+/** DEMO: the delivery company of an order */
+export function setOrderCourierLocal(id: string, courier: string) {
+  const mine = account?.orders.find((x) => x.id === id)
+  const o = mine ?? guest.find((x) => x.id === id)
+  if (!o) return
+  if (courier) o.courier = courier
+  else delete o.courier
   if (mine) { account = { ...account! }; save() } else { guest = [...guest]; saveGuest() }
 }
 /** DEMO: the discount, worked out as the database does (always from the price before any discount) */

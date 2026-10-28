@@ -2351,3 +2351,18 @@ body.ph-on .band-pill, body.ph-on .header-order-in { display: none; }
 .staff-rep-for { margin: 0.2rem 0 0.4rem; padding: 0.4rem 0.6rem; border-radius: 0.6rem; background: #eaf6ee; color: #14602f; font-size: 0.86rem; font-weight: 600; }
 .staff-rep-sent { margin: 0.2rem 0; font-size: 0.84rem; color: #14602f; font-weight: 600; }
 .staff-rep-ok { margin: 0.2rem 0; font-size: 0.85rem; color: #14602f; }
+
+/* delivery company on the card, and the Deliveries report (2026-10-28) */
+.staff-courier { display: flex; align-items: center; gap: 0.5rem; margin: 0.35rem 0 0.1rem; font-size: 0.85rem; color: rgba(16, 32, 58, 0.75); }
+.staff-courier select { font: inherit; padding: 0.3rem 0.5rem; border-radius: 0.5rem; border: 1.5px solid rgba(32, 52, 105, 0.25); background: #fff; }
+.staff-courier.none select { border-color: #d98a2b; }
+.deliv-bar { flex-wrap: wrap; align-items: flex-end; gap: 0.6rem; }
+.deliv-date { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.8rem; color: var(--d-mute, #667); }
+.deliv-date input { font: inherit; padding: 0.45rem 0.6rem; border-radius: 0.6rem; border: 1px solid rgba(32, 52, 105, 0.3); }
+.deliv-stats { margin-bottom: 0.4rem; }
+.deliv-list summary { cursor: pointer; font-weight: 600; margin: 0.3rem 0; }
+.deliv-list table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+.deliv-list th, .deliv-list td { padding: 0.35rem 0.4rem; border-bottom: 1px solid rgba(32, 52, 105, 0.12); text-align: start; }
+.deliv-loose { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.4rem; }
+.deliv-loose li { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; font-size: 0.9rem; }
+.deliv-loose select { margin-inline-start: auto; font: inherit; padding: 0.3rem 0.5rem; border-radius: 0.5rem; border: 1.5px solid #d98a2b; }
