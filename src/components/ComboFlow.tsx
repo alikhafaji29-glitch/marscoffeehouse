@@ -42,7 +42,15 @@ import { clockNow } from '../clock'
  * pumps and add-ons, at the menu's prices on top of the combo price (`custom`, per combo and item).
  * A step with several menu categories (the drinks) asks the section first (Coffee & More, Cold Coffee…), then shows
  * that section's drinks with a way back to the sections (owner, 2026-10-22; it was one long list with category chips).
+ * Before ordering, the customer may add items from the menu at their menu prices (owner, 2026-10-28: "after the customer
+ * finishes ordering the combo, add the ability to add items from the menu, in case the customer wanted to add a drink, or
+ * a sandwich"): "Add drinks or food from the menu" on the details opens the menu (search, sections, size, how many);
+ * they go on the same order after the combos, whose lines then say "Combo 1" so staff tell them apart.
  */
+/** the menu's own sections for adding items (not the Home picks, nor the add-ons, which go with a drink) */
+const NOT_SECTIONS = ['positive', 'season', 'signature', 'extra']
+const priceAt = (it: MenuItem, i: number) => (Array.isArray(it.price) ? it.price[i] ?? it.price[0] : it.price)
+type More = { name: string; size?: string; price: number; qty: number }
 /** what the customer may pick in a group, grouped by menu category; out-of-stock items are left out */
 function choices(g: OfferGroup): { cat: string; items: MenuItem[] }[] {
   const ok = (i: MenuItem) => !i.soldOut && (g.mode === 'items' ? g.items.includes(i.name) : !g.skip?.includes(i.name))
@@ -150,6 +158,11 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
   const [placedId, setPlacedId] = useState('')
   // between two combos (owner, 2026-10-21): after a combo's last step a short screen offers the next combo or skipping it
   const [between, setBetween] = useState(false)
+  // items added from the menu on top of the combos (2026-10-28), and the menu open for adding them
+  const [more, setMore] = useState<More[]>([])
+  const [adding, setAdding] = useState(false)
+  const [moreCat, setMoreCat] = useState('')
+  const [moreFind, setMoreFind] = useState('')
   const bodyRef = useRef<HTMLDivElement>(null)
   // a step with several categories (the drinks) asks the section first, then shows its drinks (owner, 2026-10-22);
   // coming back to a step with a drink chosen opens that drink's section
@@ -193,11 +206,26 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
   const optsOf = (k: number, it: MenuItem): { groups: CustGroup[]; picks: Picks } => { const groups = groupsFor(it, 'en'); return { groups, picks: custom[kk(k, it.name)] ?? defaultPicks(groups) } }
   // the choices made on a combo drink, in the customer's language, for the details' list
   const choiceWords = (k: number, it: MenuItem) => { const gs = groupsFor(it, lang); const pk = custom[kk(k, it.name)] ?? defaultPicks(gs); return gs.flatMap((g) => g.options.filter((o) => pk[g.id]?.includes(o.id) && (g.always || o.id !== g.defaultId)).map((o) => { const n = timesPicked(pk, g, o.id); return o.label + (g.kind === 'count' && n > 1 ? ` ×${n}` : '') })).join(', ') }
-  const lineOf = (k: number, n: string) => { const it = ALL.find((i) => i.name === n); const z = it && sizeOf(k, it); const o = it && optsOf(k, it); const words = o ? summary(o.picks, o.groups) : []; return `${n}${z ? ` (${z})` : ''}${words.length ? ` · ${words.join(', ')}` : ''}${count > 1 ? ` · Combo ${k + 1}` : ''} ×1` }
-  const lines = pickSteps.flatMap((x) => chosen(x.k, groups[x.i].g.id).map((n) => lineOf(x.k, n)))
+  const lineOf = (k: number, n: string) => { const it = ALL.find((i) => i.name === n); const z = it && sizeOf(k, it); const o = it && optsOf(k, it); const words = o ? summary(o.picks, o.groups) : []; return `${n}${z ? ` (${z})` : ''}${words.length ? ` · ${words.join(', ')}` : ''}${count > 1 || more.length ? ` · Combo ${k + 1}` : ''} ×1` }
+  const lines = [...pickSteps.flatMap((x) => chosen(x.k, groups[x.i].g.id).map((n) => lineOf(x.k, n))), ...more.map((m) => `${m.name}${m.size ? ` (${m.size})` : ''} ×${m.qty}`)]
+  const moreCost = more.reduce((n, m) => n + m.price * m.qty, 0)
+  const addMore = (it: MenuItem, i: number) => {
+    const size = it.sizes?.[i]
+    // from the list as it is now (two quick taps both count)
+    setMore((now) => {
+      const at = now.findIndex((m) => m.name === it.name && m.size === size)
+      return at >= 0 ? now.map((m, j) => (j === at ? { ...m, qty: Math.min(20, m.qty + 1) } : m)) : [...now, { name: it.name, size, price: priceAt(it, i), qty: 1 }]
+    })
+  }
+  const moreQty = (j: number, d: number) => setMore((now) => now.flatMap((m, i) => (i !== j ? [m] : m.qty + d <= 0 ? [] : [{ ...m, qty: Math.min(20, m.qty + d) }])))
+  const moreSections = MENU.filter((c) => !NOT_SECTIONS.includes(c.id)).map((c) => ({ cat: c.id, items: c.items.filter((i) => !i.hidden && !i.soldOut) })).filter((c) => c.items.length)
+  const moreQ = moreFind.trim().toLowerCase()
+  const moreShown = moreQ.length >= 2
+    ? moreSections.flatMap((c) => c.items).filter((it, i, all) => all.findIndex((x) => x.name === it.name) === i && [it.name, nameOf(it.name, lang)].join(' ').toLowerCase().includes(moreQ))
+    : (moreSections.find((c) => c.cat === moreCat) ?? moreSections[0])?.items ?? []
   // a picked item's choices: the ones made, else its defaults; their extra cost on top of the combo price
   const extraCost = pickSteps.reduce((n, x) => n + chosen(x.k, groups[x.i].g.id).reduce((m, name) => { const it = ALL.find((i) => i.name === name); if (!it) return m; const o = optsOf(x.k, it); return m + extras(o.picks, o.groups) }, 0), 0)
-  const total = offer.price * count + extraCost + fee // the service fee is per order, not per combo
+  const total = offer.price * count + extraCost + moreCost + fee // the service fee is per order, not per combo
   const setCountTo = (n: number) => {
     const c = Math.min(MAX_COMBOS, Math.max(1, n))
     setCount(c)
@@ -294,7 +322,7 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
         <header className="combo-head">
           <div>
             <p className="combo-eyebrow">{offer.id === 'positive' ? <PositiveHoursMark /> : title}{ps && count > 1 && !between && <span className="combo-of">{s('comboOf', { n: ps.k + 1, of: count })}</span>}{!live && step !== DONE && <em>{t('preOrder').replace(/\s*!$/, '')}</em>}</p>
-            <h2 id="combo-title">{between && ps ? s('comboReady', { n: ps.k + 1 }) : step === DONE ? (firstName ? t('thanksName').replace('{name}', firstName) : t('orderPlaced')) : step === DETAILS ? s('comboDetails') : step === ASK ? s('comboHowMany') : label(cur.g)}</h2>
+            <h2 id="combo-title">{between && ps ? s('comboReady', { n: ps.k + 1 }) : step === DONE ? (firstName ? t('thanksName').replace('{name}', firstName) : t('orderPlaced')) : step === DETAILS ? (adding ? s('comboAddMore') : s('comboDetails')) : step === ASK ? s('comboHowMany') : label(cur.g)}</h2>
           </div>
           <button type="button" className="combo-close" onClick={onClose} aria-label={t('close')}>
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
@@ -398,9 +426,58 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
                   </Fragment>
                 ))}
               </ul>
-              {count < MAX_COMBOS && (
+              {count < MAX_COMBOS && !adding && (
                 <button type="button" className="combo-add" onClick={() => { setNote(''); setStep(count * groups.length + 1); setCount(count + 1) }}>+ {s('comboAddAnother')}</button>
               )}
+              {more.length > 0 && !adding && (
+                <ul className="combo-summary combo-more-list">
+                  <li className="combo-sum-head"><b>{s('comboMoreHead')}</b></li>
+                  {more.map((m, j) => (
+                    <li key={m.name + (m.size ?? '')}>
+                      <span>{nameOf(m.name, lang)}{m.size && <small dir="ltr"> {m.size}</small>}</span>
+                      <span className="combo-more-qty">
+                        <button type="button" onClick={() => moreQty(j, -1)} aria-label={s('comboQtyLess')}>−</button>
+                        <output dir="ltr">{m.qty}</output>
+                        <button type="button" onClick={() => moreQty(j, 1)} aria-label={s('comboQtyMore')}>+</button>
+                      </span>
+                      <b dir="ltr">{iqd(m.price * m.qty)}</b>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {!adding && <button type="button" className="combo-add combo-add-more" onClick={() => { setAdding(true); setNote(''); bodyRef.current?.scrollTo({ top: 0 }) }}>+ {s('comboAddMore')}</button>}
+              {adding && (
+                <div className="combo-more">
+                  <input className="combo-more-find" value={moreFind} onChange={(e) => setMoreFind(e.target.value)} placeholder={s('comboMoreFind')} aria-label={s('comboMoreFind')} />
+                  {moreQ.length < 2 && (
+                    <div className="combo-more-cats" role="tablist">
+                      {moreSections.map((c) => (
+                        <button key={c.cat} type="button" role="tab" aria-selected={(moreCat || moreSections[0]?.cat) === c.cat} className={(moreCat || moreSections[0]?.cat) === c.cat ? 'on' : ''} onClick={() => setMoreCat(c.cat)}>{catLabel(c.cat, lang)}</button>
+                      ))}
+                    </div>
+                  )}
+                  <ul className="combo-more-items">
+                    {moreShown.map((it) => {
+                      const cat = categoryOf(it.name)
+                      const has = more.filter((m) => m.name === it.name).reduce((n, m) => n + m.qty, 0)
+                      return (
+                        <li key={it.name}>
+                          <span className="combo-tile" aria-hidden="true">{photoOf(it.name) ? <img src={photoOf(it.name)} alt="" loading="lazy" style={photoStyle(it.name)} /> : FOOD.includes(cat) ? <FoodIcon sweet={cat === 'sweets'} /> : <MiniCup color={TINT[cat] || [200, 200, 200]} ice={isIced(cat) ? 1 : 0} size={44} />}</span>
+                          <span className="combo-more-name"><b>{nameOf(it.name, lang)}</b>{has > 0 && <small> · {s('comboMoreIn', { n: has })}</small>}</span>
+                          <span className="combo-more-add">
+                            {(it.sizes?.length ? it.sizes : ['']).map((z, i) => (
+                              <button key={z || 'one'} type="button" onClick={() => addMore(it, i)}>
+                                {z && <span dir="ltr">{z} · </span>}<span dir="ltr">+ {iqd(priceAt(it, i))}</span>
+                              </button>
+                            ))}
+                          </span>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </div>
+              )}
+              {!adding && <>
               <div className="combo-form">
                 {!live && (
                   <label data-field="when" className={missing.includes('when') ? 'missing' : ''}><span>{s(delivery ? 'comboWhenDelivery' : 'comboWhenPickup')}</span>
@@ -432,12 +509,14 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
               <dl className="combo-bill">
                 <div><dt>{title}{count > 1 && <span dir="ltr"> × {count}</span>}</dt><dd dir="ltr">{iqd(offer.price * count)} IQD</dd></div>
                 {extraCost > 0 && <div><dt>{s('comboExtras')}</dt><dd dir="ltr">{iqd(extraCost)} IQD</dd></div>}
+                {moreCost > 0 && <div><dt>{s('comboMoreHead')}</dt><dd dir="ltr">{iqd(moreCost)} IQD</dd></div>}
                 {fee > 0 && <div><dt>{s('serviceFee')}</dt><dd dir="ltr">{iqd(fee)} IQD</dd></div>}
                 {delivery && offer.freeDelivery && <div><dt>{t('getDelivery')}</dt><dd>{t('free')}</dd></div>}
                 <div className="sum"><dt>{s('comboTotal')}</dt><dd dir="ltr">{iqd(total)} IQD</dd></div>
               </dl>
               <p className="combo-hint">{delivery ? `${t('payOnDelivery')} · ${t('payOnDeliveryHint')}` : t('payAtPickup')}</p>{/* a pre-order's day and time are the chosen time above */}
               {note && <p className="combo-note" role="alert">{note}</p>}
+              </>}
             </>
           )}
 
@@ -454,7 +533,9 @@ export function ComboFlow({ offerId, onClose }: { offerId: string; onClose: () =
           {step === DONE ? (
             <button type="button" className="combo-next" onClick={onClose}>{t('close')}</button>
           ) : (
-            <>
+            adding ? (
+              <button type="button" className="combo-next" onClick={() => { setAdding(false); setMoreFind(''); bodyRef.current?.scrollTo({ top: 0 }) }}>{more.length ? s('comboMoreDone', { n: more.reduce((n, m) => n + m.qty, 0) }) : s('comboMoreBack')}</button>
+            ) : <>
               {step > 0 && <button type="button" className="combo-back" onClick={() => { setNote(''); if (between) setBetween(false); else if (section && ps && cur.cats.length > 1) openSection(''); else setStep(step - 1) }}>{t('back')}</button>}
               {between ? null : step < DETAILS
                 ? <button type="button" className="combo-next" disabled={step > ASK && !full(step - 1)} onClick={() => forward(step)}>{s('comboNext')}</button>

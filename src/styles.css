@@ -2369,3 +2369,22 @@ body.ph-on .band-pill, body.ph-on .header-order-in { display: none; }
 .deliv-list td select { font: inherit; font-size: 0.82rem; padding: 0.2rem 0.35rem; border-radius: 0.45rem; border: 1px solid rgba(32, 52, 105, 0.3); background: #fff; }
 .deliv-list table { min-width: 36rem; }
 .deliv-list { overflow-x: auto; }
+
+/* items added from the menu to a combo order (2026-10-28) */
+.combo-add-more { margin-top: 0.4rem; }
+.combo-more-list li { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 0.6rem; }
+.combo-more-qty { display: inline-flex; align-items: center; gap: 0.45rem; }
+.combo-more-qty button { width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid var(--navy); background: #fff; color: var(--navy); font-size: 1.05rem; line-height: 1; cursor: pointer; }
+.combo-more-qty output { min-width: 1.2rem; text-align: center; font-weight: 700; }
+.combo-more { display: grid; gap: 0.7rem; }
+.combo-more-find { font: inherit; width: 100%; padding: 0.65rem 0.9rem; border-radius: 0.8rem; border: 1.5px solid rgba(32, 52, 105, 0.22); background: #fff; }
+.combo-more-cats { display: flex; gap: 0.4rem; overflow-x: auto; padding-bottom: 0.2rem; scrollbar-width: none; }
+.combo-more-cats button { flex: none; padding: 0.45rem 0.85rem; border-radius: 999px; border: 1.5px solid rgba(32, 52, 105, 0.25); background: #fff; color: var(--navy); font: inherit; font-size: 0.88rem; cursor: pointer; white-space: nowrap; }
+.combo-more-cats button.on { background: var(--navy); border-color: var(--navy); color: #fff; }
+.combo-more-items { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
+.combo-more-items li { display: grid; grid-template-columns: 52px 1fr; gap: 0.3rem 0.7rem; align-items: center; padding: 0.55rem; border-radius: 0.9rem; background: #fff; border: 1px solid rgba(32, 52, 105, 0.12); }
+.combo-more-items .combo-tile { grid-row: span 2; width: 52px; height: 52px; }
+.combo-more-name small { color: #1e8c46; font-weight: 600; }
+.combo-more-add { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.combo-more-add button { min-height: 36px; padding: 0.3rem 0.75rem; border-radius: 999px; border: 1.5px solid var(--navy); background: #fff; color: var(--navy); font: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+.combo-more-add button:active { background: var(--navy); color: #fff; }

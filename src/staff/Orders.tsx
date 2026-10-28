@@ -318,7 +318,9 @@ export function orderText(o: Order, L: Lang): string {
   // the plain map link of the customer's pin (owner chose it over a directions link, 2026-10-23); WhatsApp links cannot carry a location pin
   if (o.delivery?.location) lines.push(`${sIn(L, 'waLocation')}: ${mapsLink(o.delivery.location)}`)
   lines.push('')
-  for (const g of groupLines(o.items)) { if (g.combo) lines.push(sIn(L, 'comboN', { n: g.combo })); for (const x of g.lines) lines.push('• ' + x) }
+  const gs = groupLines(o.items)
+  // items added from the menu after the combos (2026-10-28) come under their own heading
+  for (const g of gs) { if (g.combo) lines.push(sIn(L, 'comboN', { n: g.combo })); else if (gs.some((x) => x.combo)) lines.push(sIn(L, 'comboMoreHead')); for (const x of g.lines) lines.push('• ' + x) }
   if (o.note) lines.push('', `${dict[L].orderNote}: ${o.note}`)
   lines.push('', o.replenish ? sIn(L, 'repFree') : o.pay === 'wallet' ? dict[L].paidByWallet : sIn(L, 'waCollect', { n: iqd(o.total) }))
   return lines.join('\n')
@@ -385,6 +387,7 @@ export function useReceiptText(): (o: Order) => ReceiptText {
     scheduled: o.offer?.wantAt ? t('scheduledFor').replace('{t}', whenText(o.offer.wantAt, lang)) : o.arriveAt ? s('arriveAt', { t: timeText(o.arriveAt, lang) }) : undefined,
     customer: s('secCustomer'),
     combo: (n) => s('comboN', { n }),
+    more: s('comboMoreHead'),
     note: t('orderNote'),
     deliverTo: o.giftTo ? `${t('giftFor')} ${o.giftTo}` : s('secDeliverTo'),
     pay: o.replenish ? `${s('repBadge')} · ${s('repFor', { code: o.replenish.ofCode, reason: s(('repR_' + o.replenish.reason) as SKey) })}` : o.pay === 'wallet' ? t('paidByWallet') : o.fulfil === 'delivery' ? t('payOnDelivery') : t('payAtPickup'),
@@ -494,9 +497,10 @@ export function OrderCard({ o, lead = LEAD_MIN, all = [] }: { o: Order; lead?: n
       )}
       <div className="staff-sec">
         <span className="staff-sec-label">{s('secOrder')}</span>
-        {groupLines(o.items).map((g, k) => (
+        {groupLines(o.items).map((g, k, gs) => (
           <div key={k} className="staff-combo">
             {g.combo && <span className="staff-combo-label">{s('comboN', { n: g.combo })}</span>}
+            {!g.combo && gs.some((x) => x.combo) && <span className="staff-combo-label">{s('comboMoreHead')}</span>}
             <ul className="staff-items">{g.lines.map((it, i) => <li key={i}>{it}</li>)}</ul>
           </div>
         ))}
