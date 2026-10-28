@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react'
 import { useLang } from '../i18n'
 import { iqd } from '../account'
+import { REPLENISH_REASONS } from '../account'
 import type { Order } from '../account'
+import { isCancelled } from '../orders'
 import { useNow } from '../orders'
 import { catLabel } from '../components/MenuSection'
-import { RANGES, dayKey, rowsFromOrders, sampleRows, sampleVisits, summarize, toCsv, traffic } from './stats'
+import { RANGES, dayKey, rangeStart, rowsFromOrders, sampleRows, sampleVisits, summarize, toCsv, traffic } from './stats'
 import type { Range } from './stats'
 import { useStaff } from './store'
 import { useS } from './strings'
@@ -25,7 +27,20 @@ export function Analytics({ orders }: { orders: Order[] }) {
   const [range, setRange] = useState<Range>('30')
   const [sample, setSample] = useState(orders.length < 3)
   const [copied, setCopied] = useState(false)
-  const rows = useMemo(() => (sample ? sampleRows(data.branch, now) : rowsFromOrders(orders)), [sample, data.branch, orders, now])
+  // replenishments are free orders sent to make up for another (2026-10-28): not sales, so not in orders, revenue or items
+  const rows = useMemo(() => (sample ? sampleRows(data.branch, now) : rowsFromOrders(orders.filter((o) => !o.replenish))), [sample, data.branch, orders, now])
+  const given = useMemo(() => {
+    const from = rangeStart(range, now, orders.length ? Math.min(...orders.map((o) => o.at)) : undefined)
+    const inRange = orders.filter((o) => o.at >= from && o.at <= now && !isCancelled(o))
+    const reps = inRange.filter((o) => o.replenish)
+    const disc = inRange.filter((o) => o.discount)
+    return {
+      reps: reps.length,
+      why: REPLENISH_REASONS.map((r) => [r, reps.filter((o) => o.replenish!.reason === r).length] as const).filter(([, n]) => n),
+      disc: disc.length,
+      off: disc.reduce((n, o) => n + o.discount!.amount, 0),
+    }
+  }, [orders, range, now])
   const visits = useMemo(() => (sample ? sampleVisits(data.branch, now) : data.visits), [sample, data.branch, data.visits, now])
   const sum = useMemo(() => summarize(rows, range, now), [rows, range, now])
   const tr = useMemo(() => traffic(visits, range, now), [visits, range, now])
@@ -62,6 +77,12 @@ export function Analytics({ orders }: { orders: Order[] }) {
         <Stat icon={<I.bag />} tone="caramel" value={sum.units.toLocaleString('en-US')} label={s('itemsSold')} note={sum.orders ? `${s('perOrder', { n: (sum.units / sum.orders).toFixed(1) })}${sum.combos ? ` · ${s('nCombos', { n: sum.combos })}` : ''}` : undefined} />
         <Stat icon={<I.bike />} tone="sky" value={`${sum.delivery} / ${sum.pickup}`} label={s('deliveryPickup')} />
       </div>
+      {!sample && (given.reps > 0 || given.disc > 0) && (
+        <div className="d-stats">
+          <Stat icon={<I.receipt />} tone="green" value={given.reps.toLocaleString('en-US')} label={s('anReps')} note={given.why.map(([r, n]) => `${s(('repR_' + r) as SKey)} ${n}`).join(' · ') || undefined} />
+          <Stat icon={<I.money />} tone="caramel" value={iqd(given.off)} label={s('anDiscIqd')} note={s('anDiscN', { n: given.disc })} />
+        </div>
+      )}
 
       <div className="d-grid2">
         <Card title={hourly ? s('ordersToday') : s('ordersPerDay')} sub={s('hoverRevenue')}>

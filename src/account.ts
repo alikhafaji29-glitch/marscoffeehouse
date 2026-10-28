@@ -41,6 +41,9 @@ export interface Order {
   locationFrom?: string // the pin was taken from this earlier order of the same customer, after staff checked with them (2026-10-27); 'wa': the customer sent it on WhatsApp
   lang?: 'en' | 'ar' | 'ku' // the site's language when it was placed: WhatsApp messages to the customer use it (2026-10-28)
   wa?: { askedAt?: number; replies?: WaReply[] } // staff asked for the location on WhatsApp; what the customer sent back that was not a location
+  discount?: Discount // staff gave a discount before sending it out (2026-10-28): `total` is already the price after it
+  replenish?: Replenish // a free order staff sent to make up for this customer's earlier order (2026-10-28)
+  courier?: string // the delivery company that took it (2026-10-28): set when staff send it to one, or chosen on the card
   giftTo?: string // a drink sent to a friend: their number (delivery goes to them, the sender paid)
   branch?: string // the branch picked on the Order screen (staff/store.ts); missing = the first branch
   offer?: { name: string; price: number; count?: number; fee?: number; pre?: boolean; wantAt?: number } // a combo from the dashboard's Offers (Positive Hours); count = how many combos (1 when missing); pre = placed outside its hours; wantAt = the time the customer chose for a pre-order (ms)
@@ -50,6 +53,12 @@ export interface Order {
   gone?: boolean // this device only: the database no longer has it (deleted by the café or the owner): not followed, not shown
   held?: 'limit' // this device only: the backend refused it for now (10 orders an hour from one device); retried
 }
+/** a discount staff gave on an active order: 100 %, 50 % or an amount; `before` = the price without it */
+export interface Discount { kind: 'pct' | 'fixed'; value: number; amount: number; before: number }
+export const REPLENISH_REASONS = ['late', 'wrong', 'missing', 'damaged', 'quality', 'other'] as const
+export type ReplenishReason = (typeof REPLENISH_REASONS)[number]
+/** what a replenishment order was sent for */
+export interface Replenish { ofUid?: string; ofCode: string; reason: ReplenishReason; note?: string }
 /** something a customer sent on WhatsApp after the location request: a text, a voice note, a photo… or a second pin */
 export interface WaReply { kind: string; text?: string; lat?: number; lng?: number; at: number }
 export interface GeoPoint { lat: number; lng: number; acc?: number } // acc: the phone's own accuracy estimate, metres
@@ -210,6 +219,44 @@ export function setOrderPinLocal(id: string, location: GeoPoint, from: string) {
   o.delivery = { ...o.delivery, location }
   o.locationFrom = from
   if (mine) { account = { ...account! }; save() } else { guest = [...guest]; saveGuest() }
+}
+/** DEMO: the delivery company of an order */
+export function setOrderCourierLocal(id: string, courier: string) {
+  const mine = account?.orders.find((x) => x.id === id)
+  const o = mine ?? guest.find((x) => x.id === id)
+  if (!o) return
+  if (courier) o.courier = courier
+  else delete o.courier
+  if (mine) { account = { ...account! }; save() } else { guest = [...guest]; saveGuest() }
+}
+/** DEMO: the discount, worked out as the database does (always from the price before any discount) */
+export function setOrderDiscountLocal(id: string, kind: 'pct' | 'fixed' | 'none', value: number): boolean {
+  const mine = account?.orders.find((x) => x.id === id)
+  const o = mine ?? guest.find((x) => x.id === id)
+  if (!o) return false
+  const before = o.discount?.before ?? o.total
+  if (kind === 'none') { o.total = before; delete o.discount }
+  else {
+    if (kind === 'pct' ? value < 1 || value > 100 : value < 1 || value > before) return false
+    const amount = kind === 'pct' ? Math.round((before * value) / 100) : value
+    o.total = before - amount
+    o.discount = { kind, value, amount, before }
+  }
+  if (mine) { account = { ...account! }; save() } else { guest = [...guest]; saveGuest() }
+  return true
+}
+/** DEMO: a free replenishment order for the same customer, address and pin, kept with this device's orders */
+export function replenishLocal(o: Order, items: string[], reason: ReplenishReason, note?: string): string {
+  const code = 'M' + String(Math.floor(Math.random() * 1e6)).padStart(6, '0')
+  const at = Date.now()
+  guest = [{
+    id: code, at, total: 0, items, points: 0, pay: 'pickup', status: 'received', history: [{ stage: 'received', at }],
+    customer: o.customer, fulfil: o.fulfil, delivery: o.delivery, giftTo: o.giftTo, branch: o.branch, lang: o.lang, uid: newUid(),
+    ...(o.locationFrom && { locationFrom: o.locationFrom }),
+    replenish: { ofUid: o.uid, ofCode: o.id, reason, ...(note && { note }) },
+  }, ...guest]
+  saveGuest()
+  return code
 }
 /** Staff dashboard: move an order to a stage. Works whether or not the customer is signed in on this device. */
 export function setOrderStatus(id: string, stage: Status, reason?: string) {

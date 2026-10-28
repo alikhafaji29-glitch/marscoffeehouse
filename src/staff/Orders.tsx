@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { dict, useLang } from '../i18n'
 import type { Lang, TKey } from '../i18n'
 import { iqd, waNumber } from '../account'
-import type { Order } from '../account'
+import { REPLENISH_REASONS } from '../account'
+import type { Order, ReplenishReason } from '../account'
 import { CANCEL_REASONS, LEAD_MIN, STAGES, dueOf, groupLines, isActive, isCancelled, isLater, mergedInto, nextStage, reasonText, stageIndex, stagesFor, timeText, untilText, useNow, whenText } from '../orders'
 import { branchName, settingsFor, useStaff } from './store'
 import { printReceipt } from './receipt'
@@ -10,7 +11,7 @@ import type { ReceiptText } from './receipt'
 import type { Stage } from '../orders'
 import { IconCheck, IconPin } from '../components/Icons'
 import { mapsLink } from '../components/ShareLocation'
-import { applyPreviousPin, askLocation, cancelOrder, mergeOrders, moveOrder, previousPins, sendWhatsApp } from './remote'
+import { applyPreviousPin, askLocation, cancelOrder, mergeOrders, moveOrder, previousPins, replenishOrder, sendWhatsApp, setCourier, setDiscount } from './remote'
 import type { PrevPin } from './remote'
 import { sIn, useS } from './strings'
 import type { SKey } from './strings'
@@ -49,6 +50,152 @@ const SENT_KEY = 'mars-staff-sent'
 const readSent = (): Record<string, { name: string; at: number; api?: boolean }> => { try { return JSON.parse(localStorage.getItem(SENT_KEY) || '{}') } catch { return {} } }
 /* An order without a pin: the same customer's earlier pins at this branch, to add one after confirming with the
  * customer that it is the same place (owner, 2026-10-27: "for sure that's after they make sure it's the same location") */
+/** the delivery company that took the order (2026-10-28): set by the Zhin / wadi app buttons, or chosen here for an order
+ *  sent another way (Other…, a phone call, a route); the Deliveries report counts it for that company */
+function CourierPick({ o }: { o: Order }) {
+  const s = useS()
+  const viewing = useStaff().branch
+  const names = (settingsFor(o.branch ?? viewing).drivers ?? []).map((d) => d.name || d.phone).filter(Boolean)
+  const list = o.courier && !names.includes(o.courier) ? [...names, o.courier] : names
+  return (
+    <label className={'staff-courier' + (o.courier ? '' : ' none')}>
+      <span>{s('courierLabel')}</span>
+      <select value={o.courier ?? ''} onChange={(e) => setCourier(o, e.target.value)}>
+        <option value="">{s('courierNone')}</option>
+        {list.map((n) => <option key={n} value={n}>{n}</option>)}
+      </select>
+    </label>
+  )
+}
+/** "Discount 50%" / "Discount 2,000 IQD" */
+const discText = (o: Order, s: ReturnType<typeof useS>) => (o.discount ? (o.discount.kind === 'pct' ? s('discPct', { n: o.discount.value }) : s('discFixed', { n: iqd(o.discount.value) })) : '')
+
+/* Discount (owner, 2026-10-28: "some customers may have a discount when they order, so the barista can edit the discount,
+ * it may be a full discount 100% or 50% or a fixed amount that he types, on active orders before sending"). Any staff,
+ * while the order is at Request received / Preparing / Done. The database works it out from the price before any
+ * discount (order_set_discount), so choosing again replaces it; the total shown, printed and sent to the driver is the
+ * price after it. */
+function DiscountBox({ o }: { o: Order }) {
+  const s = useS()
+  const [open, setOpen] = useState(false)
+  const [amount, setAmount] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState('')
+  const before = o.discount?.before ?? o.total
+  const apply = async (kind: 'pct' | 'fixed' | 'none', value = 0) => {
+    if (kind === 'fixed' && !(value >= 1 && value <= before)) { setErr(s('discBad', { n: iqd(before) })); return }
+    setBusy(true); setErr('')
+    const why = await setDiscount(o, kind, value)
+    setBusy(false)
+    if (why) { setErr(s('discFailed', { why })); return }
+    setOpen(false); setAmount('')
+  }
+  if (!open) return <button type="button" className="link-btn staff-disc-open" onClick={() => setOpen(true)}>{o.discount ? s('discChange') : s('discBtn')}</button>
+  return (
+    <div className="staff-disc-box" role="group" aria-label={s('discTitle')}>
+      <p>{s('discTitle')} <small>· {s('discWas', { n: iqd(before) })}</small></p>
+      <div className="staff-disc-row">
+        <button type="button" disabled={busy} onClick={() => void apply('pct', 100)}>{s('discFull')}</button>
+        <button type="button" disabled={busy} onClick={() => void apply('pct', 50)}>50%</button>
+      </div>
+      <div className="staff-disc-row">
+        <input dir="ltr" inputMode="numeric" placeholder={s('discAmount')} aria-label={s('discAmount')} value={amount} onChange={(e) => { setAmount(e.target.value.replace(/[^\d]/g, '').slice(0, 7)); setErr('') }} />
+        <button type="button" disabled={busy || !amount} onClick={() => void apply('fixed', Number(amount))}>{s('discApply')}</button>
+      </div>
+      {err && <p className="staff-cancel-need" role="alert">{err}</p>}
+      <div className="staff-disc-row">
+        {o.discount && <button type="button" className="link-btn" disabled={busy} onClick={() => void apply('none')}>{s('discRemove')}</button>}
+        <button type="button" className="link-btn" onClick={() => { setOpen(false); setErr('') }}>{s('cancel')}</button>
+      </div>
+    </div>
+  )
+}
+
+/* Replenishment (owner, 2026-10-28: "if something happens to the order, or the order arrived late, or any other reason,
+ * they resend the order to the client as a replenishment gift for free"; baristas too; the items of the order, with the
+ * option to add from the menu; no message to the customer). Shown as "Gift" (owner, 2026-10-28: "rename Replenishment to
+ * gift, put the option on cancelled orders too, and on received orders and preparing, all stages"), on any order. It makes
+ * a new free order for the same customer, address and pin (order_replenish), which starts at Request received like any
+ * order, says "Gift · free" on its card, receipt and driver message, and the driver collects nothing. */
+function ReplenishBox({ o }: { o: Order }) {
+  const { lang } = useLang()
+  const s = useS()
+  const [open, setOpen] = useState(false)
+  const [reason, setReason] = useState<ReplenishReason | ''>('')
+  const [keep, setKeep] = useState<boolean[]>(() => o.items.map(() => true))
+  const [added, setAdded] = useState<string[]>([])
+  const [find, setFind] = useState('')
+  const [note, setNote] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)
+  const items = [...o.items.filter((_, i) => keep[i]), ...added]
+  const q = find.trim().toLowerCase()
+  const matches = q.length < 2 ? [] : ALL_ITEMS.filter((it) => !it.hidden && [it.name, nameOf(it.name, lang)].join(' ').toLowerCase().includes(q)).slice(0, 8)
+  const add = (line: string) => { setAdded([...added, line]); setFind('') }
+  const send = async () => {
+    if (!reason) { setMsg({ ok: false, text: s('repNeedReason') }); return }
+    if (!items.length) { setMsg({ ok: false, text: s('repNeedItems') }); return }
+    setBusy(true); setMsg(null)
+    const r = await replenishOrder(o, items, reason, note)
+    setBusy(false)
+    if (r.error) { setMsg({ ok: false, text: s('repFailed', { why: r.error }) }); return }
+    setOpen(false); setMsg({ ok: true, text: s('repDone', { code: r.code ?? '' }) })
+    setReason(''); setAdded([]); setNote(''); setKeep(o.items.map(() => true))
+  }
+  if (!open) {
+    return (
+      <div className="staff-rep">
+        <button type="button" className="link-btn staff-rep-open" onClick={() => { setOpen(true); setMsg(null) }}>{s('repBtn')}</button>
+        {msg && <p className={msg.ok ? 'staff-rep-ok' : 'staff-cancel-need'} role="status">{msg.text}</p>}
+      </div>
+    )
+  }
+  return (
+    <div className="staff-rep staff-rep-box" role="group" aria-label={s('repTitle')}>
+      <p className="staff-rep-title">{s('repTitle')}</p>
+      <p className="staff-rep-label">{s('repWhy')}</p>
+      <div className="staff-rep-reasons">
+        {REPLENISH_REASONS.map((r) => (
+          <label key={r} className="staff-cancel-opt">
+            <input type="radio" name={'rep-' + (o.uid ?? o.id)} checked={reason === r} onChange={() => { setReason(r); setMsg(null) }} />
+            <span>{s(('repR_' + r) as SKey)}</span>
+          </label>
+        ))}
+      </div>
+      <p className="staff-rep-label">{s('repItems')}</p>
+      <ul className="staff-rep-items">
+        {o.items.map((line, i) => (
+          <li key={'o' + i}><label className="staff-cancel-opt"><input type="checkbox" checked={keep[i]} onChange={() => setKeep(keep.map((k, j) => (j === i ? !k : k)))} /><span>{line}</span></label></li>
+        ))}
+        {added.map((line, i) => (
+          <li key={'a' + i} className="added"><span>{line}</span><button type="button" className="link-btn" onClick={() => setAdded(added.filter((_, j) => j !== i))}>{s('remove')}</button></li>
+        ))}
+      </ul>
+      <div className="staff-rep-add">
+        <input value={find} placeholder={s('repSearch')} aria-label={s('repAdd')} onChange={(e) => setFind(e.target.value)} />
+        {matches.length > 0 && (
+          <ul>
+            {matches.map((it) => (
+              <li key={it.name}>
+                <span>{nameOf(it.name, lang)}</span>
+                {it.sizes?.length
+                  ? it.sizes.map((sz) => <button key={sz} type="button" onClick={() => add(`${it.name} (${sz}) ×1`)}>{sz}</button>)
+                  : <button type="button" onClick={() => add(`${it.name} ×1`)}>{s('repAddOne')}</button>}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+      <input className="staff-cancel-text" maxLength={200} value={note} placeholder={s('repNote')} onChange={(e) => setNote(e.target.value)} />
+      {msg && !msg.ok && <p className="staff-cancel-need" role="alert">{msg.text}</p>}
+      <div className="staff-cancel-acts">
+        <button type="button" className="staff-rep-go" disabled={busy} onClick={() => void send()}>{busy ? s('waSending') : s('repSend', { n: items.length })}</button>
+        <button type="button" className="staff-cancel-keep" onClick={() => { setOpen(false); setMsg(null) }}>{s('cancel')}</button>
+      </div>
+    </div>
+  )
+}
+
 /* "Ask for location (WhatsApp)" (owner, 2026-10-26; template approved 2026-10-28): on a delivery order without a pin,
  * the approved automated message goes to the customer's own number in the language they ordered in. When they send their
  * location, wa-webhook puts it on this order (the card shows the map link and "sent by the customer on WhatsApp", and the
@@ -165,6 +312,7 @@ function PreviousPins({ o }: { o: Order }) {
 /** an order as the plain WhatsApp text (the fallback when no template can be sent), in language L */
 export function orderText(o: Order, L: Lang): string {
   const lines = [`Mars CoffeeHouse · ${branchName(o.branch)} · #${o.id}`, '']
+  if (o.replenish) lines.push(sIn(L, 'repFor', { code: o.replenish.ofCode, reason: sIn(L, ('repR_' + o.replenish.reason) as SKey) }), '')
   if (o.customer) lines.push(`${sIn(L, 'waCustomer')}: ${o.customer.name} · ${phoneOf(o)}`)
   if (o.delivery?.address) lines.push(`${sIn(L, 'waAddress')}: ${o.delivery.address}`)
   // the plain map link of the customer's pin (owner chose it over a directions link, 2026-10-23); WhatsApp links cannot carry a location pin
@@ -172,7 +320,7 @@ export function orderText(o: Order, L: Lang): string {
   lines.push('')
   for (const g of groupLines(o.items)) { if (g.combo) lines.push(sIn(L, 'comboN', { n: g.combo })); for (const x of g.lines) lines.push('• ' + x) }
   if (o.note) lines.push('', `${dict[L].orderNote}: ${o.note}`)
-  lines.push('', o.pay === 'wallet' ? dict[L].paidByWallet : sIn(L, 'waCollect', { n: iqd(o.total) }))
+  lines.push('', o.replenish ? sIn(L, 'repFree') : o.pay === 'wallet' ? dict[L].paidByWallet : sIn(L, 'waCollect', { n: iqd(o.total) }))
   return lines.join('\n')
 }
 /** this device remembers who an order went to, for the "Sent to …" line on its card */
@@ -195,7 +343,11 @@ function SendToDriver({ o }: { o: Order }) {
   const text = (L: Lang = lang) => orderText(o, L)
   const [busy, setBusy] = useState(false)
   const [failed, setFailed] = useState('')
-  const remember = (name: string, api?: boolean) => setSent(markSent(o, name, api))
+  const remember = (name: string, api?: boolean) => {
+    setSent(markSent(o, name, api))
+    // sent to one of the branch's delivery companies: the order is theirs in the Deliveries report (2026-10-28)
+    if (drivers.some((d) => (d.name || d.phone) === name)) setCourier(o, name)
+  }
   const send = async (name: string, phone?: string, L: Lang = lang) => {
     setFailed('')
     if (phone && o.uid) {
@@ -235,8 +387,8 @@ export function useReceiptText(): (o: Order) => ReceiptText {
     combo: (n) => s('comboN', { n }),
     note: t('orderNote'),
     deliverTo: o.giftTo ? `${t('giftFor')} ${o.giftTo}` : s('secDeliverTo'),
-    pay: o.pay === 'wallet' ? t('paidByWallet') : o.fulfil === 'delivery' ? t('payOnDelivery') : t('payAtPickup'),
-    fee: o.offer?.fee ? s('inclFee', { n: iqd(o.offer.fee) }) : undefined,
+    pay: o.replenish ? `${s('repBadge')} · ${s('repFor', { code: o.replenish.ofCode, reason: s(('repR_' + o.replenish.reason) as SKey) })}` : o.pay === 'wallet' ? t('paidByWallet') : o.fulfil === 'delivery' ? t('payOnDelivery') : t('payAtPickup'),
+    fee: [o.offer?.fee ? s('inclFee', { n: iqd(o.offer.fee) }) : '', o.discount ? `${discText(o, s)} · ${s('discWas', { n: iqd(o.discount.before) })}` : ''].filter(Boolean).join(' · ') || undefined,
     thanks: s('rcThanks'),
   })
 }
@@ -298,10 +450,20 @@ export function OrderCard({ o, lead = LEAD_MIN, all = [] }: { o: Order; lead?: n
       <p className="staff-badges">
         <span className={'staff-how ' + (o.fulfil === 'delivery' ? 'deliv' : 'pick')}>{o.fulfil === 'delivery' ? t('getDelivery') : t('getPickup')}</span>
         {o.giftTo && <span className="staff-how gift">{t('giftBadge')}</span>}
+        {o.replenish && <span className="staff-how rep">{s('repBadge')}</span>}
         {o.offer && <span className="staff-how offer">{o.offer.name}{(o.offer.count ?? 1) > 1 && <span dir="ltr"> ×{o.offer.count}</span>}</span>}
         {o.offer?.pre && <span className="staff-how pre">{s('preOrderBadge')}</span>}
         {dueOf(o) && isActive(o) && (o.status ?? 'received') === 'received' && !isLater(o, now, lead) && <span className="staff-how now">{s('makeNow')}</span>}
       </p>
+      {o.replenish && (
+        <p className="staff-rep-for">
+          {s('repFor', { code: o.replenish.ofCode, reason: s(('repR_' + o.replenish.reason) as SKey) })}
+          {o.replenish.note && <> · <q>{o.replenish.note}</q></>}
+        </p>
+      )}
+      {all.filter((x) => x.replenish && (x.replenish.ofUid ? x.replenish.ofUid === o.uid : x.replenish.ofCode === o.id)).map((x) => (
+        <p key={x.uid ?? x.id} className="staff-rep-sent">{s('repSent', { code: x.id, reason: s(('repR_' + x.replenish!.reason) as SKey) })}</p>
+      ))}
       {same.length > 0 && (
         <p className="staff-same" role="note">
           <b>{s('sameCustomer')}</b>{' '}
@@ -351,11 +513,19 @@ export function OrderCard({ o, lead = LEAD_MIN, all = [] }: { o: Order; lead?: n
           <WaReplies o={o} />
         </div>
       )}
-      <p className="staff-total"><b dir="ltr">{iqd(o.total)} IQD</b> · {o.pay === 'wallet' ? t('paidByWallet') : o.fulfil === 'delivery' ? t('payOnDelivery') : t('payAtPickup')}{o.offer?.fee ? <> · {s('inclFee', { n: iqd(o.offer.fee) })}</> : null}</p>
+      <p className="staff-total">
+        <b dir="ltr">{iqd(o.total)} IQD</b>
+        {o.discount && <> <s dir="ltr">{iqd(o.discount.before)}</s> · <span className="staff-disc">{discText(o, s)}</span></>}
+        {' · '}{o.replenish ? s('repFree') : o.pay === 'wallet' ? t('paidByWallet') : o.fulfil === 'delivery' ? t('payOnDelivery') : t('payAtPickup')}
+        {o.offer?.fee ? <> · {s('inclFee', { n: iqd(o.offer.fee) })}</> : null}
+      </p>
+      {!o.replenish && !cancelled && ['received', 'preparing', 'done'].includes(o.status ?? 'received') && <DiscountBox o={o} />}
       <div className="staff-acts" role="group">
         <button type="button" className="staff-print" onClick={() => printReceipt(o, receipt(o))}><PrintIcon />{s('printReceipt')}</button>
         {o.fulfil === 'delivery' && !cancelled && isActive(o) && <SendToDriver o={o} />}
       </div>
+      {o.fulfil === 'delivery' && !cancelled && <CourierPick o={o} />}
+      {!o.replenish && <ReplenishBox o={o} />}
       {cancelled && <p className="staff-cancel-reason"><b>{t('cancelReason')}:</b> {reasonText(o.cancelReason, t)}</p>}
       {!cancelled && <ol className="staff-steps" aria-label={t('trackOrder')}>
         {stages.map((st, i) => (

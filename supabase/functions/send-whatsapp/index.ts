@@ -54,6 +54,7 @@ type OrderRow = {
   uid: string; code: string; branch: string; customer_name: string | null; customer_phone: string | null; delivery_phone: string | null
   address: string | null; location: { lat: number; lng: number } | null; items: string[]; total: number; pay: string | null
   fulfil: string; status: string; gift_to: string | null; lang: string | null; wa: Record<string, unknown> | null
+  replenish: { of_code?: string } | null
 }
 
 /** Iraqi numbers as WhatsApp wants them: 0750 123 4567 → 9647501234567 */
@@ -73,10 +74,11 @@ const BRANCH: Record<string, Record<string, string>> = {
 }
 /** the template language for the dashboard's language: Kurdish is filed under Persian (WhatsApp has no Kurdish) */
 const templateLang = (lang?: string) => (lang === 'ku' ? 'fa' : lang === 'ar' ? 'ar' : 'en')
-const COLLECT: Record<string, { wallet: string; cur: string }> = {
-  en: { wallet: 'Paid by wallet', cur: 'IQD' },
-  ar: { wallet: 'مدفوع بالمحفظة', cur: 'دينار' },
-  fa: { wallet: 'بە جزدان پارەی دراوە', cur: 'دینار' },
+// a gift (a replenishment: a free order sent to make up for another, 2026-10-28): the driver collects nothing
+const COLLECT: Record<string, { wallet: string; cur: string; free: string }> = {
+  en: { wallet: 'Paid by wallet', cur: 'IQD', free: 'Free gift: collect nothing' },
+  ar: { wallet: 'مدفوع بالمحفظة', cur: 'دينار', free: 'هدية مجانية: لا تستلم أي مبلغ' },
+  fa: { wallet: 'بە جزدان پارەی دراوە', cur: 'دینار', free: 'دیاری بێبەرامبەر: هیچ پارەیەک وەرمەگرە' },
 }
 
 Deno.serve(async (req: Request) => {
@@ -105,7 +107,7 @@ Deno.serve(async (req: Request) => {
   const { data: staff } = await sb.from('staff').select('branch').eq('user_id', u.user.id).maybeSingle()
   if (!staff) return json(403, { ok: false, reason: 'not_staff' })
   const { data: o } = await sb.from('orders')
-    .select('uid,code,branch,customer_name,customer_phone,delivery_phone,address,location,items,total,pay,fulfil,status,gift_to,lang,wa')
+    .select('uid,code,branch,customer_name,customer_phone,delivery_phone,address,location,items,total,pay,fulfil,status,gift_to,lang,wa,replenish')
     .eq('uid', body.order_uid).maybeSingle<OrderRow>()
   if (!o || (staff.branch && staff.branch !== o.branch)) return json(404, { ok: false, reason: 'no_order' })
 
@@ -132,7 +134,7 @@ Deno.serve(async (req: Request) => {
     o.address ?? '',
     o.location ? `https://www.google.com/maps?q=${o.location.lat},${o.location.lng}` : '',
     (o.items ?? []).join(' · '),
-    o.pay === 'wallet' ? COLLECT[tl].wallet : `${iqd(o.total)} ${COLLECT[tl].cur}`,
+    o.replenish ? COLLECT[tl].free : o.pay === 'wallet' ? COLLECT[tl].wallet : `${iqd(o.total)} ${COLLECT[tl].cur}`,
   ].map((t) => ({ type: 'text', text: flat(t) }))
   const shortParams = (tl: string) => {
     const p = params(tl)

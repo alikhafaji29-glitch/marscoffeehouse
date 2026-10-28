@@ -2326,3 +2326,43 @@ body.ph-on .band-pill, body.ph-on .header-order-in { display: none; }
 .staff-askloc-lang { display: inline-flex; flex-direction: column; align-items: center; min-height: 40px; padding: 0.4rem 0.9rem; border-radius: 999px; border: 1.5px solid #1e8c46; background: #fff; color: #14602f; font: inherit; font-weight: 600; cursor: pointer; }
 .staff-askloc-lang.ordered { background: #1e8c46; color: #fff; }
 .staff-askloc-lang small { font-size: 0.68rem; font-weight: 400; opacity: 0.9; }
+
+/* discount and replenishment (2026-10-28) */
+.staff-total s { color: rgba(16, 32, 58, 0.5); font-size: 0.85em; }
+.staff-disc { color: #1e8c46; font-weight: 700; }
+.staff-disc-open, .staff-rep-open { font-size: 0.88rem; margin: 0.15rem 0; width: fit-content; align-self: flex-start; justify-self: start; }
+.staff-disc-box, .staff-rep-box { display: grid; gap: 0.45rem; margin: 0.4rem 0; padding: 0.7rem; border-radius: 0.8rem; border: 1.5px solid rgba(30, 140, 70, 0.35); background: #f6fbf7; }
+.staff-disc-box > p, .staff-rep-title { margin: 0; font-size: 0.88rem; font-weight: 700; color: var(--navy); }
+.staff-disc-row { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+.staff-disc-row > button:not(.link-btn), .staff-rep-add li button { min-height: 40px; padding: 0.4rem 0.9rem; border-radius: 999px; border: 1.5px solid #1e8c46; background: #fff; color: #14602f; font: inherit; font-weight: 600; cursor: pointer; }
+.staff-disc-row input, .staff-rep-add input { flex: 1 1 8rem; min-width: 0; font: inherit; padding: 0.5rem 0.7rem; border-radius: 0.6rem; border: 1.5px solid rgba(32, 52, 105, 0.25); }
+.staff-rep-label { margin: 0.2rem 0 0; font-size: 0.82rem; font-weight: 600; color: rgba(16, 32, 58, 0.7); }
+.staff-rep-reasons { display: grid; grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); }
+.staff-rep-items { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.1rem; }
+.staff-rep-items li.added { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; padding: 0.3rem 0.4rem; font-size: 0.88rem; background: #fff; border-radius: 0.5rem; }
+.staff-rep-add { display: grid; gap: 0.3rem; }
+.staff-rep-add ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.25rem; }
+.staff-rep-add li { display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem; font-size: 0.88rem; }
+.staff-rep-add li span { flex: 1 1 8rem; }
+.staff-rep-add li button { min-height: 34px; padding: 0.2rem 0.7rem; }
+.staff-rep-go { flex: 1; min-height: 46px; border: 0; border-radius: 999px; background: #1e8c46; color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+.staff-rep-go:disabled { opacity: 0.6; }
+.staff-how.rep { background: #1e8c46; color: #fff; }
+.staff-rep-for { margin: 0.2rem 0 0.4rem; padding: 0.4rem 0.6rem; border-radius: 0.6rem; background: #eaf6ee; color: #14602f; font-size: 0.86rem; font-weight: 600; }
+.staff-rep-sent { margin: 0.2rem 0; font-size: 0.84rem; color: #14602f; font-weight: 600; }
+.staff-rep-ok { margin: 0.2rem 0; font-size: 0.85rem; color: #14602f; }
+
+/* delivery company on the card, and the Deliveries report (2026-10-28) */
+.staff-courier { display: flex; align-items: center; gap: 0.5rem; margin: 0.35rem 0 0.1rem; font-size: 0.85rem; color: rgba(16, 32, 58, 0.75); }
+.staff-courier select { font: inherit; padding: 0.3rem 0.5rem; border-radius: 0.5rem; border: 1.5px solid rgba(32, 52, 105, 0.25); background: #fff; }
+.staff-courier.none select { border-color: #d98a2b; }
+.deliv-bar { flex-wrap: wrap; align-items: flex-end; gap: 0.6rem; }
+.deliv-date { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.8rem; color: var(--d-mute, #667); }
+.deliv-date input { font: inherit; padding: 0.45rem 0.6rem; border-radius: 0.6rem; border: 1px solid rgba(32, 52, 105, 0.3); }
+.deliv-stats { margin-bottom: 0.4rem; }
+.deliv-list summary { cursor: pointer; font-weight: 600; margin: 0.3rem 0; }
+.deliv-list table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+.deliv-list th, .deliv-list td { padding: 0.35rem 0.4rem; border-bottom: 1px solid rgba(32, 52, 105, 0.12); text-align: start; }
+.deliv-loose { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.4rem; }
+.deliv-loose li { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; font-size: 0.9rem; }
+.deliv-loose select { margin-inline-start: auto; font: inherit; padding: 0.3rem 0.5rem; border-radius: 0.5rem; border: 1.5px solid #d98a2b; }
