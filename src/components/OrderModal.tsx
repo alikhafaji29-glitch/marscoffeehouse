@@ -3,7 +3,7 @@ import { PickupSwitch } from './PickupSwitch'
 import { useLang } from '../i18n'
 import { unlockAudio } from '../chime'
 import { useCart } from '../cart'
-import { iqd, normPhone, payAtPickup, payFromWallet, placeOfferOrder, saveContact, savedContact, sendDrinkGift, useAccount, useMyOrders } from '../account'
+import { iqd, latinDigits, payAtPickup, payFromWallet, placeOfferOrder, saveContact, savedContact, sendDrinkGift, useAccount, useMyOrders, validPhone } from '../account'
 import { SendToFriend } from './SendToFriend'
 import type { Delivery, GeoPoint } from '../account'
 import { ShareLocation, mapsLink } from './ShareLocation'
@@ -53,7 +53,7 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
     const miss: Missing[] = []
     if (how !== 'delivery' && arriveAt < clockNow().getTime()) miss.push('arrive')
     if (guestMode && name.trim().length < 2) miss.push('name')
-    if ((guestMode || how === 'delivery') && normPhone(phone).length < 10) miss.push('phone')
+    if ((guestMode || how === 'delivery') && !validPhone(phone)) miss.push('phone')
     // delivery needs the shared pin or a typed address, either one, as in Positive Hours (owner, 2026-10-29: "orders from
     // menu requires location, not like positive hours"; the pin alone was required since 2026-10-23)
     if (how === 'delivery' && !location && address.trim().length < 5) miss.push('where')
@@ -73,7 +73,7 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
   const details = (): Delivery | undefined | null => {
     if (!check()) return null
     if (how !== 'delivery') return undefined
-    return { phone: phone.trim(), address: address.trim(), location: location ?? undefined }
+    return { phone: latinDigits(phone.trim()), address: address.trim(), location: location ?? undefined }
   }
   const payWallet = () => {
     unlockAudio() // this tap lets the order's status sounds play later
@@ -87,8 +87,8 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
     unlockAudio()
     const d = details(); if (d === null) return
     if (guestMode) {
-      saveContact({ name: name.trim(), phone: phone.trim(), ...(d && { address: d.address }) })
-      const res = placeOfferOrder({ total, items: itemLines(), name: name.trim(), phone: phone.trim(), address: d ? d.address : undefined, location: d?.location, note: staffNote.trim() || undefined, arriveAt: d ? undefined : arriveAt })
+      saveContact({ name: name.trim(), phone: latinDigits(phone.trim()), ...(d && { address: d.address }) })
+      const res = placeOfferOrder({ total, items: itemLines(), name: name.trim(), phone: latinDigits(phone.trim()), address: d ? d.address : undefined, location: d?.location, note: staffNote.trim() || undefined, arriveAt: d ? undefined : arriveAt })
       if (!res.ok) return
       clear()
       setPaid(res)

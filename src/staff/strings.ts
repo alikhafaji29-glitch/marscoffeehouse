@@ -551,7 +551,7 @@ const S = {
   missTitle: ['Almost there!', 'بقي القليل!', 'کەمێکی ماوە!'],
   missSub: ['To place your order, please:', 'لإتمام طلبك، من فضلك:', 'بۆ تەواوکردنی داواکارییەکەت، تکایە:'],
   missName: ['Write your first name', 'اكتب اسمك الأول', 'ناوی یەکەمت بنووسە'],
-  missPhone: ['Write your phone number (at least 10 digits)', 'اكتب رقم هاتفك (10 أرقام على الأقل)', 'ژمارەی مۆبایلەکەت بنووسە (لانیکەم 10 ژمارە)'],
+  missPhone: ['Write a valid mobile number, for example 0750 123 4567', 'اكتب رقم هاتف صحيحاً، مثل 0750 123 4567', 'ژمارەیەکی مۆبایلی دروست بنووسە، وەک 0750 123 4567'],
   missWhere: ['Type your address, or tap “Share my location”', 'اكتب عنوانك، أو اضغط «مشاركة موقعي»', 'ناونیشانەکەت بنووسە، یان «هاوبەشکردنی شوێنەکەم» دابگرە'],
   missPlace: ['Tap “Share my location” so the driver can find you', 'اضغط «مشاركة موقعي» ليصل إليك السائق', '«هاوبەشکردنی شوێنەکەم» دابگرە بۆ ئەوەی شۆفێر بتدۆزێتەوە'],
   missWhen: ['Choose when you want your order', 'اختر متى تريد طلبك', 'هەڵبژێرە کەی داواکارییەکەتت دەوێت'],

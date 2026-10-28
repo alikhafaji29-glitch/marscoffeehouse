@@ -90,7 +90,19 @@ let account: Account | null = (() => {
 let session = (() => { try { return localStorage.getItem(SESSION) === '1' } catch { return false } })()
 const setSession = (on: boolean) => { session = on; try { localStorage.setItem(SESSION, on ? '1' : '0') } catch { /* ignore */ } }
 
-export const normPhone = (p: string) => p.replace(/\D/g, '')
+// Arabic (٠–٩) and Persian / Kurdish (۰–۹) digits count as digits: phones set to Arabic or Kurdish type them (2026-10-29)
+/** the same number with Arabic / Persian digits written as 0–9, spaces kept: what an order stores and staff dial */
+export const latinDigits = (p: string) => p.replace(/[٠-٩۰-۹]/g, (c) => String((c.charCodeAt(0) & 0xf) % 10))
+export const normPhone = (p: string) => latinDigits(p).replace(/\D/g, '')
+/** an Iraqi mobile number (owner, 2026-10-29: "if the user types invalid number don't accept it"): 07X XXXX XXXX, also
+ *  written +964 7…, 00964 7… or 7… without the first 0; 07 then 3–9 (Korek 075, Asiacell 077, Zain 078 / 079…) */
+export function validPhone(p: string): boolean {
+  let d = normPhone(p)
+  if (d.startsWith('00')) d = d.slice(2)
+  if (d.startsWith('964')) d = '0' + d.slice(3)
+  if (d.length === 10 && d.startsWith('7')) d = '0' + d
+  return /^07[3-9]\d{8}$/.test(d)
+}
 // demo password hash (pure JS so it also works over plain http on the LAN)
 export function hashPassword(phone: string, pw: string): string {
   const s = normPhone(phone) + ':' + pw
