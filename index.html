@@ -1,7 +1,16 @@
 <!doctype html>
-<html lang="en">
+<!-- translate="no" + the google notranslate meta (2026-10-28): a browser's page translator (Kirkuk's phone, in a Floating
+     Apps window) had rewritten the Arabic dashboard into nonsense Arabic. Nothing on the site may be machine-translated:
+     it has its own Arabic and Kurdish. -->
+<html lang="en" translate="no" class="notranslate">
   <head>
     <meta charset="UTF-8" />
+    <meta name="google" content="notranslate" />
+    <script>
+      // the page's language from the first moment, before the app starts: Arabic, or Kurdish (Sorani, "ckb": "ku" alone
+      // reads as Kurmanji, written in Latin letters, so translators offered to "translate" our Kurdish)
+      try { var l = localStorage.getItem('mars-lang'); if (l === 'ar' || l === 'ku') { document.documentElement.lang = l === 'ku' ? 'ckb' : 'ar'; document.documentElement.dir = 'rtl' } } catch (e) {}
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#11264b" />
     <link rel="icon" type="image/png" href="/favicon.png" />
