@@ -2388,3 +2388,11 @@ body.ph-on .band-pill, body.ph-on .header-order-in { display: none; }
 .combo-more-add { display: flex; flex-wrap: wrap; gap: 0.35rem; }
 .combo-more-add button { min-height: 36px; padding: 0.3rem 0.75rem; border-radius: 999px; border: 1.5px solid var(--navy); background: #fff; color: var(--navy); font: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
 .combo-more-add button:active { background: var(--navy); color: #fff; }
+
+/* "Show the whole menu" at the end of the menu's sections, phones only (2026-10-28) */
+.menu-show-all { display: none; }
+@media (max-width: 767px) {
+  .menu-show-all { display: block; width: 100%; margin: 1rem 0 6rem; /* clear of the floating Track order bar */ min-height: 52px; border: 0; border-radius: 999px; background: var(--navy); color: #fff; font: inherit; font-weight: 700; font-size: 1rem; letter-spacing: 0.02em; cursor: pointer; }
+}
+.osection-all + .osection-all { margin-top: 1.6rem; }
+.menu-all-top { margin-top: 1.4rem; }

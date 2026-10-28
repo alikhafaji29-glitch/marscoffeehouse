@@ -502,6 +502,7 @@ const S = {
   comboNextCombo: ['Next combo', 'الكومبو التالي', 'کۆمبۆی داهاتوو'],
   comboReady: ['Combo {n} is ready', 'الكومبو {n} جاهز', 'کۆمبۆی {n} ئامادەیە'],
   comboReadyHint: ['Choose combo {n} now, or skip it.', 'اختر الكومبو {n} الآن، أو تخطَّه.', 'ئێستا کۆمبۆی {n} هەڵبژێرە، یان بیپەڕێنە.'],
+  menuShowAll: ['Show the whole menu', 'عرض القائمة كاملة', 'هەموو مینیوەکە پیشان بدە'],
   comboAddMore: ['Add drinks or food from the menu', 'أضف مشروبات أو مأكولات من القائمة', 'خواردنەوە یان خواردن لە مینیو زیاد بکە'],
   comboQtyLess: ['One fewer', 'واحد أقل', 'دانەیەک کەمتر'],
   comboQtyMore: ['One more', 'واحد إضافي', 'دانەیەکی تر'],
