@@ -17,6 +17,7 @@ export interface ReceiptText {
   scheduled?: string // "Scheduled for …" / "Arriving at …"
   customer: string
   combo: (n: number) => string
+  more?: string // the heading of items added from the menu after the combos (2026-10-28)
   note: string
   deliverTo: string
   pay: string
@@ -28,7 +29,8 @@ const esc = (v: string) => v.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
 
 export function receiptHtml(o: Order, L: ReceiptText): string {
   const phone = o.delivery?.phone ?? o.customer?.phone ?? ''
-  const lines = groupLines(o.items).map((g) => `${g.combo ? `<p class="combo">${esc(L.combo(g.combo))}</p>` : ''}<ul>${g.lines.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`).join('')
+  const gs = groupLines(o.items)
+  const lines = gs.map((g) => `${g.combo ? `<p class="combo">${esc(L.combo(g.combo))}</p>` : L.more && gs.some((x) => x.combo) ? `<p class="combo">${esc(L.more)}</p>` : ''}<ul>${g.lines.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`).join('')
   return `<!doctype html><html dir="${L.dir}"><head><meta charset="utf-8"><title>#${esc(o.id)}</title><style>
 @page { size: 80mm auto; margin: 4mm; }
 * { box-sizing: border-box; }

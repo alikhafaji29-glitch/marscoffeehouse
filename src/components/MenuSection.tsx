@@ -96,8 +96,11 @@ export function MenuSection({ onPick, gift = false }: { onPick: (item: MenuItem)
   const query = q.trim().toLowerCase()
   const results = query ? MENU.flatMap((c) => c.items.filter((i) => !i.hidden && [i.name, ...Object.values(itemState(i.name)?.names ?? {})].some((n) => n.toLowerCase().includes(query))).map((i) => ({ item: i, cat: c.id }))) : [] // any language
   const shown = sections.find((c) => c.id === open)
+  // "Show the whole menu" at the end of the sections, on phones (owner, 2026-10-28): every section in one scroll
+  const ALL_OPEN = '*all'
+  const whole = open === ALL_OPEN
   // a section that left the menu (a branch switch, an event ended) goes back to the list
-  useEffect(() => { if (open && !shown) setOpen('') }, [open, shown])
+  useEffect(() => { if (open && !whole && !shown) setOpen('') }, [open, shown, whole])
   // coming to the menu again (Order now, the header's Menu) starts at the sections
   useEffect(() => {
     const on = () => { if (location.hash === '#menu') setOpen('') }
@@ -134,6 +137,17 @@ export function MenuSection({ onPick, gift = false }: { onPick: (item: MenuItem)
           <h2 className="osection-title">{t('results')}</h2>
           {results.length ? <ul className="ocards">{results.map(({ item, cat }) => <Card key={item.name} item={item} cat={cat} onPick={onPick} />)}</ul> : <p className="acct-hint">{t('noResults')}</p>}
         </div>
+      ) : whole ? (
+        <div className="osection" data-cat="all">
+          <button type="button" className="combo-sections-back" onClick={() => openSection('')}>‹ {u('comboAllSections')}</button>
+          {sections.map((c) => (
+            <div key={c.id} className="osection-all" id={'cat-' + c.id}>
+              <h2 className="osection-title">{sectionName(c.id)}</h2>
+              <ul className="ocards">{c.items.map((item) => <Card key={item.name} item={item} cat={CURATED.includes(c.id) ? categoryOf(item.name) : c.id} onPick={onPick} />)}</ul>
+            </div>
+          ))}
+          <button type="button" className="combo-sections-back menu-all-top" onClick={() => openSection('')}>‹ {u('comboAllSections')}</button>
+        </div>
       ) : !shown ? (
         <div className="osection" data-cat="sections">
           <ul className="order-sections" aria-label={u('comboSections')}>
@@ -147,6 +161,7 @@ export function MenuSection({ onPick, gift = false }: { onPick: (item: MenuItem)
               </li>
             ))}
           </ul>
+          <button type="button" className="menu-show-all" onClick={() => openSection(ALL_OPEN)}>{u('menuShowAll')}</button>
         </div>
       ) : (
         <div className="osection" id={'cat-' + shown.id} data-cat={shown.id}>
