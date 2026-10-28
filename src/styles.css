@@ -2366,3 +2366,6 @@ body.ph-on .band-pill, body.ph-on .header-order-in { display: none; }
 .deliv-loose { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.4rem; }
 .deliv-loose li { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; font-size: 0.9rem; }
 .deliv-loose select { margin-inline-start: auto; font: inherit; padding: 0.3rem 0.5rem; border-radius: 0.5rem; border: 1.5px solid #d98a2b; }
+.deliv-list td select { font: inherit; font-size: 0.82rem; padding: 0.2rem 0.35rem; border-radius: 0.45rem; border: 1px solid rgba(32, 52, 105, 0.3); background: #fff; }
+.deliv-list table { min-width: 36rem; }
+.deliv-list { overflow-x: auto; }

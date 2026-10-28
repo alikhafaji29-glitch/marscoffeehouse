@@ -16,7 +16,8 @@ import { dayKey, startOf } from './stats'
  * cancelled ones never), the money they collected from customers (each order's total, after any discount; a gift is 0),
  * their share as set in Tools → Delivery drivers (a fixed amount per order, a percentage of what the customer paid, or
  * the delivery fee on the order), and what Mars receives from them. Orders with no company are listed apart with a choice,
- * so the report can be fixed on the spot. Print and CSV (the same text on the clipboard).
+ * and every listed order can be moved to another company (owner, 2026-10-28: "add the ability to change the delivery
+ * company in reports"), so the report can be fixed on the spot. Print and CSV (the same text on the clipboard).
  */
 type Line = { o: Order; share: number }
 const DAY = 86400000
@@ -69,6 +70,15 @@ export function Deliveries({ orders: here }: { orders: Order[] }) {
     }).filter((g) => g.lines.length || g.d)
   }, [rows, drivers])
   const loose = (rows ?? []).filter((o) => !o.courier)
+  // move an order to another company (or none): saved on the order, and the report follows at once
+  const move = (o: Order, courier: string) => { setCourier(o, courier); setRows((rows ?? []).map((x) => (x === o ? { ...x, courier: courier || undefined } : x))) }
+  const choices = drivers.map((d) => d.name || d.phone)
+  const pick = (o: Order) => (
+    <select aria-label={s('courierLabel')} value={o.courier ?? ''} onChange={(e) => move(o, e.target.value)}>
+      <option value="">{s('courierNone')}</option>
+      {[...choices, ...(o.courier && !choices.includes(o.courier) ? [o.courier] : [])].map((n) => <option key={n} value={n}>{n}</option>)}
+    </select>
+  )
   const shareText = (d?: Driver) => !d?.share ? s('shareUnset') : d.share.kind === 'fixed' ? s('shareIsFixed', { n: iqd(d.share.value) }) : d.share.kind === 'pct' ? s('shareIsPct', { n: d.share.value }) : s('shareIsFee')
   const range = from === to ? new Date(from).toLocaleDateString(lang === 'en' ? 'en-GB' : lang === 'ar' ? 'ar-IQ' : 'ckb-IQ') : `${new Date(from).toLocaleDateString('en-GB')} – ${new Date(to).toLocaleDateString('en-GB')}`
   const time = (t: number) => new Date(t).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
@@ -138,8 +148,8 @@ export function Deliveries({ orders: here }: { orders: Order[] }) {
                     <details className="deliv-list">
                       <summary>{s('delivShowOrders', { n: g.lines.length })}</summary>
                       <table>
-                        <thead><tr><th>{s('repTime')}</th><th>{s('repOrder')}</th><th>{s('secCustomer')}</th><th>{s('repCollected')}</th><th>{s('repShare')}</th><th /></tr></thead>
-                        <tbody>{g.lines.map((l) => <tr key={l.o.uid ?? l.o.id}><td dir="ltr">{time(l.o.at)}</td><td dir="ltr">#{l.o.id}</td><td>{l.o.customer?.name}</td><td dir="ltr">{iqd(l.o.total)}</td><td dir="ltr">{iqd(l.share)}</td><td>{note(l.o)}</td></tr>)}</tbody>
+                        <thead><tr><th>{s('repTime')}</th><th>{s('repOrder')}</th><th>{s('secCustomer')}</th><th>{s('repCollected')}</th><th>{s('repShare')}</th><th /><th>{s('courierLabel')}</th></tr></thead>
+                        <tbody>{g.lines.map((l) => <tr key={l.o.uid ?? l.o.id}><td dir="ltr">{time(l.o.at)}</td><td dir="ltr">#{l.o.id}</td><td>{l.o.customer?.name}</td><td dir="ltr">{iqd(l.o.total)}</td><td dir="ltr">{iqd(l.share)}</td><td>{note(l.o)}</td><td>{pick(l.o)}</td></tr>)}</tbody>
                       </table>
                     </details>
                   )}
@@ -151,10 +161,7 @@ export function Deliveries({ orders: here }: { orders: Order[] }) {
                     {loose.map((o) => (
                       <li key={o.uid ?? o.id}>
                         <span dir="ltr">{time(o.at)}</span> · <b dir="ltr">#{o.id}</b> · {o.customer?.name} · <span dir="ltr">{iqd(o.total)} IQD</span>
-                        <select value="" onChange={(e) => { setCourier(o, e.target.value); setRows((rows ?? []).map((x) => (x === o ? { ...x, courier: e.target.value } : x))) }}>
-                          <option value="">{s('courierNone')}</option>
-                          {drivers.map((d) => <option key={d.name || d.phone} value={d.name || d.phone}>{d.name || d.phone}</option>)}
-                        </select>
+                        {pick(o)}
                       </li>
                     ))}
                   </ul>
