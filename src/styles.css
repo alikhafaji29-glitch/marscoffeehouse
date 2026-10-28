@@ -2396,3 +2396,6 @@ body.ph-on .band-pill, body.ph-on .header-order-in { display: none; }
 }
 .osection-all + .osection-all { margin-top: 1.6rem; }
 .menu-all-top { margin-top: 1.4rem; }
+@media (max-width: 767px) {
+  .home-show-all { max-width: 22rem; margin: 0.4rem auto 0.6rem; }
+}

@@ -19,6 +19,8 @@ import type { Cat } from './BaristaJourney'
 import { SidePanel } from './SidePanel'
 import { PHOTOS } from '../photos'
 import { Logo } from './Header'
+import { openWholeMenu } from './MenuSection'
+import { useS } from '../staff/strings'
 import { iqd } from '../account'
 
 // Build Your Drink card photo: a finished iced build in the Mars cup (the builder's last frame)
@@ -157,6 +159,7 @@ function Track({ children }: { children: React.ReactNode }) {
 
 export function HomeDeck({ onOrder, onPick }: { onOrder: () => void; onPick: (item: MenuItem, o?: { checkout?: boolean; deal?: Deal }) => void }) {
   const { t } = useLang()
+  const u = useS()
   useStaff()
   const offer = positiveOffer() // staff dashboard → Offers: its hours (useCountdown reads them), price and switch
   const offerOn = offer?.active !== false
@@ -330,6 +333,8 @@ export function HomeDeck({ onOrder, onPick }: { onOrder: () => void; onPick: (it
       <section className="slide slide-brand" id="about">
         <div className="brand-logo"><Logo /></div>
         <p className="brand-line">{t('footer')}</p>
+        {/* phones: the whole menu in one scroll, from the end of the home page (owner, 2026-10-28) */}
+        <button type="button" className="menu-show-all home-show-all" onClick={openWholeMenu}>{u('menuShowAll')}</button>
         {/* the two placeholder branch cards ("coming soon") are out until Mars gives the addresses and hours (2026-10-23) */}
         <div id="locations" />
         <p className="brand-copy">© Mars CoffeeHouse</p>

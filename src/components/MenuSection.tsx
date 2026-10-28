@@ -79,6 +79,15 @@ function Card({ item, cat, onPick }: { item: MenuItem; cat: string; onPick: (i: 
   )
 }
 
+/* "Show the whole menu" from the end of the home page on phones (owner, 2026-10-28: "i need it in main page"): the menu
+ * opens on every section at once. The flag is read when the menu screen comes up (#menu). */
+let wholeNext = false
+export function openWholeMenu() {
+  wholeNext = true
+  if (location.hash === '#menu') window.dispatchEvent(new HashChangeEvent('hashchange'))
+  else location.hash = '#menu'
+}
+
 export function MenuSection({ onPick, gift = false }: { onPick: (item: MenuItem) => void; gift?: boolean }) {
   const { lang, t } = useLang()
   const u = useS()
@@ -103,7 +112,7 @@ export function MenuSection({ onPick, gift = false }: { onPick: (item: MenuItem)
   useEffect(() => { if (open && !whole && !shown) setOpen('') }, [open, shown, whole])
   // coming to the menu again (Order now, the header's Menu) starts at the sections
   useEffect(() => {
-    const on = () => { if (location.hash === '#menu') setOpen('') }
+    const on = () => { if (location.hash === '#menu') { setOpen(wholeNext ? '*all' : ''); if (wholeNext) requestAnimationFrame(() => window.scrollTo({ top: 0 })); wholeNext = false } }
     window.addEventListener('hashchange', on)
     return () => window.removeEventListener('hashchange', on)
   }, [])
