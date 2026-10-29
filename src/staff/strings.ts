@@ -646,6 +646,8 @@ const S = {
   shareNone: ['Not set', 'غير محددة', 'دیاری نەکراوە'],
   shareFixed: ['A fixed amount per order', 'مبلغ ثابت لكل طلب', 'بڕێکی جێگیر بۆ هەر داواکارییەک'],
   sharePct: ['A percentage of what the customer paid', 'نسبة مما دفعه الزبون', 'ڕێژەیەک لەوەی کڕیار دای'],
+  shareBoth: ['A fixed amount + a percentage', 'مبلغ ثابت + نسبة', 'بڕێکی جێگیر + ڕێژەیەک'],
+  shareIsBoth: ['Their share: {n} IQD + {p}% of each order', 'حصتهم: {n} د.ع + {p}% من كل طلب', 'بەشیان: {n} دینار + {p}% لە هەر داواکارییەک'],
   shareFee: ['The delivery fee on the order', 'رسوم التوصيل في الطلب', 'کرێی گەیاندنی ناو داواکاری'],
   shareValueIqd: ['Amount (IQD)', 'المبلغ (د.ع)', 'بڕ (دینار)'],
   shareValuePct: ['Percentage (%)', 'النسبة (%)', 'ڕێژە (%)'],

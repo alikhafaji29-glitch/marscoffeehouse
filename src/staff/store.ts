@@ -38,7 +38,8 @@ export const COTD_DEFAULT: Cotd = { on: true, price: 3500, items: ['Americano', 
 export interface Driver { name: string; phone: string; lang?: Lang; share?: CourierShare } // lang: the WhatsApp message's language (owner, 2026-10-25); missing = the dashboard's
 /** what a delivery company keeps of each delivered order (owner, 2026-10-28: "put it as an option"): a fixed amount, a
  *  percentage of what the customer paid, or the delivery fee on the order; the Deliveries report works it out */
-export interface CourierShare { kind: 'fixed' | 'pct' | 'fee'; value: number }
+// kind 'both' (owner, 2026-10-29: "a company may take a fixed amount + a percentage"): `value` IQD plus `pct` % of the order
+export interface CourierShare { kind: 'fixed' | 'pct' | 'fee' | 'both'; value: number; pct?: number }
 /** a flavour of the branch's list (Dashboard → Flavours, owner 2026-10-26): `id` is the English name it was made with and
  *  never changes (items and orders keep it); `name` is what customers see; `out` = out of stock, hidden on item pages */
 export interface FlavourDef { id: string; name: L3; out?: boolean }

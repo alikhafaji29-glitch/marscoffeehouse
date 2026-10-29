@@ -61,7 +61,8 @@ const closed = (o: OrderRow) => o.status === 'delivered' || o.status === 'cancel
 // the replies agreed with the owner (2026-10-26), in the customer's language
 const SAY = {
   got: { en: 'Automated reply: location received for order {order}. Thank you.', ar: 'ردّ تلقائي: تم استلام الموقع للطلب {order}. شكراً لك.', ku: 'وەڵامی ئۆتۆماتیکی: شوێن بۆ داواکاری {order} وەرگیرا. سوپاس.' },
-  only: { en: 'Automated reply: this chat only accepts your location. Tap the paper clip → Location → Send your current location. To talk to us, call {phone}.', ar: 'ردّ تلقائي: هذه المحادثة تستقبل موقعك فقط. اضغط مشبك الورق ← الموقع ← إرسال موقعك الحالي. للتحدث معنا، اتصل على {phone}.', ku: 'وەڵامی ئۆتۆماتیکی: ئەم چاتە تەنها شوێنەکەت وەردەگرێت. سنجاقی کاغەز ← شوێن ← ناردنی شوێنی ئێستات. بۆ قسەکردن لەگەڵمان، پەیوەندی بکە بە {phone}.' },
+  // no paper clip in any language (owner, 2026-10-29)
+  only: { en: 'Automated reply: this chat only accepts your location. Choose Location, then Send your current location. To talk to us, call {phone}.', ar: 'ردّ تلقائي: هذه المحادثة تستقبل موقعك فقط. اختر «الموقع» ثم «إرسال موقعك الحالي». للتحدث معنا، اتصل على {phone}.', ku: 'وەڵامی ئۆتۆماتیکی: ئەم چاتە تەنها شوێنەکەت وەردەگرێت. «شوێن» هەڵبژێرە، پاشان «ناردنی شوێنی ئێستات». بۆ قسەکردن لەگەڵمان، پەیوەندی بکە بە {phone}.' },
   closed: { en: 'Automated reply: this order is already closed. For a new order: www.marscoffeehouse.com', ar: 'ردّ تلقائي: هذا الطلب مُغلق. لطلب جديد: www.marscoffeehouse.com', ku: 'وەڵامی ئۆتۆماتیکی: ئەم داواکارییە داخراوە. بۆ داواکاریی نوێ: www.marscoffeehouse.com' },
 }
 const say = (k: keyof typeof SAY, lang: string | null, vars: Record<string, string>) =>

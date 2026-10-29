@@ -37,10 +37,16 @@
 // one the customer ordered in (orders.lang); Kurdish filed as fa, then Arabic: {{1}} "#code"  {{2}} branch  {{3}} the branch phone from Tools (branch_config settings.phone).
 // orders.wa.asked_at is set, so wa-webhook knows which order a location that comes back belongs to, and orders.wa.lang,
 // so its automatic replies use the same language.
+// The short wording mars_location_short (owner, 2026-10-29: the first one "too long and not easy to understand"; {{1}}
+// "#code" only, no paper clip) is tried first; while Meta has not approved it, mars_location_request goes as before.
+// Kurdish: Meta filed mars_location_short (fa) under MARKETING, so Kurdish never uses it; it tries the reworded
+// mars_location_short_ku (fa, "your order {{1}} needs your delivery location"), then mars_location_request (fa, then ar).
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
 const GRAPH = Deno.env.get('WA_GRAPH_VERSION') ?? 'v23.0'
 const SHORT = 'mars_order_loc'
+// the same short wording without the map, for orders with no pin (owner, 2026-10-29: "submit"); the long one until approved
+const SHORT_TEXT = 'mars_order_text'
 const allowed = (Deno.env.get('ALLOWED_ORIGINS') ?? '').split(',').map((s) => s.trim()).filter(Boolean)
 const originOk = (o: string | null) => !allowed.length || (o !== null && allowed.includes(o))
 const cors = (o: string | null) => ({
@@ -157,24 +163,29 @@ Deno.serve(async (req: Request) => {
     if (!branchPhone) return json(200, { ok: false, reason: 'no_branch_phone' })
     const chosen = body.lang === 'ar' || body.lang === 'ku' || body.lang === 'en' ? body.lang : o.lang ?? 'en'
     const ctl = templateLang(chosen)
-    for (const lang of ctl === 'fa' ? ['fa', 'ar'] : [ctl]) {
-      const parameters = [`#${o.code}`, BRANCH[lang][o.branch] ?? o.branch, branchPhone].map((t) => ({ type: 'text', text: flat(t) }))
-      sent = await post({ type: 'template', template: { name: 'mars_location_request', language: { code: lang }, components: [{ type: 'body', parameters }] } })
-      if (sent.res.messages?.length) { used = `mars_location_request/${lang}`; break }
+    const tries: [string, string][] = ctl === 'fa'
+      ? [['mars_location_short_ku', 'fa'], ['mars_location_request', 'fa'], ['mars_location_request', 'ar']]
+      : [['mars_location_short', ctl], ['mars_location_request', ctl]]
+    for (const [name, lang] of tries) {
+      const values = name === 'mars_location_request' ? [`#${o.code}`, BRANCH[lang][o.branch] ?? o.branch, branchPhone] : [`#${o.code}`]
+      const parameters = values.map((t) => ({ type: 'text', text: flat(t) }))
+      sent = await post({ type: 'template', template: { name, language: { code: lang }, components: [{ type: 'body', parameters }] } })
+      if (sent.res.messages?.length) { used = `${name}/${lang}`; break }
     }
     if (sent.res.messages?.length) {
       const { error } = await admin.from('orders').update({ wa: { ...(o.wa ?? {}), asked_at: new Date().toISOString(), asked_by: u.user.id, lang: chosen } }).eq('uid', o.uid)
       if (error) console.warn('[send-whatsapp] asked_at not saved:', error.message)
     }
   } else {
-    // the pin version first, then the plain one; Kurdish (fa) then Arabic, until Meta takes one
-    const names = pin ? [SHORT, `${template}_loc`, template] : [template]
+    // the short pin version first, then the plain one; Kurdish (fa) then Arabic, until Meta takes one. The long pin
+    // version mars_delivery_order_loc was deleted at Meta (owner, 2026-10-29: "remove unused templates")
+    const names = pin ? [SHORT, template] : [SHORT_TEXT, template]
     const langs = tl === 'fa' ? ['fa', 'ar'] : [tl]
     attempts: for (const name of names) {
       for (const lang of langs) {
         const components: unknown[] = []
         if (name.endsWith('_loc')) components.push({ type: 'header', parameters: [{ type: 'location', location: pin }] })
-        components.push({ type: 'body', parameters: name === SHORT ? shortParams(lang) : params(lang) })
+        components.push({ type: 'body', parameters: name === SHORT || name === SHORT_TEXT ? shortParams(lang) : params(lang) })
         sent = await post({ type: 'template', template: { name, language: { code: lang }, components } })
         if (sent.res.messages?.length) { used = `${name}/${lang}`; break attempts }
       }
