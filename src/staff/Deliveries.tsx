@@ -29,6 +29,7 @@ export function shareOf(o: Order, share?: CourierShare): number {
   if (!share) return 0
   if (share.kind === 'fixed') return share.value
   if (share.kind === 'pct') return Math.round((o.total * share.value) / 100)
+  if (share.kind === 'both') return share.value + Math.round((o.total * (share.pct ?? 0)) / 100)
   return o.offer?.fee ?? 0
 }
 
@@ -79,7 +80,7 @@ export function Deliveries({ orders: here }: { orders: Order[] }) {
       {[...choices, ...(o.courier && !choices.includes(o.courier) ? [o.courier] : [])].map((n) => <option key={n} value={n}>{n}</option>)}
     </select>
   )
-  const shareText = (d?: Driver) => !d?.share ? s('shareUnset') : d.share.kind === 'fixed' ? s('shareIsFixed', { n: iqd(d.share.value) }) : d.share.kind === 'pct' ? s('shareIsPct', { n: d.share.value }) : s('shareIsFee')
+  const shareText = (d?: Driver) => !d?.share ? s('shareUnset') : d.share.kind === 'fixed' ? s('shareIsFixed', { n: iqd(d.share.value) }) : d.share.kind === 'pct' ? s('shareIsPct', { n: d.share.value }) : d.share.kind === 'both' ? s('shareIsBoth', { n: iqd(d.share.value), p: d.share.pct ?? 0 }) : s('shareIsFee')
   const range = from === to ? new Date(from).toLocaleDateString(lang === 'en' ? 'en-GB' : lang === 'ar' ? 'ar-IQ' : 'ckb-IQ') : `${new Date(from).toLocaleDateString('en-GB')} – ${new Date(to).toLocaleDateString('en-GB')}`
   const time = (t: number) => new Date(t).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
   const note = (o: Order) => [o.replenish ? s('repBadge') : '', o.discount ? (o.discount.kind === 'pct' ? s('discPct', { n: o.discount.value }) : s('discFixed', { n: iqd(o.discount.value) })) : ''].filter(Boolean).join(' · ')

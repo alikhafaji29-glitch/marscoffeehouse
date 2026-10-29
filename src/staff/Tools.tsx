@@ -110,16 +110,22 @@ function Drivers() {
           </Field>
           {/* what the company keeps of each delivered order, for the Deliveries report (owner, 2026-10-28) */}
           <Field label={s('shareKind')}>
-            <select value={d.share?.kind ?? ''} onChange={(e) => edit(i, { share: e.target.value ? { kind: e.target.value as CourierShare['kind'], value: e.target.value === 'fee' ? 0 : d.share?.value ?? 0 } : undefined })}>
+            <select value={d.share?.kind ?? ''} onChange={(e) => edit(i, { share: e.target.value ? { kind: e.target.value as CourierShare['kind'], value: e.target.value === 'fee' ? 0 : d.share?.value ?? 0, ...(e.target.value === 'both' && { pct: d.share?.pct ?? 0 }) } : undefined })}>
               <option value="">{s('shareNone')}</option>
               <option value="fixed">{s('shareFixed')}</option>
               <option value="pct">{s('sharePct')}</option>
+              <option value="both">{s('shareBoth')}</option>
               <option value="fee">{s('shareFee')}</option>
             </select>
           </Field>
           {d.share && d.share.kind !== 'fee' && (
             <Field label={d.share.kind === 'pct' ? s('shareValuePct') : s('shareValueIqd')}>
-              <input dir="ltr" inputMode="numeric" value={d.share.value || ''} placeholder={d.share.kind === 'pct' ? '10' : '2000'} onChange={(e) => { const n = Number(e.target.value.replace(/[^\d]/g, '').slice(0, 7)) || 0; edit(i, { share: { kind: d.share!.kind, value: d.share!.kind === 'pct' ? Math.min(n, 100) : n } }) }} />
+              <input dir="ltr" inputMode="numeric" value={d.share.value || ''} placeholder={d.share.kind === 'pct' ? '10' : '2000'} onChange={(e) => { const n = Number(e.target.value.replace(/[^\d]/g, '').slice(0, 7)) || 0; edit(i, { share: { ...d.share!, value: d.share!.kind === 'pct' ? Math.min(n, 100) : n } }) }} />
+            </Field>
+          )}
+          {d.share?.kind === 'both' && (
+            <Field label={s('shareValuePct')}>
+              <input dir="ltr" inputMode="decimal" value={d.share.pct || ''} placeholder="5" onChange={(e) => { const n = Math.min(100, Number(e.target.value.replace(/[^\d.]/g, '').slice(0, 5)) || 0); edit(i, { share: { ...d.share!, pct: n } }) }} />
             </Field>
           )}
           <button type="button" className="d-btn line" onClick={() => { setDone(false); setDraft(draft.filter((_, j) => j !== i)) }}>{s('driverRemove')}</button>
