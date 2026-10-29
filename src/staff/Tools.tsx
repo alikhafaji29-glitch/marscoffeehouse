@@ -39,6 +39,13 @@ export function Tools() {
           <input type="tel" inputMode="tel" dir="ltr" value={set.phone ?? ''} placeholder="0750 000 0000" onChange={(e) => patch({ phone: e.target.value.replace(/[^\d+ ]/g, '').slice(0, 20) })} />
         </Field>
       </Card>
+      {/* an order still at Order received after 10 minutes → one WhatsApp to this number (owner, 2026-10-29); empty = off */}
+      <Card title={s('alertTitle')} sub={s('alertSub')}>
+        <Field label={s('alertPhone')}>
+          <input type="tel" inputMode="tel" dir="ltr" value={set.alertPhone ?? ''} placeholder="0750 000 0000" onChange={(e) => patch({ alertPhone: e.target.value.replace(/[^\d+ ]/g, '').slice(0, 20) })} />
+        </Field>
+        <p className="d-hint">{set.alertPhone?.replace(/\D/g, '') ? s('alertOn') : s('alertOff')}</p>
+      </Card>
       <Shops />
       <Card title={s('reachTitle')} sub={s('reachSub')}>
         <div className="d-seg big" role="radiogroup" aria-label={s('reachTitle')}>
