@@ -33,18 +33,12 @@ export function Tools() {
           <p className="d-hint">{s('pauseMsgHint')}</p>
         </div>
       </Card>
-      {/* the number customers call (owner, 2026-10-27): filled into the automated WhatsApp location request */}
+      {/* the number customers call (owner, 2026-10-27): filled into the automated WhatsApp location request; it also gets
+          the alert for an order nobody started in 10 minutes (owner, 2026-10-30: "will be sent to the branch's phone") */}
       <Card title={s('branchPhone')} sub={s('branchPhoneSub')}>
         <Field label={s('branchPhone')}>
           <input type="tel" inputMode="tel" dir="ltr" value={set.phone ?? ''} placeholder="0750 000 0000" onChange={(e) => patch({ phone: e.target.value.replace(/[^\d+ ]/g, '').slice(0, 20) })} />
         </Field>
-      </Card>
-      {/* an order still at Order received after 10 minutes → one WhatsApp to this number (owner, 2026-10-29); empty = off */}
-      <Card title={s('alertTitle')} sub={s('alertSub')}>
-        <Field label={s('alertPhone')}>
-          <input type="tel" inputMode="tel" dir="ltr" value={set.alertPhone ?? ''} placeholder="0750 000 0000" onChange={(e) => patch({ alertPhone: e.target.value.replace(/[^\d+ ]/g, '').slice(0, 20) })} />
-        </Field>
-        <p className="d-hint">{set.alertPhone?.replace(/\D/g, '') ? s('alertOn') : s('alertOff')}</p>
       </Card>
       <Shops />
       <Card title={s('reachTitle')} sub={s('reachSub')}>

@@ -3,8 +3,8 @@
 //
 // pg_cron checks every minute and calls this only when an order has waited 10 minutes (job mars-order-waiting, header
 // x-report-key from the vault). public.claim_waiting_orders checks the key, records each order in order_alerts (so it is
-// never alerted twice) and returns them with the branch's alert number (Tools → Pending-order alert, settings.alertPhone).
-// No number for the branch → nothing is sent (status no_number). Template mars_order_waiting (en):
+// never alerted twice) and returns them with the branch's phone (Tools → Branch phone number, settings.phone; owner,
+// 2026-10-30: "will be sent to the branch's phone"). No number for the branch → nothing is sent (status no_number). Template mars_order_waiting (en):
 //   "Order {{1}} at the {{2}} branch has been waiting for {{3}} minutes and nobody has started preparing it. …"
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import type { SupabaseClient } from 'npm:@supabase/supabase-js@2'
