@@ -12,3 +12,9 @@ passwords.md
 /items images/
 /coffee of the day/
 /logo-compare.png
+
+# local order maps (customer locations, never committed)
+erbil-order-map.html
+erbil-orders-for-google-my-maps.csv
+kirkuk-order-map.html
+kirkuk-orders-for-google-my-maps.csv

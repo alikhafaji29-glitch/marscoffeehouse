@@ -1,4 +1,4 @@
-import { iqd } from '../account'
+import { iqd, localPhone } from '../account'
 import type { Order } from '../account'
 import { groupLines } from '../orders'
 
@@ -28,7 +28,7 @@ export interface ReceiptText {
 const esc = (v: string) => v.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!)
 
 export function receiptHtml(o: Order, L: ReceiptText): string {
-  const phone = o.delivery?.phone ?? o.customer?.phone ?? ''
+  const phone = localPhone(o.delivery?.phone ?? o.customer?.phone ?? '')
   const gs = groupLines(o.items)
   const lines = gs.map((g) => `${g.combo ? `<p class="combo">${esc(L.combo(g.combo))}</p>` : L.more && gs.some((x) => x.combo) ? `<p class="combo">${esc(L.more)}</p>` : ''}<ul>${g.lines.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`).join('')
   return `<!doctype html><html dir="${L.dir}"><head><meta charset="utf-8"><title>#${esc(o.id)}</title><style>

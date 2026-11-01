@@ -7,7 +7,8 @@
 // (2026-10-29: Meta filed the first wording, mars_daily_report, under MARKETING; reworded as an account summary):
 //   {{1}} "Erbil · Wed 28 Oct"  {{2}} orders  {{3}} revenue  {{4}} cancelled  {{5}} speed  {{6}} best sellers
 //   {{7}} gifts and discounts  {{8}} delivery companies
-// ?dry=1 works the report out and returns it without sending; ?day=YYYY-MM-DD picks another day (default: yesterday in Iraq).
+// ?dry=1 works the report out and returns it without sending; ?day=YYYY-MM-DD picks another day (default: yesterday in Iraq);
+// ?to=07… sends to that number instead of the owner's (tests, 2026-10-30; the key is still needed).
 // Test orders are left out (named / noted / cancelled "test"), as in Analytics. Each send goes into the WhatsApp log.
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import type { SupabaseClient } from 'npm:@supabase/supabase-js@2'
@@ -91,6 +92,7 @@ Deno.serve(async (req: Request) => {
   const from = new Date(day.getTime() - IRAQ).toISOString()
   const until = new Date(day.getTime() + 24 * 3600e3 - IRAQ).toISOString()
   const dry = url.searchParams.get('dry') === '1'
+  const test = url.searchParams.get('to')
   const out: Record<string, unknown> = {}
   const { data: cfgs } = await db.from('branch_config').select('branch,settings')
   for (const branch of ['erbil', 'kirkuk']) {
@@ -101,7 +103,7 @@ Deno.serve(async (req: Request) => {
     const drivers = ((cfgs ?? []).find((c) => c.branch === branch)?.settings as { drivers?: Driver[] } | null)?.drivers ?? []
     const values = report(branch, day, (data ?? []) as Row[], drivers)
     if (dry) { out[branch] = values; continue }
-    out[branch] = await send(db, branch, String(to), values)
+    out[branch] = await send(db, branch, test && /^[\d+ ]{8,20}$/.test(test) ? test : String(to), values)
   }
   return json(200, { ok: true, day: day.toISOString().slice(0, 10), dry, out })
 })

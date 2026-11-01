@@ -9,43 +9,35 @@
 // Secrets (Supabase → Edge Functions → Secrets, never in the code or the site):
 //   WA_TOKEN           the permanent access token (a System User token of Mars' Meta Business account)
 //   WA_PHONE_ID        the Phone number ID of the number that sends (WhatsApp Manager → API Setup)
-//   WA_TEMPLATE        optional: the template's name, default mars_delivery_order (owner, 2026-10-24: "add it
-//                      yourself"). A driver who has not written to the number in the last 24 hours can only be sent a
-//                      template (Meta's rule). The template is tried first; while Meta has not approved it (or it is
-//                      refused) the plain text and the pin go instead, which reach drivers who wrote in the last 24 h.
-//   (the template's language follows the dashboard's: English → en, Arabic → ar, Kurdish → fa: WhatsApp has no Kurdish,
-//   so the Kurdish wording is filed under Persian (owner, 2026-10-24: "i said kurdish template"); if Meta has no
-//   approved fa version, it is sent again in Arabic)
-//   The customer's pin is sent as a real WhatsApp location (owner, 2026-10-24: "send the location as WhatsApp sends
-//   it"): with templates, `<WA_TEMPLATE>_loc` (the same wording with a LOCATION header) is tried first, then the
-//   plain template; without templates, a location message follows the text.
 //   WA_GRAPH_VERSION   optional: Graph API version (default v23.0)
 //   ALLOWED_ORIGINS    optional: comma-separated site addresses allowed to call it
 //
-// The template mars_delivery_order (approved wording in HANDOFF decision 193) has 7 variables, in this order:
-//   {{1}} order number  {{2}} branch  {{3}} customer + phone  {{4}} address  {{5}} map link  {{6}} items  {{7}} collect
-// The short one, mars_order_loc (owner, 2026-10-25: "too many useless words"; HANDOFF decision 204), is tried before
-// it when the order has a pin: a LOCATION header and 5 variables: {{1}} "#code · branch"  {{2}} customer + phone
-//   {{3}} address  {{4}} items  {{5}} collect. While Meta has not approved it, the long ones go as before.
+// A driver who has not written to the number in the last 24 hours can only be sent a template (Meta's rule). The template's
+// language follows the dashboard's: English → en, Arabic → ar, Kurdish → fa: WhatsApp has no Kurdish, so the Kurdish
+// wording is filed under Persian (owner, 2026-10-24: "i said kurdish template"); if fa fails it is sent again in Arabic.
+// Order with a pin: mars_order_loc (owner, 2026-10-25: "too many useless words"; HANDOFF decision 204), the pin as a real
+// WhatsApp location in a LOCATION header. No pin, or that one refused: mars_order_text, the same wording without the
+// header. Both have 5 variables: {{1}} "#code · branch"  {{2}} customer + phone  {{3}} address  {{4}} items  {{5}} collect.
+// If Meta refuses them, the plain text and the pin go instead (these reach drivers who wrote in the last 24 hours). The
+// long mars_delivery_order was deleted at Meta (owner, 2026-11-02: "delete").
 //
 // Every send is written to public.wa_messages (owner, 2026-10-25: "wa msgs log"; HANDOFF decision 205) with Meta's
 // message id, or as failed with Meta's reason; wa-webhook then marks it delivered / read / failed.
 //
 // kind "location_request" (owner, 2026-10-26; template approved 2026-10-28; HANDOFF decision 223): the dashboard's "Ask
 // for location" on a delivery order without a pin. Goes to the CUSTOMER (the order's own phone, never a number from the
-// browser) as the template mars_location_request, in the language staff chose when sending (owner, 2026-10-28), else the
-// one the customer ordered in (orders.lang); Kurdish filed as fa, then Arabic: {{1}} "#code"  {{2}} branch  {{3}} the branch phone from Tools (branch_config settings.phone).
+// browser) as the template mars_location_short ({{1}} "#code"; owner, 2026-10-29: the first wording "too long and not easy
+// to understand"), in the language staff chose when sending (owner, 2026-10-28), else the one the customer ordered in
+// (orders.lang). Kurdish: mars_location_short_ku (fa, "your order {{1}} needs your delivery location"; Meta filed
+// mars_location_short fa under MARKETING), then mars_location_short in Arabic. The long mars_location_request was deleted
+// at Meta (owner, 2026-11-02: "delete").
 // orders.wa.asked_at is set, so wa-webhook knows which order a location that comes back belongs to, and orders.wa.lang,
 // so its automatic replies use the same language.
-// The short wording mars_location_short (owner, 2026-10-29: the first one "too long and not easy to understand"; {{1}}
-// "#code" only, no paper clip) is tried first; while Meta has not approved it, mars_location_request goes as before.
-// Kurdish: Meta filed mars_location_short (fa) under MARKETING, so Kurdish never uses it; it tries the reworded
-// mars_location_short_ku (fa, "your order {{1}} needs your delivery location"), then mars_location_request (fa, then ar).
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
 const GRAPH = Deno.env.get('WA_GRAPH_VERSION') ?? 'v23.0'
 const SHORT = 'mars_order_loc'
-// the same short wording without the map, for orders with no pin (owner, 2026-10-29: "submit"); the long one until approved
+// the same short wording without the map, for orders with no pin (owner, 2026-10-29: "submit")
 const SHORT_TEXT = 'mars_order_text'
 const allowed = (Deno.env.get('ALLOWED_ORIGINS') ?? '').split(',').map((s) => s.trim()).filter(Boolean)
 const originOk = (o: string | null) => !allowed.length || (o !== null && allowed.includes(o))
@@ -63,11 +55,12 @@ type OrderRow = {
   replenish: { of_code?: string } | null
 }
 
-/** Iraqi numbers as WhatsApp wants them: 0750 123 4567 → 9647501234567 */
+/** Iraqi numbers as WhatsApp wants them: 0750 123 4567 or 750 123 4567 → 9647501234567 */
 function waNumber(raw: string): string {
   let d = raw.replace(/\D/g, '')
   if (d.startsWith('00')) d = d.slice(2)
   if (d.startsWith('0')) d = '964' + d.slice(1)
+  if (d.length === 10 && d.startsWith('7')) d = '964' + d
   return d
 }
 /** a template variable may not hold line breaks, tabs or long runs of spaces (Meta's rule) */
@@ -129,23 +122,16 @@ Deno.serve(async (req: Request) => {
   const to = waNumber(askLoc ? (o.delivery_phone || o.customer_phone || '') : body.to!)
   if (to.length < 10 || to.length > 15) return json(400, { ok: false, reason: 'bad_number' })
 
-  const template = Deno.env.get('WA_TEMPLATE') || 'mars_delivery_order'
   const tl = templateLang(body.lang)
   const phone = o.delivery_phone || o.customer_phone || ''
   const pin = o.location ? { latitude: o.location.lat, longitude: o.location.lng, name: flat(o.customer_name || `#${o.code}`, 100), address: flat(o.address || `#${o.code}`, 200) } : null
   const params = (tl: string) => [
-    o.code,
-    BRANCH[tl][o.branch] ?? o.branch,
+    `#${o.code} · ${BRANCH[tl][o.branch] ?? o.branch}`,
     [o.customer_name, phone].filter(Boolean).join(' · '),
     o.address ?? '',
-    o.location ? `https://www.google.com/maps?q=${o.location.lat},${o.location.lng}` : '',
     (o.items ?? []).join(' · '),
     o.replenish ? COLLECT[tl].free : o.pay === 'wallet' ? COLLECT[tl].wallet : `${iqd(o.total)} ${COLLECT[tl].cur}`,
   ].map((t) => ({ type: 'text', text: flat(t) }))
-  const shortParams = (tl: string) => {
-    const p = params(tl)
-    return [{ type: 'text', text: flat(`#${o.code} · ${BRANCH[tl][o.branch] ?? o.branch}`) }, p[2], p[3], p[5], p[6]]
-  }
   type Sent = { r: Response; res: { messages?: { id: string }[]; error?: { code?: number; message?: string } } }
   const post = async (message: Record<string, unknown>): Promise<Sent> => {
     const r = await fetch(`https://graph.facebook.com/${GRAPH}/${phoneId}/messages`, {
@@ -158,17 +144,11 @@ Deno.serve(async (req: Request) => {
   let sent: Sent = { r: new Response(null, { status: 500 }), res: {} }
   let used = ''
   if (askLoc) {
-    const { data: cfg } = await admin.from('branch_config').select('settings').eq('branch', o.branch).maybeSingle()
-    const branchPhone = String((cfg?.settings as { phone?: string } | null)?.phone ?? '').trim()
-    if (!branchPhone) return json(200, { ok: false, reason: 'no_branch_phone' })
     const chosen = body.lang === 'ar' || body.lang === 'ku' || body.lang === 'en' ? body.lang : o.lang ?? 'en'
     const ctl = templateLang(chosen)
-    const tries: [string, string][] = ctl === 'fa'
-      ? [['mars_location_short_ku', 'fa'], ['mars_location_request', 'fa'], ['mars_location_request', 'ar']]
-      : [['mars_location_short', ctl], ['mars_location_request', ctl]]
+    const tries: [string, string][] = ctl === 'fa' ? [['mars_location_short_ku', 'fa'], ['mars_location_short', 'ar']] : [['mars_location_short', ctl]]
+    const parameters = [{ type: 'text', text: flat(`#${o.code}`) }]
     for (const [name, lang] of tries) {
-      const values = name === 'mars_location_request' ? [`#${o.code}`, BRANCH[lang][o.branch] ?? o.branch, branchPhone] : [`#${o.code}`]
-      const parameters = values.map((t) => ({ type: 'text', text: flat(t) }))
       sent = await post({ type: 'template', template: { name, language: { code: lang }, components: [{ type: 'body', parameters }] } })
       if (sent.res.messages?.length) { used = `${name}/${lang}`; break }
     }
@@ -177,21 +157,20 @@ Deno.serve(async (req: Request) => {
       if (error) console.warn('[send-whatsapp] asked_at not saved:', error.message)
     }
   } else {
-    // the short pin version first, then the plain one; Kurdish (fa) then Arabic, until Meta takes one. The long pin
-    // version mars_delivery_order_loc was deleted at Meta (owner, 2026-10-29: "remove unused templates")
-    const names = pin ? [SHORT, template] : [SHORT_TEXT, template]
+    // the pin version first, then the one without; Kurdish (fa) then Arabic, until Meta takes one
+    const names = pin ? [SHORT, SHORT_TEXT] : [SHORT_TEXT]
     const langs = tl === 'fa' ? ['fa', 'ar'] : [tl]
     attempts: for (const name of names) {
       for (const lang of langs) {
         const components: unknown[] = []
         if (name.endsWith('_loc')) components.push({ type: 'header', parameters: [{ type: 'location', location: pin }] })
-        components.push({ type: 'body', parameters: name === SHORT || name === SHORT_TEXT ? shortParams(lang) : params(lang) })
+        components.push({ type: 'body', parameters: params(lang) })
         sent = await post({ type: 'template', template: { name, language: { code: lang }, components } })
         if (sent.res.messages?.length) { used = `${name}/${lang}`; break attempts }
       }
     }
   }
-  // no template accepted yet (in review, or refused): the text, then the pin, as before (not for the customer's request)
+  // no template accepted: the text, then the pin (not for the customer's request)
   if (!sent.res.messages?.length && !askLoc) {
     sent = await post({ type: 'text', text: { body: (body.text ?? '').slice(0, 4000) || `Mars order #${o.code}`, preview_url: true } })
     // the pin right after the text, as WhatsApp shows a shared location
