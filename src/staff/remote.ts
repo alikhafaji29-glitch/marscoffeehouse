@@ -187,6 +187,16 @@ export async function sendWhatsApp(orderUid: string, to: string, text: string, l
   return (data as WaResult) ?? { ok: false, reason: 'unreachable' }
 }
 
+/** one company's statement from the server, the same PDF as the midnight one ('' = no company; 2026-11-03): the file, or sent to the owner */
+export type StatementResult = { ok: boolean; file?: string; pdf?: string; sent?: boolean; reason?: string; message?: string }
+export async function companyStatement(branch: string, from: string, to: string, company: string, send: boolean): Promise<StatementResult> {
+  const sb = backendOn ? await getClient() : null
+  if (!sb) return { ok: false, reason: 'no_backend' }
+  const { data, error } = await sb.functions.invoke('delivery-statement', { body: { branch, from, to, company, send } })
+  if (error) return { ok: false, reason: 'unreachable', message: error.message }
+  return (data as StatementResult) ?? { ok: false, reason: 'unreachable' }
+}
+
 /** merge `absorb` into `keep` (same customer, both open; database function merge_orders, 2026-10-24); null when done,
  *  else the database's reason. The live channel brings both changed orders to every dashboard. */
 export async function mergeOrders(keep: Order, absorb: Order): Promise<string | null> {
