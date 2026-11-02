@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLang } from '../i18n'
-import { iqd } from '../account'
+import { iqd, latinDigits, validPhone } from '../account'
 import type { Order } from '../account'
 import { backendOn } from '../backend'
 import { branchName, settingsFor, useStaff } from './store'
@@ -107,12 +107,16 @@ export function Deliveries({ orders: here }: { orders: Order[] }) {
   // the statement PDF of one company ('' = no company), for the days shown
   const [pdfBusy, setPdfBusy] = useState('')
   const [pdfNote, setPdfNote] = useState<{ name: string; ok: boolean; text: string } | null>(null)
+  const [sendTo, setSendTo] = useState<Record<string, string>>({}) // the number typed per statement; empty = the owner
   const statement = async (name: string, send: boolean) => {
+    const phone = send ? latinDigits(sendTo[name] ?? '').trim() : ''
+    if (phone && !validPhone(phone)) { setPdfNote({ name, ok: false, text: s('statementBadPhone') }); return }
+    if (send && !window.confirm(phone ? s('statementSureTo', { n: latinDigits(phone) }) : s('statementSure'))) return
     setPdfBusy(name + (send ? ':send' : ':get')); setPdfNote(null)
-    const r = await companyStatement(branch, dateValue(from), dateValue(to), name, send)
+    const r = await companyStatement(branch, dateValue(from), dateValue(to), name, send, phone)
     setPdfBusy('')
-    if (!r.ok) { setPdfNote({ name, ok: false, text: r.reason === 'no_orders' ? s('delivNone') : s('statementFailed') }); return }
-    if (r.sent) { setPdfNote({ name, ok: true, text: s('statementSent') }); return }
+    if (!r.ok) { setPdfNote({ name, ok: false, text: r.reason === 'no_orders' ? s('delivNone') : r.reason === 'bad_number' ? s('statementBadPhone') : s('statementFailed') }); return }
+    if (r.sent) { setPdfNote({ name, ok: true, text: phone ? s('statementSentTo', { n: latinDigits(phone) }) : s('statementSent') }); return }
     const bytes = Uint8Array.from(atob(r.pdf ?? ''), (c) => c.charCodeAt(0))
     const a = document.createElement('a')
     a.href = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }))
@@ -123,7 +127,8 @@ export function Deliveries({ orders: here }: { orders: Order[] }) {
   const statementBar = (name: string) => backendOn && (
     <div className="deliv-pdf">
       <button type="button" className="d-btn outline" disabled={!!pdfBusy} onClick={() => void statement(name, false)}><I.download />{pdfBusy === name + ':get' ? s('statementBusy') : s('statementGet')}</button>
-      <button type="button" className="d-btn outline" disabled={!!pdfBusy} onClick={() => { if (window.confirm(s('statementSure'))) void statement(name, true) }}><I.whatsapp />{pdfBusy === name + ':send' ? s('statementBusy') : s('statementSend')}</button>
+      <button type="button" className="d-btn outline" disabled={!!pdfBusy} onClick={() => void statement(name, true)}><I.whatsapp />{pdfBusy === name + ':send' ? s('statementBusy') : (sendTo[name] ?? '').trim() ? s('statementSendNum') : s('statementSend')}</button>
+      <input type="tel" inputMode="tel" dir="ltr" className="deliv-pdf-to" aria-label={s('statementTo')} placeholder={s('statementTo')} value={sendTo[name] ?? ''} onChange={(e) => setSendTo({ ...sendTo, [name]: e.target.value.replace(/[^\d+ ٠-٩۰-۹]/g, '').slice(0, 20) })} />
       {pdfNote?.name === name && <small className={'d-hint' + (pdfNote.ok ? '' : ' bad')} role="status">{pdfNote.text}</small>}
     </div>
   )
