@@ -21,7 +21,7 @@ export async function onRequestGet({ request, waitUntil }) {
   const url = new URL(request.url)
   const apikey = request.headers.get('apikey')
   const answer = (body, cache) => new Response(body, { headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'x-menu-cache': cache } })
-  if (!apikey) return answer('{"error":"no key"}', 'none')
+  if (!apikey) return new Response('{"error":"no key"}', { status: 400, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } })
   const read = async (path) => {
     const res = await fetch(BACKEND + path, { headers: { apikey } })
     if (!res.ok) throw new Error(`${path.split('?')[0]} ${res.status}`)
