@@ -225,11 +225,26 @@ export async function readWaLog(branch: string, day: Date): Promise<WaLogRow[] |
  * have confirmed with the customer that it is the same place (owner, 2026-10-27). The database checks it is the same
  * customer and branch (order_previous_pins / order_use_pin); the demo looks in this browser's orders. */
 export type PrevPin = { code: string; at: number; address?: string; location: GeoPoint }
-export async function previousPins(o: Order): Promise<PrevPin[] | null> {
-  if (!backendOn) return localPreviousPins(o)
+/* Each order's answer is kept 2 seconds, and a lookup already on its way is shared (owner, 2026-11-02): on 2 Nov one computer
+ * rebuilt its order cards and sent this 48,747 times in 20 minutes. The first lookup of an order still goes at once. */
+const PIN_KEEP_MS = 2000
+const pinLookups = new Map<string, { at: number; answer: Promise<PrevPin[] | null> }>() // at: when it came back, Infinity on the way
+export function previousPins(o: Order): Promise<PrevPin[] | null> {
+  if (!backendOn) return Promise.resolve(localPreviousPins(o))
+  if (!o.uid) return Promise.resolve(null)
+  const uid = o.uid
+  const kept = pinLookups.get(uid)
+  if (kept && (kept.at === Infinity || Date.now() - kept.at < PIN_KEEP_MS)) return kept.answer
+  if (pinLookups.size > 200) pinLookups.clear()
+  const entry = { at: Infinity, answer: readPreviousPins(uid) }
+  pinLookups.set(uid, entry)
+  void entry.answer.finally(() => { entry.at = Date.now() })
+  return entry.answer
+}
+async function readPreviousPins(uid: string): Promise<PrevPin[] | null> {
   const sb = await getClient()
-  if (!sb || !o.uid) return null
-  const { data, error } = await sb.rpc('order_previous_pins', { p_uid: o.uid })
+  if (!sb) return null
+  const { data, error } = await sb.rpc('order_previous_pins', { p_uid: uid })
   if (error) { console.warn('[backend] previous pins not read:', error.message); return null }
   type Row = { code: string; created_at: string; address: string | null; location: GeoPoint }
   return (data as Row[]).map((r) => ({ code: r.code, at: Date.parse(r.created_at), address: r.address || undefined, location: r.location }))
