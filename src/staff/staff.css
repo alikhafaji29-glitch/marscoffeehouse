@@ -438,3 +438,4 @@ button.d-chip.on { background: var(--d-ink); color: #fff; }
 /* Deliveries: the statement PDF of a company (2026-11-03) */
 .deliv-pdf { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin: 0.75rem 0; }
 .deliv-pdf .bad { color: #b3261e; }
+.deliv-pdf-to { flex: 1 1 13rem; max-width: 16rem; min-height: 40px; padding: 0 0.75rem; border: 1px solid var(--line, #cfd3dc); border-radius: 10px; font: inherit; }

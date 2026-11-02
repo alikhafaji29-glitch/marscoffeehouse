@@ -15,7 +15,8 @@
 // Staff, from Deliveries (owner, 2026-11-03: "exports same form of the sent pdf, so if they want to adjust it and resend it or
 // download it they can"): POST with their session, { branch, from, to, company, send }. One company ('' = no company) for
 // those days, built from the orders as they are now, with today's shares; staff of that branch only. Returns the PDF, or
-// with send: true sends it to the owner's number, which never reaches the site.
+// with send: true sends it: to `to`, an Iraqi mobile typed by staff (owner, 2026-11-03: "send button, put a phone number
+// field"), else to the owner's number, which never reaches the site.
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import type { SupabaseClient } from 'npm:@supabase/supabase-js@2'
 import { PDFDocument, rgb } from 'npm:pdf-lib@1.17.1'
@@ -152,9 +153,12 @@ async function byStaff(req: Request, db: SupabaseClient) {
   if (!originOk(origin)) return json(403, { ok: false, reason: 'origin' })
   const auth = req.headers.get('authorization') ?? ''
   if (!auth.startsWith('Bearer ')) return json(401, { ok: false, reason: 'not_signed_in' })
-  let body: { branch?: string; from?: string; to?: string; company?: string; send?: boolean }
+  let body: { branch?: string; from?: string; to?: string; company?: string; send?: boolean; phone?: string }
   try { body = await req.json() } catch { return json(400, { ok: false, reason: 'bad_request' }) }
-  const { branch = '', from = '', to = '', company = '', send: sendIt } = body
+  const { branch = '', from = '', to = '', company = '', send: sendIt, phone = '' } = body
+  let typed = intl(phone)
+  if (typed.length === 10 && typed.startsWith('7')) typed = '964' + typed
+  if (phone.trim() && !/^9647[3-9]\d{8}$/.test(typed)) return json(400, { ok: false, reason: 'bad_number' })
   if (!BRANCH[branch] || !DAY.test(from) || !DAY.test(to) || from > to || company.length > 60) return json(400, { ok: false, reason: 'bad_request' })
   // read as the caller, so the database's row rules apply
   const apikey = Deno.env.get('SUPABASE_ANON_KEY') || req.headers.get('apikey') || ''
@@ -182,11 +186,11 @@ async function byStaff(req: Request, db: SupabaseClient) {
   const pdf = await statement({ company: name, branch: BRANCH[branch], dayLabel: from === to ? label(from) : `${label(from)} to ${label(to)}`, shareRule: company ? ruleOf(d?.share) : 'no delivery company picked', lines, branchPhone: settings.phone ?? '', made, live: true })
   const file = `${name.replace(/[^\w\u0600-\u06FF -]/g, '').trim() || 'company'} ${BRANCH[branch]} ${from === to ? from : `${from} to ${to}`}.pdf`
   if (!sendIt) return json(200, { ok: true, file, pdf: base64(pdf) })
-  const { data: owner } = await db.rpc('daily_report_owner')
-  if (!owner) return json(200, { ok: false, reason: 'no_owner' })
+  const { data: owner } = phone.trim() ? { data: null } : await db.rpc('daily_report_owner')
+  if (!phone.trim() && !owner) return json(200, { ok: false, reason: 'no_owner' })
   const owes = lines.reduce((n, l) => n + l.total - l.share, 0)
   const values = [`${company || 'orders with no delivery company'} · ${BRANCH[branch]}`, from === to ? label(from, false) : `${label(from, false)} to ${label(to, false)}`, String(lines.length), iqd(owes)]
-  const res = await send(db, branch, intl(String(owner)), pdf, file, values)
+  const res = await send(db, branch, phone.trim() ? typed : intl(String(owner)), pdf, file, values, phone.trim() ? 'statement' : 'owner')
   return json(200, res.ok ? { ok: true, sent: true } : { ok: false, reason: 'meta', message: res.reason })
 }
 
@@ -236,7 +240,7 @@ Deno.serve(async (req: Request) => {
 })
 
 /** upload the PDF to WhatsApp, send it with the template, log it like the other WhatsApp messages */
-async function send(db: SupabaseClient, branch: string, n: string, pdf: Uint8Array, filename: string, values: string[]) {
+async function send(db: SupabaseClient, branch: string, n: string, pdf: Uint8Array, filename: string, values: string[], driver = 'owner') {
   const token = Deno.env.get('WA_TOKEN')
   const phoneId = Deno.env.get('WA_PHONE_ID')
   if (!token || !phoneId) return { ok: false, reason: 'not_configured' }
@@ -262,7 +266,7 @@ async function send(db: SupabaseClient, branch: string, n: string, pdf: Uint8Arr
     ok = r.ok && !!res.messages?.length
   }
   await db.from('wa_messages').insert({
-    wamid: ok ? res.messages![0].id : null, order_code: 'statement', branch, to_number: n, driver: 'owner',
+    wamid: ok ? res.messages![0].id : null, order_code: 'statement', branch, to_number: n, driver,
     template: 'mars_delivery_statement/en', status: ok ? 'sent' : 'failed',
     ...(!ok && { error: (res.error?.message ?? `HTTP ${status}`).slice(0, 500), failed_at: new Date().toISOString() }),
   })
