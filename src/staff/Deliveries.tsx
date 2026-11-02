@@ -5,7 +5,7 @@ import type { Order } from '../account'
 import { backendOn } from '../backend'
 import { branchName, settingsFor, useStaff } from './store'
 import type { CourierShare, Driver } from './store'
-import { deliveredOrders, setCourier } from './remote'
+import { companyStatement, deliveredOrders, setCourier } from './remote'
 import { useS } from './strings'
 import { Card, Stat, I } from './ui'
 import { dayKey, startOf } from './stats'
@@ -17,7 +17,9 @@ import { dayKey, startOf } from './stats'
  * their share as set in Tools → Delivery drivers (a fixed amount per order, a percentage of what the customer paid, or
  * the delivery fee on the order), and what Mars receives from them. Orders with no company are listed apart with a choice,
  * and every listed order can be moved to another company (owner, 2026-10-28: "add the ability to change the delivery
- * company in reports"), so the report can be fixed on the spot. Print and CSV (the same text on the clipboard).
+ * company in reports"), so the report can be fixed on the spot. Print and CSV (the same text on the clipboard). Each company,
+ * and the orders with none, can be downloaded as the PDF statement the owner gets at midnight or sent to the owner again
+ * (owner, 2026-11-03: "so if they want to adjust it and resend it or download it they can"): the server builds it.
  */
 type Line = { o: Order; share: number }
 const DAY = 86400000
@@ -102,6 +104,29 @@ export function Deliveries({ orders: here }: { orders: Order[] }) {
     } catch { /* clipboard only */ }
     navigator.clipboard?.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2500) }).catch(() => {})
   }
+  // the statement PDF of one company ('' = no company), for the days shown
+  const [pdfBusy, setPdfBusy] = useState('')
+  const [pdfNote, setPdfNote] = useState<{ name: string; ok: boolean; text: string } | null>(null)
+  const statement = async (name: string, send: boolean) => {
+    setPdfBusy(name + (send ? ':send' : ':get')); setPdfNote(null)
+    const r = await companyStatement(branch, dateValue(from), dateValue(to), name, send)
+    setPdfBusy('')
+    if (!r.ok) { setPdfNote({ name, ok: false, text: r.reason === 'no_orders' ? s('delivNone') : s('statementFailed') }); return }
+    if (r.sent) { setPdfNote({ name, ok: true, text: s('statementSent') }); return }
+    const bytes = Uint8Array.from(atob(r.pdf ?? ''), (c) => c.charCodeAt(0))
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }))
+    a.download = r.file ?? 'statement.pdf'
+    a.click()
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000)
+  }
+  const statementBar = (name: string) => backendOn && (
+    <div className="deliv-pdf">
+      <button type="button" className="d-btn outline" disabled={!!pdfBusy} onClick={() => void statement(name, false)}><I.download />{pdfBusy === name + ':get' ? s('statementBusy') : s('statementGet')}</button>
+      <button type="button" className="d-btn outline" disabled={!!pdfBusy} onClick={() => { if (window.confirm(s('statementSure'))) void statement(name, true) }}><I.whatsapp />{pdfBusy === name + ':send' ? s('statementBusy') : s('statementSend')}</button>
+      {pdfNote?.name === name && <small className={'d-hint' + (pdfNote.ok ? '' : ' bad')} role="status">{pdfNote.text}</small>}
+    </div>
+  )
   const print = () => {
     const esc = (t: string) => t.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!)
     const dir = lang === 'en' ? 'ltr' : 'rtl'
@@ -145,6 +170,7 @@ export function Deliveries({ orders: here }: { orders: Order[] }) {
                     <Stat icon={<I.receipt />} tone="caramel" value={iqd(g.share)} label={s('repShare')} />
                     <Stat icon={<I.money />} value={iqd(g.collected - g.share)} label={s('marsGets')} />
                   </div>
+                  {g.lines.length > 0 && statementBar(g.name)}
                   {g.lines.length > 0 && (
                     <details className="deliv-list">
                       <summary>{s('delivShowOrders', { n: g.lines.length })}</summary>
@@ -158,6 +184,7 @@ export function Deliveries({ orders: here }: { orders: Order[] }) {
               ))}
               {loose.length > 0 && (
                 <Card title={s('delivLoose', { n: loose.length })} sub={s('delivLooseSub')}>
+                  {statementBar('')}
                   <ul className="deliv-loose">
                     {loose.map((o) => (
                       <li key={o.uid ?? o.id}>
