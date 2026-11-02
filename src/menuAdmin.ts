@@ -214,11 +214,26 @@ export function useMenuVersion(): number {
 }
 
 /* ---- reading the database ---- */
+/* Customer pages on the real site read the menu through Cloudflare's cache (functions/api/menu.js; owner, 2026-10-27),
+ * so Supabase is spared the same public reads thousands of times a day. Staff read Supabase directly, and any failure
+ * here falls back to it. */
+const viaCache = () => /(^|\.)marscoffeehouse\.(com|pages\.dev)$/.test(location.hostname) && !location.hash.startsWith('#staff')
+async function cachedMenu(): Promise<[Response, Response, Response, Response] | null> {
+  if (!viaCache()) return null
+  try {
+    const r = await fetch('/api/menu', { headers: { apikey: backendKey! } })
+    if (!r.ok) return null
+    const m = (await r.json()) as { items?: unknown[]; categories: unknown; branches: unknown; config: unknown }
+    if (!m.items?.length) return null
+    const part = (x: unknown) => new Response(JSON.stringify(x))
+    return [part(m.items), part(m.categories), part(m.branches), part(m.config)]
+  } catch { return null }
+}
 async function pull(): Promise<boolean> {
   if (!backendOn) return false
   try {
     const get = (path: string) => fetch(`${backendUrl}/rest/v1/${path}`, { headers: { apikey: backendKey! } })
-    const [res, cres, bres, gres] = await Promise.all([
+    const [res, cres, bres, gres] = await cachedMenu() ?? await Promise.all([
       get('menu_items?select=branch,name,category,names,sort,available,in_stock,prices,sizes,tag,description,flavors,nutrition,photo,photo_x,photo_y,photo_zoom,opts,flavor_extras'),
       get('menu_categories?select=branch,id,kind,names,sort').catch(() => null),
       get('branches?select=id,names,active,sort&order=sort.asc,id.asc').catch(() => null),
@@ -261,7 +276,9 @@ async function check() {
   try {
     let mark = ''
     try {
-      const res = await fetch(`${backendUrl}/rest/v1/menu_version?select=changed_at`, { headers: { apikey: backendKey! } })
+      const direct = () => fetch(`${backendUrl}/rest/v1/menu_version?select=changed_at`, { headers: { apikey: backendKey! } })
+      const edge = viaCache() ? await fetch('/api/menu?mark=1', { headers: { apikey: backendKey! } }).catch(() => null) : null
+      const res = edge?.ok ? edge : await direct()
       if (res.ok) mark = ((await res.json()) as { changed_at: string }[])[0]?.changed_at ?? ''
     } catch { /* offline, or no mark: read the menu itself */ }
     const have = read<unknown>(CACHE, null) !== null
