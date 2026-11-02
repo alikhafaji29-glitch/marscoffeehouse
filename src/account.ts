@@ -103,6 +103,15 @@ export function validPhone(p: string): boolean {
   if (d.length === 10 && d.startsWith('7')) d = '0' + d
   return /^07[3-9]\d{8}$/.test(d)
 }
+/** one form for every Iraqi mobile: 7501234567, +964 750… and 00964 750… → 07501234567 (owner, 2026-11-02: about 1 order in 10
+ *  was typed without the first 0, which a phone cannot dial); anything else stays as typed, with 0–9 digits */
+export function localPhone(p: string): string {
+  if (!validPhone(p)) return latinDigits(p.trim())
+  let d = normPhone(p)
+  if (d.startsWith('00')) d = d.slice(2)
+  if (d.startsWith('964')) d = d.slice(3)
+  return d.startsWith('0') ? d : '0' + d
+}
 // demo password hash (pure JS so it also works over plain http on the LAN)
 export function hashPassword(phone: string, pw: string): string {
   const s = normPhone(phone) + ':' + pw
@@ -487,11 +496,12 @@ const saveInbox = () => {
   try { localStorage.setItem(INBOX, JSON.stringify(inbox)) } catch { /* private mode */ }
   listeners.forEach((l) => l())
 }
-/** Iraqi numbers for wa.me links: 0750… → 964750… */
+/** Iraqi numbers for wa.me links: 0750… or 750… → 964750… */
 export const waNumber = (p: string) => {
   let d = normPhone(p)
   if (d.startsWith('00')) d = d.slice(2)
   if (d.startsWith('0')) d = '964' + d.slice(1)
+  if (d.length === 10 && d.startsWith('7')) d = '964' + d
   return d
 }
 export function sendGift(to: string, payload: GiftPayload, cardId?: string): boolean {

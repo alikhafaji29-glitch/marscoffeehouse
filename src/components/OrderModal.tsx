@@ -3,7 +3,7 @@ import { PickupSwitch } from './PickupSwitch'
 import { useLang } from '../i18n'
 import { unlockAudio } from '../chime'
 import { useCart } from '../cart'
-import { iqd, latinDigits, payAtPickup, payFromWallet, placeOfferOrder, saveContact, savedContact, sendDrinkGift, useAccount, useMyOrders, validPhone } from '../account'
+import { iqd, localPhone, payAtPickup, payFromWallet, placeOfferOrder, saveContact, savedContact, sendDrinkGift, useAccount, useMyOrders, validPhone } from '../account'
 import { SendToFriend } from './SendToFriend'
 import type { Delivery, GeoPoint } from '../account'
 import { ShareLocation, mapsLink } from './ShareLocation'
@@ -73,7 +73,7 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
   const details = (): Delivery | undefined | null => {
     if (!check()) return null
     if (how !== 'delivery') return undefined
-    return { phone: latinDigits(phone.trim()), address: address.trim(), location: location ?? undefined }
+    return { phone: localPhone(phone), address: address.trim(), location: location ?? undefined }
   }
   const payWallet = () => {
     unlockAudio() // this tap lets the order's status sounds play later
@@ -87,8 +87,8 @@ export function OrderModal({ onClose }: { onClose: () => void }) {
     unlockAudio()
     const d = details(); if (d === null) return
     if (guestMode) {
-      saveContact({ name: name.trim(), phone: latinDigits(phone.trim()), ...(d && { address: d.address }) })
-      const res = placeOfferOrder({ total, items: itemLines(), name: name.trim(), phone: latinDigits(phone.trim()), address: d ? d.address : undefined, location: d?.location, note: staffNote.trim() || undefined, arriveAt: d ? undefined : arriveAt })
+      saveContact({ name: name.trim(), phone: localPhone(phone), ...(d && { address: d.address }) })
+      const res = placeOfferOrder({ total, items: itemLines(), name: name.trim(), phone: localPhone(phone), address: d ? d.address : undefined, location: d?.location, note: staffNote.trim() || undefined, arriveAt: d ? undefined : arriveAt })
       if (!res.ok) return
       clear()
       setPaid(res)

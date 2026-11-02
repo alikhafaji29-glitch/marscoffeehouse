@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { dict, useLang } from '../i18n'
 import type { Lang, TKey } from '../i18n'
-import { iqd, waNumber } from '../account'
+import { iqd, localPhone, waNumber } from '../account'
 import { REPLENISH_REASONS } from '../account'
 import type { Order, ReplenishReason } from '../account'
 import { CANCEL_REASONS, LEAD_MIN, STAGES, dueOf, groupLines, isActive, isCancelled, isLater, mergedInto, nextStage, reasonText, stageIndex, stagesFor, timeText, untilText, useNow, whenText } from '../orders'
@@ -37,7 +37,7 @@ export function ago(at: number, now: number, lang: Lang, justNow: string): strin
   return new Intl.RelativeTimeFormat(lang === 'ku' ? 'ckb' : lang, { numeric: 'always' }).format(-n, unit)
 }
 
-const phoneOf = (o: Order) => o.delivery?.phone ?? o.customer?.phone ?? ''
+const phoneOf = (o: Order) => localPhone(o.delivery?.phone ?? o.customer?.phone ?? '') // older orders may lack the first 0
 
 /*
  * Send a delivery order to a driver on WhatsApp (owner, 2026-10-23): one button per driver set in Tools, and Other…
