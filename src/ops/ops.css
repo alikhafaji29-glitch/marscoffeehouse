@@ -1,0 +1,48 @@
+/* Mars Ops (HANDOFF decision 246): plain and readable on the Sunmi's old browser too (no :has, no container queries). */
+:root { --navy: #203469; --ink: #1e1f2e; --muted: #6b7080; --line: #dfe1e8; --soft: #f3f4f8; --bad: #b3261e; }
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { font-family: 'Crimson Text', Georgia, serif; font-size: 17px; color: var(--ink); background: #f7f8fb; }
+button, input, select, textarea { font: inherit; color: inherit; }
+h1 { margin: 0 0 4px; color: var(--navy); font-size: 1.6rem; }
+h2 { margin: 0; color: var(--navy); font-size: 1.25rem; }
+.ops-wait { padding: 24px; color: var(--muted); }
+.ops-muted { color: var(--muted); margin: 6px 0 14px; }
+.ops-bad { color: var(--bad); margin: 8px 0; }
+
+.ops-center { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.ops-card { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 20px; width: 100%; max-width: 420px; box-shadow: 0 6px 24px rgba(20, 30, 60, 0.08); }
+.ops-field { display: block; margin: 10px 0; }
+.ops-field span { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 3px; }
+.ops-field input, .ops-field select, .ops-field textarea { width: 100%; min-height: 42px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+.ops-two { display: flex; }
+.ops-two > * { flex: 1; }
+.ops-two > * + * { margin-left: 10px; }
+.ops-check { display: block; margin: 10px 0; }
+.ops-actions { display: flex; justify-content: flex-end; margin-top: 14px; }
+.ops-actions > * + * { margin-left: 8px; }
+
+.ops-btn { min-height: 42px; padding: 0 16px; border: 1px solid var(--navy); border-radius: 10px; background: #fff; color: var(--navy); cursor: pointer; }
+.ops-btn.solid { background: var(--navy); color: #fff; }
+.ops-btn:disabled { opacity: 0.6; }
+.ops-link { background: none; border: 0; color: var(--navy); text-decoration: underline; cursor: pointer; padding: 4px; }
+
+.ops-top { display: flex; flex-wrap: wrap; align-items: center; padding: 10px 16px; background: var(--navy); color: #fff; }
+.ops-top b { font-size: 1.2rem; margin-right: 16px; }
+.ops-top nav { display: flex; }
+.ops-top nav button { background: none; border: 0; color: #c9d1ea; padding: 8px 12px; cursor: pointer; border-radius: 8px; }
+.ops-top nav button.on { background: rgba(255, 255, 255, 0.15); color: #fff; }
+.ops-me { margin-left: auto; margin-right: 10px; font-size: 0.9rem; color: #c9d1ea; }
+.ops-top .ops-link { color: #fff; }
+.ops-main { padding: 16px; max-width: 1100px; margin: 0 auto; }
+
+.ops-bar { display: flex; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+.ops-bar > * { margin: 4px 10px 4px 0; }
+.ops-search { min-height: 40px; padding: 4px 10px; border: 1px solid var(--line); border-radius: 10px; margin-left: auto !important; }
+.ops-table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.ops-table th, .ops-table td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); }
+.ops-table th { font-size: 0.8rem; color: var(--muted); font-weight: 600; background: var(--soft); }
+.ops-table .r { text-align: right; }
+.ops-table tr.off td { color: var(--muted); }
+.ops-modal { position: fixed; left: 0; top: 0; right: 0; bottom: 0; background: rgba(15, 20, 40, 0.45); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 10; }
+@media (max-width: 640px) { .ops-table th:nth-child(3), .ops-table td:nth-child(3) { display: none; } .ops-me { width: 100%; margin: 6px 0 0; } }

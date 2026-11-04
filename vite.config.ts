@@ -69,10 +69,12 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react(), moodApi(), ...(mode === 'https' ? [basicSsl()] : []), ...(old ? [legacy({ targets: ['chrome >= 49', 'android >= 5'], renderModernChunks: false })] : [])],
     server: { port: mode === 'https' ? 1441 : mode === 'demo' ? 1442 : 1440, host: true },
+    // two pages: the site, and Mars Ops (warehouse, POS, Master; HANDOFF decision 246), each also in the /old/ copy
+    build: { rollupOptions: { input: { main: 'index.html', ops: 'ops.html' } } },
     ...(old && {
       base: '/old/',
       publicDir: false,
-      build: { outDir: 'dist/old', cssTarget: 'chrome61' },
+      build: { outDir: 'dist/old', cssTarget: 'chrome61', rollupOptions: { input: { main: 'index.html', ops: 'ops.html' } } },
       css: { postcss: { plugins: [flexGapPolyfill(), tapsThrough] } }, // flex `gap` came in Chrome 84: margins instead
       define: { 'import.meta.env.VITE_CLERK_PUBLISHABLE_KEY': '""' }, // no Clerk: its script needs a new engine, and the staff dashboard does not use it
     }),
