@@ -12,8 +12,9 @@ import { dayKey, startOf } from './stats'
 
 /*
  * Deliveries (owner, 2026-10-28: "a report for the delivery companies to collect revenues from them, and to give them their
- * share"). For a range of days (today unless chosen), per delivery company: the delivered orders (free gifts included,
- * cancelled ones never), the money they collected from customers (each order's total, after any discount; a gift is 0),
+ * share"). For a range of days (today unless chosen), per delivery company: the delivered orders, and those still On the
+ * way, counted as delivered like the midnight PDF (owner, 2026-11-05: staff rarely tap Delivered), free gifts included,
+ * cancelled ones never, the money they collected from customers (each order's total, after any discount; a gift is 0),
  * their share as set in Tools → Delivery drivers (a fixed amount per order, a percentage of what the customer paid, or
  * the delivery fee on the order), and what Mars receives from them. Orders with no company are listed apart with a choice,
  * and every listed order can be moved to another company (owner, 2026-10-28: "add the ability to change the delivery
@@ -53,7 +54,7 @@ export function Deliveries({ orders: here }: { orders: Order[] }) {
     setFailed(false)
     if (!backendOn) {
       // the demo: this device's orders
-      setRows(here.filter((o) => (o.branch ?? 'erbil') === branch && o.fulfil === 'delivery' && o.status === 'delivered' && o.at >= from && o.at < end))
+      setRows(here.filter((o) => (o.branch ?? 'erbil') === branch && o.fulfil === 'delivery' && (o.status === 'delivered' || o.status === 'onway') && o.at >= from && o.at < end))
       return
     }
     setRows(null)
@@ -69,7 +70,7 @@ export function Deliveries({ orders: here }: { orders: Order[] }) {
       const lines: Line[] = list.filter((o) => o.courier === name).map((o) => ({ o, share: shareOf(o, d?.share) }))
       const collected = lines.reduce((n, l) => n + l.o.total, 0)
       const share = lines.reduce((n, l) => n + l.share, 0)
-      return { name, d, lines, collected, share, gifts: lines.filter((l) => l.o.replenish).length }
+      return { name, d, lines, collected, share, gifts: lines.filter((l) => l.o.replenish).length, onway: lines.filter((l) => l.o.status === 'onway').length }
     }).filter((g) => g.lines.length || g.d)
   }, [rows, drivers])
   const loose = (rows ?? []).filter((o) => !o.courier)
@@ -85,7 +86,7 @@ export function Deliveries({ orders: here }: { orders: Order[] }) {
   const shareText = (d?: Driver) => !d?.share ? s('shareUnset') : d.share.kind === 'fixed' ? s('shareIsFixed', { n: iqd(d.share.value) }) : d.share.kind === 'pct' ? s('shareIsPct', { n: d.share.value }) : d.share.kind === 'both' ? s('shareIsBoth', { n: iqd(d.share.value), p: d.share.pct ?? 0 }) : s('shareIsFee')
   const range = from === to ? new Date(from).toLocaleDateString(lang === 'en' ? 'en-GB' : lang === 'ar' ? 'ar-IQ' : 'ckb-IQ') : `${new Date(from).toLocaleDateString('en-GB')} – ${new Date(to).toLocaleDateString('en-GB')}`
   const time = (t: number) => new Date(t).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
-  const note = (o: Order) => [o.replenish ? s('repBadge') : '', o.discount ? (o.discount.kind === 'pct' ? s('discPct', { n: o.discount.value }) : s('discFixed', { n: iqd(o.discount.value) })) : ''].filter(Boolean).join(' · ')
+  const note = (o: Order) => [o.status === 'onway' ? s('delivOnway') : '', o.replenish ? s('repBadge') : '', o.discount ? (o.discount.kind === 'pct' ? s('discPct', { n: o.discount.value }) : s('discFixed', { n: iqd(o.discount.value) })) : ''].filter(Boolean).join(' · ')
 
   const csv = () => {
     const out = [['company', 'date', 'order', 'customer', 'collected_iqd', 'share_iqd', 'note'].join(',')]
@@ -170,7 +171,7 @@ export function Deliveries({ orders: here }: { orders: Order[] }) {
               {groups.map((g) => (
                 <Card key={g.name} title={g.name} sub={shareText(g.d)}>
                   <div className="d-stats deliv-stats">
-                    <Stat icon={<I.bike />} tone="sky" value={String(g.lines.length)} label={s('delivOrders')} note={g.gifts ? s('delivGifts', { n: g.gifts }) : undefined} />
+                    <Stat icon={<I.bike />} tone="sky" value={String(g.lines.length)} label={s('delivOrders')} note={[g.onway ? s('delivOnwayN', { n: g.onway }) : '', g.gifts ? s('delivGifts', { n: g.gifts }) : ''].filter(Boolean).join(' · ') || undefined} />
                     <Stat icon={<I.money />} tone="green" value={iqd(g.collected)} label={s('repCollected')} />
                     <Stat icon={<I.receipt />} tone="caramel" value={iqd(g.share)} label={s('repShare')} />
                     <Stat icon={<I.money />} value={iqd(g.collected - g.share)} label={s('marsGets')} />
@@ -193,7 +194,7 @@ export function Deliveries({ orders: here }: { orders: Order[] }) {
                   <ul className="deliv-loose">
                     {loose.map((o) => (
                       <li key={o.uid ?? o.id}>
-                        <span dir="ltr">{time(o.at)}</span> · <b dir="ltr">#{o.id}</b> · {o.customer?.name} · <span dir="ltr">{iqd(o.total)} IQD</span>
+                        <span dir="ltr">{time(o.at)}</span> · <b dir="ltr">#{o.id}</b> · {o.customer?.name} · <span dir="ltr">{iqd(o.total)} IQD</span>{o.status === 'onway' && <> · {s('delivOnway')}</>}
                         {pick(o)}
                       </li>
                     ))}
