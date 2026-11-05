@@ -28,6 +28,17 @@
         "dev:demo"
       ],
       "port": 1442
+    },
+    {
+      "name": "coffeebrain-warehouse",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "C:/Projects/coffeebrain/CoffeeBrain Warehouse",
+        "run",
+        "dev"
+      ],
+      "port": 1460
     }
   ]
 }

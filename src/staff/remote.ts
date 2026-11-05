@@ -144,7 +144,7 @@ export function setCourier(o: Order, courier: string) {
 export async function deliveredOrders(branch: string, from: number, to: number): Promise<Order[] | null> {
   const sb = await getClient()
   if (!sb) return null
-  const { data, error } = await sb.from('orders').select('*').eq('branch', branch).eq('fulfil', 'delivery').eq('status', 'delivered')
+  const { data, error } = await sb.from('orders').select('*').eq('branch', branch).eq('fulfil', 'delivery').in('status', ['delivered', 'onway'])
     .gte('created_at', new Date(from).toISOString()).lt('created_at', new Date(to).toISOString()).order('created_at').limit(3000)
   if (error) { console.warn('[backend] deliveries not read:', error.message); return null }
   return (data as OrderRow[]).map(fromRow)
