@@ -178,11 +178,14 @@ Deno.serve(async (req: Request) => {
         const components: unknown[] = []
         if (name.endsWith('_loc')) components.push({ type: 'header', parameters: [{ type: 'location', location: pin }] })
         components.push({ type: 'body', parameters: name === LINKS ? [...params(lang), { type: 'text', text: links }] : params(lang) })
-        // the Arabic links one has its own name: Meta filed mars_order_links ar as MARKETING, so it was deleted and
-        // resubmitted as mars_order_links_ar (owner, 2026-11-06: "delete it then resubmit"); the old name is blocked 30 days
-        const tname = name === LINKS && lang === 'ar' ? 'mars_order_links_ar' : name
-        sent = await post({ type: 'template', template: { name: tname, language: { code: lang }, components } })
-        if (sent.res.messages?.length) { used = `${tname}/${lang}`; break attempts }
+        // Arabic links ones have their own names: Meta filed mars_order_links ar as MARKETING (deleted; the name is blocked
+        // 30 days), then mars_order_links_ar too (owner, 2026-11-06: "ask meta to review category, and submit new wording").
+        // mars_order_map_ar (no «جديد», «موقع الزبون») first, then mars_order_links_ar, whichever Meta approved
+        const tnames = name === LINKS && lang === 'ar' ? ['mars_order_map_ar', 'mars_order_links_ar'] : [name]
+        for (const tname of tnames) {
+          sent = await post({ type: 'template', template: { name: tname, language: { code: lang }, components } })
+          if (sent.res.messages?.length) { used = `${tname}/${lang}`; break attempts }
+        }
       }
     }
   }
