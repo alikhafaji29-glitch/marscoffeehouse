@@ -351,6 +351,16 @@ export function dropClerk(uid: string) {
   delete o.clerk
   commit(mine)
 }
+/** orders this device saved under the account's development id (before Clerk moved to production, 2026-11-06) now
+ *  belong to its production id: shown, followed and, if not sent yet, sent as this account's */
+export function retagClerk(from: string, to: string) {
+  let changed = false
+  for (const o of myOrders()) if (o.clerk === from) { o.clerk = to; changed = true }
+  if (!changed) return
+  if (account) { account = { ...account }; save() }
+  guest = [...guest]
+  saveGuest()
+}
 /** orders of this Clerk account placed on another device: kept here as guest orders, already in the database */
 export function importOrders(list: Order[]) {
   const have = new Set(myOrders().map((o) => o.uid))

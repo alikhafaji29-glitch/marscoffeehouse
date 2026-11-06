@@ -36,11 +36,14 @@ export async function ensureUser(sb: SupabaseClient): Promise<boolean> {
  * Supabase session: Supabase → Authentication → Third-party auth → Clerk accepts it, and the row rules know the order
  * by its `clerk_id` (migration 20261022000400). Guests and staff keep the client above. */
 export type Contact = { name?: string; phone?: string; address?: string }
-type ClerkUser = { id: string; unsafeMetadata?: Record<string, unknown>; update: (p: { unsafeMetadata: Record<string, unknown> }) => Promise<unknown> }
+type ClerkUser = { id: string; externalId?: string | null; unsafeMetadata?: Record<string, unknown>; update: (p: { unsafeMetadata: Record<string, unknown> }) => Promise<unknown> }
 type ClerkLike = { user?: ClerkUser | null; session?: { getToken: () => Promise<string | null> } | null }
 const clerk = (): ClerkLike | undefined => (globalThis as { Clerk?: ClerkLike }).Clerk
 /** the Clerk user signed in on this page, if any */
 export const clerkUserId = (): string | null => clerk()?.user?.id ?? null
+/** the account's id on Clerk's development instance, for an account copied to production on 2026-11-06 (HANDOFF
+ *  decision 251: external_id = the old id), so orders this device saved under the old id are found again */
+export const clerkOldId = (): string | null => clerk()?.user?.externalId ?? null
 /* The checkout details of a customer signed in with Clerk (owner, 2026-10-22: "do they have to type their number
  * again?"): kept on the Clerk account as profile data (`unsafeMetadata.contact`: the customer's own, writable from
  * the page; never used to sign in, Clerk has no Iraqi numbers), so any device they sign in on fills the checkout */
