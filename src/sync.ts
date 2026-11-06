@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { applyRemoteStatus, dropClerk, importOrders, markGone, markHeld, markRefused, markSynced, myOrders, setOrderPlacedHook } from './account'
+import { applyRemoteStatus, dropClerk, importOrders, markGone, markHeld, markRefused, markSynced, myOrders, retagClerk, setOrderPlacedHook } from './account'
 import type { Discount, Order, ReplenishReason } from './account'
-import { backendOn, clerkUserId, ensureUser, getClerkClient, getClient } from './backend'
+import { backendOn, clerkOldId, clerkUserId, ensureUser, getClerkClient, getClient } from './backend'
 import { isActive, recentlyCancelled } from './orders'
 import type { Status } from './orders'
 
@@ -90,10 +90,10 @@ async function pull(sb: SupabaseClient, clerkId: string | null) {
   for (const uid of uids) if (!found.has(uid)) markGone(uid)
 }
 
-/** a customer signed in with Clerk: their orders from the last day placed on other devices come to this one */
+/** a customer signed in with Clerk: the account's last 20 orders, from any device and any day, come to this one (owner,
+ *  2026-11-06: signed in after the move to Clerk production, past orders "missing"; it was the last day only) */
 async function bringClerkOrders(sb: SupabaseClient, clerkId: string) {
-  const since = new Date(Date.now() - 24 * 3600_000).toISOString()
-  const { data, error } = await sb.from('orders').select('*').eq('clerk_id', clerkId).gte('created_at', since).limit(50)
+  const { data, error } = await sb.from('orders').select('*').eq('clerk_id', clerkId).order('created_at', { ascending: false }).limit(20)
   if (error) { console.warn('[backend] could not read the account\'s orders:', error.message); return }
   importOrders((data as OrderRow[]).map((r) => ({ ...fromRow(r), clerk: clerkId })))
 }
@@ -102,6 +102,9 @@ let clerkSeen: string | null = null
 let clerkListening = false
 async function run() {
   const clerkId = clerkUserId()
+  // an account copied from Clerk development: this device's orders under its old id are its own (decision 251)
+  const oldId = clerkOldId()
+  if (clerkId && oldId && oldId !== clerkId) retagClerk(oldId, clerkId)
   const mine = myOrders().filter((o) => o.uid)
   // the Clerk account's own orders, through a client signed with its session
   if (clerkId) {
