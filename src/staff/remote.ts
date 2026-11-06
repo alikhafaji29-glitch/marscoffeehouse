@@ -179,10 +179,10 @@ export async function askLocation(o: Order, lang: 'en' | 'ar' | 'ku'): Promise<W
   if (r.ok) upsert({ ...o, wa: { ...o.wa, askedAt: Date.now() } }) // at once on screen; the live channel confirms
   return r
 }
-export async function sendWhatsApp(orderUid: string, to: string, text: string, lang: string, driver = ''): Promise<WaResult> {
+export async function sendWhatsApp(orderUid: string, to: string, text: string, lang: string, driver = '', links?: string): Promise<WaResult> {
   const sb = backendOn ? await getClient() : null
   if (!sb) return { ok: false, reason: 'no_backend' }
-  const { data, error } = await sb.functions.invoke('send-whatsapp', { body: { order_uid: orderUid, to, text, lang, driver } })
+  const { data, error } = await sb.functions.invoke('send-whatsapp', { body: { order_uid: orderUid, to, text, lang, driver, ...(links && { links }) } })
   if (error) return { ok: false, reason: 'unreachable', message: error.message }
   return (data as WaResult) ?? { ok: false, reason: 'unreachable' }
 }

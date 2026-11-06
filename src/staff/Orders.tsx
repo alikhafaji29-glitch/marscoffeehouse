@@ -350,11 +350,11 @@ function SendToDriver({ o }: { o: Order }) {
     // sent to one of the branch's delivery companies: the order is theirs in the Deliveries report (2026-10-28)
     if (drivers.some((d) => (d.name || d.phone) === name)) setCourier(o, name)
   }
-  const send = async (name: string, phone?: string, L: Lang = lang) => {
+  const send = async (name: string, phone?: string, L: Lang = lang, links?: string) => {
     setFailed('')
     if (phone && o.uid) {
       setBusy(true)
-      const r = await sendWhatsApp(o.uid, waNumber(phone), text(L), L, name) // the template in the driver's language (Kurdish: filed as Persian)
+      const r = await sendWhatsApp(o.uid, waNumber(phone), text(L), L, name, links) // the template in the driver's language (Kurdish: filed as Persian)
       setBusy(false)
       if (r.ok) { remember(name, true); return }
       // not set up yet (or no backend): quietly the old way; a real refusal is shown
@@ -367,7 +367,7 @@ function SendToDriver({ o }: { o: Order }) {
   return (
     <>
       {/* in the card's action row, beside Print receipt (owner, 2026-10-23) */}
-      {drivers.map((d, i) => <button key={i} type="button" className="staff-wa" title={s('sendToDriver')} disabled={busy} onClick={() => void send(d.name || d.phone, d.phone, d.lang ?? lang)}><I.whatsapp />{busy ? s('waSending') : d.name || d.phone}</button>)}
+      {drivers.map((d, i) => <button key={i} type="button" className="staff-wa" title={s('sendToDriver')} disabled={busy} onClick={() => void send(d.name || d.phone, d.phone, d.lang ?? lang, d.links)}><I.whatsapp />{busy ? s('waSending') : d.name || d.phone}</button>)}
       <button type="button" className={'staff-wa' + (drivers.length ? ' other' : '')} title={s('sendToDriver')} disabled={busy} onClick={() => void send(drivers.length ? s('sendOther') : 'WhatsApp')}><I.whatsapp />{drivers.length ? s('sendOther') : s('sendWhatsapp')}</button>
       {failed && <small className="staff-sent staff-wa-failed" role="alert">{failed}</small>}
       {sent && <small className="staff-sent">{s(sent.api ? 'sentApi' : 'sentTo', { name: sent.name, t: ago(sent.at, now, lang, t('justNow')) })}</small>}

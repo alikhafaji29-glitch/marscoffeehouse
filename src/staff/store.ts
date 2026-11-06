@@ -35,7 +35,10 @@ export const branchLabel = (id: string, lang: keyof L3) => { const b = BRANCHES.
 /** Coffee of the day (owner, 2026-10-22): a Home slide; any of `items` at one price for its smallest size */
 export interface Cotd { on: boolean; price: number; items: string[] }
 export const COTD_DEFAULT: Cotd = { on: true, price: 3500, items: ['Americano', 'Espresso', 'Turkish Coffee', 'Filter Coffee'] } // 3,500 for now; the owner's order (2026-10-23)
-export interface Driver { name: string; phone: string; lang?: Lang; share?: CourierShare } // lang: the WhatsApp message's language (owner, 2026-10-25); missing = the dashboard's
+export interface Driver { name: string; phone: string; lang?: Lang; share?: CourierShare; links?: MapLinks }
+/** how the customer's location goes in the driver's WhatsApp message (owner, 2026-11-06): missing = the pin (cannot be
+ *  forwarded); a company that forwards to its drivers gets links instead (template mars_order_links) */
+export type MapLinks = 'both' | 'google' | 'waze' // lang: the WhatsApp message's language (owner, 2026-10-25); missing = the dashboard's
 /** what a delivery company keeps of each delivered order (owner, 2026-10-28: "put it as an option"): a fixed amount, a
  *  percentage of what the customer paid, or the delivery fee on the order; the Deliveries report works it out */
 // kind 'both' (owner, 2026-10-29: "a company may take a fixed amount + a percentage"): `value` IQD plus `pct` % of the order
