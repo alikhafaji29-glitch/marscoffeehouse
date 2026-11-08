@@ -644,6 +644,8 @@ const S = {
   courierNone: ['Not set', 'غير محدد', 'دیاری نەکراوە'],
   driverLinks: ['Location in the message', 'الموقع في الرسالة', 'شوێن لە نامەکەدا'],
   linksPin: ['Pin (cannot be forwarded)', 'دبوس الموقع (لا يمكن إعادة توجيهه)', 'پینی شوێن (ناتوانرێت فۆروارد بکرێت)'],
+  linksBoth: ['Google Maps + Waze links', 'رابط Google Maps و Waze', 'بەستەری Google Maps و Waze'],
+  linksGoogle: ['Google Maps link', 'رابط Google Maps', 'بەستەری Google Maps'],
   linksWaze: ['Waze link', 'رابط Waze', 'بەستەری Waze'],
   shareKind: ['Their share of each order', 'حصتهم من كل طلب', 'بەشیان لە هەر داواکارییەک'],
   shareNone: ['Not set', 'غير محددة', 'دیاری نەکراوە'],
