@@ -109,11 +109,12 @@ function Drivers() {
               {LANGS.map(([v, name]) => <option key={v} value={v}>{name}</option>)}
             </select>
           </Field>
-          {/* the pin, or a link that can be forwarded to the company's own drivers (owner, 2026-11-06); Waze only (owner,
-              2026-11-08: "delete google maps link, just keep waze"); a driver saved earlier with Google Maps shows as Waze */}
+          {/* the pin, or links that can be forwarded to the company's own drivers (owner, 2026-11-06) */}
           <Field label={s('driverLinks')}>
-            <select value={d.links ? 'waze' : ''} onChange={(e) => edit(i, { links: e.target.value ? 'waze' : undefined })}>
+            <select value={d.links ?? ''} onChange={(e) => edit(i, { links: (e.target.value || undefined) as Driver['links'] })}>
               <option value="">{s('linksPin')}</option>
+              <option value="both">{s('linksBoth')}</option>
+              <option value="google">{s('linksGoogle')}</option>
               <option value="waze">{s('linksWaze')}</option>
             </select>
           </Field>
