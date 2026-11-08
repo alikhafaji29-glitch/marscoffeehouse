@@ -109,6 +109,15 @@ function Drivers() {
               {LANGS.map(([v, name]) => <option key={v} value={v}>{name}</option>)}
             </select>
           </Field>
+          {/* the pin, or links that can be forwarded to the company's own drivers (owner, 2026-11-06) */}
+          <Field label={s('driverLinks')}>
+            <select value={d.links ?? ''} onChange={(e) => edit(i, { links: (e.target.value || undefined) as Driver['links'] })}>
+              <option value="">{s('linksPin')}</option>
+              <option value="both">{s('linksBoth')}</option>
+              <option value="google">{s('linksGoogle')}</option>
+              <option value="waze">{s('linksWaze')}</option>
+            </select>
+          </Field>
           {/* what the company keeps of each delivered order, for the Deliveries report (owner, 2026-10-28) */}
           <Field label={s('shareKind')}>
             <select value={d.share?.kind ?? ''} onChange={(e) => edit(i, { share: e.target.value ? { kind: e.target.value as CourierShare['kind'], value: e.target.value === 'fee' ? 0 : d.share?.value ?? 0, ...(e.target.value === 'both' && { pct: d.share?.pct ?? 0 }) } : undefined })}>

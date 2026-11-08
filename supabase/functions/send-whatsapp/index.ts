@@ -39,6 +39,10 @@ const GRAPH = Deno.env.get('WA_GRAPH_VERSION') ?? 'v23.0'
 const SHORT = 'mars_order_loc'
 // the same short wording without the map, for orders with no pin (owner, 2026-10-29: "submit")
 const SHORT_TEXT = 'mars_order_text'
+// links instead of the pin, for a company that forwards the message to its own drivers (owner, 2026-11-06: a template with
+// "no pin, instead put google maps pin + waze link", "control if we want to put google maps and waze or one of them"; HANDOFF
+// decision 250): mars_order_text's wording plus "Location: {{6}}", {{6}} = the links chosen for that driver in Tools
+const LINKS = 'mars_order_links'
 const allowed = (Deno.env.get('ALLOWED_ORIGINS') ?? '').split(',').map((s) => s.trim()).filter(Boolean)
 const originOk = (o: string | null) => !allowed.length || (o !== null && allowed.includes(o))
 const cors = (o: string | null) => ({
@@ -89,7 +93,7 @@ Deno.serve(async (req: Request) => {
 
   const auth = req.headers.get('authorization') ?? ''
   if (!auth.startsWith('Bearer ')) return json(401, { ok: false, reason: 'not_signed_in' })
-  let body: { order_uid?: string; to?: string; text?: string; lang?: string; driver?: string; kind?: string }
+  let body: { order_uid?: string; to?: string; text?: string; lang?: string; driver?: string; kind?: string; links?: string }
   try { body = await req.json() } catch { return json(400, { ok: false, reason: 'bad_request' }) }
   const askLoc = body.kind === 'location_request'
   if (!body.order_uid || (!body.to && !askLoc)) return json(400, { ok: false, reason: 'bad_request' })
@@ -132,6 +136,13 @@ Deno.serve(async (req: Request) => {
     (o.items ?? []).join(' · '),
     o.replenish ? COLLECT[tl].free : o.pay === 'wallet' ? COLLECT[tl].wallet : `${iqd(o.total)} ${COLLECT[tl].cur}`,
   ].map((t) => ({ type: 'text', text: flat(t) }))
+  // the links for {{6}}: Google Maps, Waze, or both, as chosen in Tools (no pin: none, so the order goes as before)
+  const ll = o.location ? `${o.location.lat},${o.location.lng}` : ''
+  const want = body.links === 'google' || body.links === 'waze' || body.links === 'both' ? body.links : ''
+  const links = ll && want ? [
+    want !== 'waze' ? `Google Maps: https://www.google.com/maps?q=${ll}` : '',
+    want !== 'google' ? `Waze: https://waze.com/ul?ll=${ll}&navigate=yes` : '',
+  ].filter(Boolean).join(' | ') : ''
   type Sent = { r: Response; res: { messages?: { id: string }[]; error?: { code?: number; message?: string } } }
   const post = async (message: Record<string, unknown>): Promise<Sent> => {
     const r = await fetch(`https://graph.facebook.com/${GRAPH}/${phoneId}/messages`, {
@@ -158,15 +169,23 @@ Deno.serve(async (req: Request) => {
     }
   } else {
     // the pin version first, then the one without; Kurdish (fa) then Arabic, until Meta takes one
-    const names = pin ? [SHORT, SHORT_TEXT] : [SHORT_TEXT]
+    // links chosen: no pin header, so the company can forward it; if Meta refuses it (not approved yet), the pin one as
+    // before, so the location still arrives
+    const names = links ? [LINKS, SHORT, SHORT_TEXT] : pin ? [SHORT, SHORT_TEXT] : [SHORT_TEXT]
     const langs = tl === 'fa' ? ['fa', 'ar'] : [tl]
     attempts: for (const name of names) {
       for (const lang of langs) {
         const components: unknown[] = []
         if (name.endsWith('_loc')) components.push({ type: 'header', parameters: [{ type: 'location', location: pin }] })
-        components.push({ type: 'body', parameters: params(lang) })
-        sent = await post({ type: 'template', template: { name, language: { code: lang }, components } })
-        if (sent.res.messages?.length) { used = `${name}/${lang}`; break attempts }
+        components.push({ type: 'body', parameters: name === LINKS ? [...params(lang), { type: 'text', text: links }] : params(lang) })
+        // Arabic links ones have their own names: Meta filed mars_order_links ar as MARKETING (deleted; the name is blocked
+        // 30 days), then mars_order_links_ar too (owner, 2026-11-06: "ask meta to review category, and submit new wording").
+        // mars_order_map_ar (no «جديد», «موقع الزبون») first, then mars_order_links_ar, whichever Meta approved
+        const tnames = name === LINKS && lang === 'ar' ? ['mars_order_map_ar', 'mars_order_links_ar'] : [name]
+        for (const tname of tnames) {
+          sent = await post({ type: 'template', template: { name: tname, language: { code: lang }, components } })
+          if (sent.res.messages?.length) { used = `${tname}/${lang}`; break attempts }
+        }
       }
     }
   }
@@ -174,7 +193,8 @@ Deno.serve(async (req: Request) => {
   if (!sent.res.messages?.length && !askLoc) {
     sent = await post({ type: 'text', text: { body: (body.text ?? '').slice(0, 4000) || `Mars order #${o.code}`, preview_url: true } })
     // the pin right after the text, as WhatsApp shows a shared location
-    if (sent.res.messages?.length && pin) await post({ type: 'location', location: pin })
+    // (with links chosen the text already has the map link, and a pin would not forward)
+    if (sent.res.messages?.length && pin && !links) await post({ type: 'location', location: pin })
   }
   const { r, res } = sent
   // the log, written with the service role (staff may only read it)
