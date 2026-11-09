@@ -50,7 +50,13 @@ export function TrackBar() {
     document.addEventListener('visibilitychange', back)
     return () => { document.removeEventListener('pointerdown', on); document.removeEventListener('keydown', on); document.removeEventListener('visibilitychange', back) }
   }, [waiting])
-  if (!active.length && !cancelled.length) return null
+  const showing = active.length > 0 || cancelled.length > 0
+  // room at the bottom of the page while this bar floats over it (see CartBar)
+  useEffect(() => {
+    document.body.classList.toggle('has-track-bar', showing)
+    return () => document.body.classList.remove('has-track-bar')
+  }, [showing])
+  if (!showing) return null
   return (
     <>
       <button className={'cart-bar track-bar' + (count > 0 ? ' raised' : '') + (active.length ? '' : ' cancelled')} onClick={() => setOpen(true)}>
