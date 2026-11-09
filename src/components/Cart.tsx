@@ -16,6 +16,12 @@ export function CartBar({ onOpen }: { onOpen: () => void }) {
     const id = setTimeout(() => setBump(false), 600)
     return () => clearTimeout(id)
   }, [count])
+  // the bar floats over the page: while it shows, the page gets room at the bottom so the last menu sections can scroll
+  // above it (Mars staff, 2026-11-09: Sandwiches & Salads could not be reached with something in the basket)
+  useEffect(() => {
+    document.body.classList.toggle('has-cart-bar', count > 0)
+    return () => document.body.classList.remove('has-cart-bar')
+  }, [count])
 
   if (count === 0) return null
   return (

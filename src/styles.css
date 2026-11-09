@@ -1013,6 +1013,11 @@ body[data-view='home'] .deck > .slide:first-child::before { content: ''; positio
 .track-modal .track + .track { border-top: 1px solid rgba(255, 255, 255, 0.35); padding-top: 0.6rem; }
 .modal-line.small { font-size: 0.8rem; opacity: 0.85; }
 
+/* Room under the page for the floating bars (Mars staff, 2026-11-09: the last menu sections were hidden behind the
+   View order bar): one bar ~3.3rem tall at 0.9rem from the bottom, two bars stacked 64px apart */
+body.has-cart-bar main, body.has-track-bar main { padding-bottom: calc(5.6rem + env(safe-area-inset-bottom)); }
+body.has-cart-bar.has-track-bar main { padding-bottom: calc(5.6rem + 64px + env(safe-area-inset-bottom)); }
+
 /* Track order bar: same pill as the View order bar; sits above it when both are showing */
 .track-bar { background: var(--sky-deep); animation: none; }
 .track-bar-icon { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: rgba(255, 255, 255, 0.18); }
