@@ -11,7 +11,7 @@ import type { ReceiptText } from './receipt'
 import type { Stage } from '../orders'
 import { IconCheck, IconPin } from '../components/Icons'
 import { mapsLink } from '../components/ShareLocation'
-import { applyPreviousPin, askLocation, cancelOrder, mergeOrders, moveOrder, previousPins, replenishOrder, sendWhatsApp, setCourier, setDiscount } from './remote'
+import { applyPreviousPin, askLocation, cancelOrder, mergeOrders, moveOrder, previousPins, readDay, replenishOrder, searchOrders, sendWhatsApp, setCourier, setDiscount } from './remote'
 import type { PrevPin } from './remote'
 import { sIn, useS } from './strings'
 import type { SKey } from './strings'
@@ -605,6 +605,13 @@ export function useOrderFilter(): OrderFilter {
   const [q, setQ] = useState('')
   const [adv, setAdv] = useState<Adv>(NO_ADV)
   const day = picked ?? dayKey(now)
+  // an older day, or a search over all dates, is read from the database (the dashboard keeps only the latest orders)
+  useEffect(() => { if (picked) void readDay(picked) }, [picked])
+  useEffect(() => {
+    if (picked !== '' || q.trim().length < 3) return
+    const id = setTimeout(() => void searchOrders(q), 450)
+    return () => clearTimeout(id)
+  }, [picked, q])
   const wordsOf = (x: string) => norm(x.trim()).split(/\s+/).filter(Boolean)
   const digitsOf = (x: string) => x.replace(/\D/g, '').replace(/^(00964|964|0)/, '')
   const words = wordsOf(q)
