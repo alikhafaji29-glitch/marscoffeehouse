@@ -30,6 +30,45 @@ export function useRemote(): Remote {
 }
 
 const upsert = (o: Order) => set({ orders: [o, ...state.orders.filter((x) => x.uid !== o.uid)].sort((a, b) => b.at - a.at) })
+/** older orders read on demand join the list (the live ones already there win: they may be newer) */
+const addOlder = (rows: OrderRow[]) => {
+  const have = new Set(state.orders.map((o) => o.uid))
+  const fresh = rows.map(fromRow).filter((o) => o.uid && !have.has(o.uid))
+  if (fresh.length) set({ orders: [...state.orders, ...fresh].sort((a, b) => b.at - a.at) })
+}
+/* The dashboard keeps only the latest 300 orders (both branches: about 2–3 days), so a date before that, or a search
+ * over all dates, found nothing (owner, 2026-11-10: "when they search for orders from 3, 2, 1 of nov, there is no
+ * result"; HANDOFF decision 255). A picked day is read from the database (placed that day, or scheduled for it), once
+ * per day; an all-dates search asks the database too. The rules still show staff their own branch only. */
+const daysRead = new Set<string>()
+export async function readDay(day: string): Promise<void> {
+  if (!backendOn || !/^\d{4}-\d{2}-\d{2}$/.test(day) || daysRead.has(day)) return
+  const sb = await getClient()
+  if (!sb) return
+  const [y, m, d] = day.split('-').map(Number)
+  const from = new Date(y, m - 1, d).toISOString()
+  const to = new Date(y, m - 1, d + 1).toISOString()
+  const { data, error } = await sb.from('orders').select('*')
+    .or(`and(created_at.gte.${from},created_at.lt.${to}),and(arrive_at.gte.${from},arrive_at.lt.${to})`)
+    .order('created_at', { ascending: false }).limit(1000)
+  if (error) { console.warn('[backend] could not read that day:', error.message); return }
+  daysRead.add(day)
+  addOlder(data as OrderRow[])
+}
+/** a search over all dates: the database's orders whose number, customer, phone, address or note has the text */
+export async function searchOrders(text: string): Promise<void> {
+  const q = text.trim().replace(/[%_,()*\\]/g, ' ').replace(/\s+/g, ' ').trim()
+  if (!backendOn || q.length < 3) return
+  const sb = await getClient()
+  if (!sb) return
+  const digits = q.replace(/\D/g, '').replace(/^(00964|964|0)/, '')
+  const like = `%${q}%`
+  const ors = ['code', 'customer_name', 'address', 'note', 'cancel_reason'].map((c) => `${c}.ilike.${like}`)
+  if (digits.length >= 4) ors.push(`customer_phone.ilike.%${digits}%`, `delivery_phone.ilike.%${digits}%`)
+  const { data, error } = await sb.from('orders').select('*').or(ors.join(',')).order('created_at', { ascending: false }).limit(200)
+  if (error) { console.warn('[backend] search not read:', error.message); return }
+  addOlder(data as OrderRow[])
+}
 let channel: ReturnType<SupabaseClient['channel']> | null = null
 
 async function load(sb: SupabaseClient) {
