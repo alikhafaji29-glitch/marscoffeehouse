@@ -20,6 +20,7 @@ const DAY = 86400000
 const SHOWN = 300 // rows on the screen; the export always has them all
 const PERIOD_LABEL: Record<Period, SKey> = { '7': 'r7', '30': 'r30', '90': 'r90', all: 'rAll', custom: 'srCustom' }
 const dateValue = (t: number) => { const d = new Date(t); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` }
+const WEEK = [6, 0, 1, 2, 3, 4, 5] // Saturday first, as the week runs here; the numbers are JavaScript's (Sunday = 0)
 const fromValue = (v: string) => { const [y, m, d] = v.split('-').map(Number); return new Date(y, m - 1, d).getTime() }
 // one tap fills the filters; nothing is saved
 const PRESETS: { key: SKey; period: Period; f: Partial<Filters> }[] = [
@@ -69,6 +70,9 @@ export function SmartReport({ orders, owner }: { orders: Order[]; owner: boolean
   const shown = all ? list : list.slice(0, SHOWN)
   const cats = MENU.filter((c) => c.id !== 'extra' && c.items.length) // add-ons (extra milk, a shot) are not what a customer comes for
   const itemsAll = useMemo(() => [...new Set(cats.flatMap((c) => c.items.map((i) => i.name)))].sort((a, b) => nameOf(a, lang).localeCompare(nameOf(b, lang))), [lang]) // eslint-disable-line react-hooks/exhaustive-deps
+  // the delivery companies to choose from: the ones in the list, and the one chosen
+  const couriers = useMemo(() => [...new Set([...(rows ?? []).flatMap((c) => c.couriers), ...(f.courier ? [f.courier] : [])])].sort((a, b) => a.localeCompare(b)), [rows, f.courier])
+  const dayName = (d: number) => new Intl.DateTimeFormat(lang === 'ku' ? 'ckb' : lang, { weekday: 'short' }).format(new Date(2026, 10, 1 + d)) // 1 Nov 2026 is a Sunday
   const preset = (p: (typeof PRESETS)[number]) => { setPeriod(p.period); setF({ ...NO_FILTERS, ...p.f }); setSort(p.f.lastOver ? { key: 'lastAt', desc: true } : { key: 'orders', desc: true }) }
   const isPreset = (p: (typeof PRESETS)[number]) => period === p.period && JSON.stringify(f) === JSON.stringify({ ...NO_FILTERS, ...p.f })
   const clean = period === '30' && JSON.stringify(f) === JSON.stringify(NO_FILTERS)
@@ -84,7 +88,7 @@ export function SmartReport({ orders, owner }: { orders: Order[]; owner: boolean
     } catch { /* clipboard only */ }
     navigator.clipboard?.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2500) }).catch(() => {})
   }
-  const numberBox = (key: 'itemMin' | 'minOrders' | 'maxOrders' | 'lastOver' | 'lastWithin' | 'firstWithin' | 'minSpent', label: SKey, hint?: SKey) => (
+  const numberBox = (key: 'itemMin' | 'minOrders' | 'maxOrders' | 'lastOver' | 'lastWithin' | 'firstWithin' | 'minSpent' | 'minAvg' | 'maxAvg', label: SKey, hint?: SKey) => (
     <Field label={s(label)} hint={hint && s(hint)}>
       <input type="text" inputMode="numeric" dir="ltr" value={f[key]} className={f[key].trim() !== '' && num(f[key]) === undefined ? 'bad' : ''} onChange={(e) => set({ [key]: e.target.value.replace(/[^\d]/g, '').slice(0, 9) })} />
     </Field>
@@ -142,6 +146,8 @@ export function SmartReport({ orders, owner }: { orders: Order[]; owner: boolean
           {numberBox('minOrders', 'srMinOrders')}
           {numberBox('maxOrders', 'srMaxOrders')}
           {numberBox('minSpent', 'srMinSpent')}
+          {numberBox('minAvg', 'srMinAvg')}
+          {numberBox('maxAvg', 'srMaxAvg')}
           {numberBox('lastOver', 'srLastOver', 'srLastOverHint')}
           {numberBox('lastWithin', 'srLastWithin')}
           {numberBox('firstWithin', 'srFirstWithin')}
@@ -155,8 +161,22 @@ export function SmartReport({ orders, owner }: { orders: Order[]; owner: boolean
               <option value="">{s('srAny')}</option><option value="morning">{s('srMorning')}</option><option value="afternoon">{s('srAfternoon')}</option><option value="evening">{s('srEvening')}</option>
             </select>
           </Field>
+          <Field label={s('srCourier')}>
+            <select value={f.courier} onChange={(e) => set({ courier: e.target.value })}>
+              <option value="">{s('srAny')}</option>
+              {couriers.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </Field>
+          <div className="sr-days" role="group" aria-label={s('srDays')}>
+            <span>{s('srDays')}</span>
+            <div>
+              {WEEK.map((d) => <button key={d} type="button" aria-pressed={f.days.includes(d)} className={f.days.includes(d) ? 'on' : ''} onClick={() => set({ days: f.days.includes(d) ? f.days.filter((x) => x !== d) : [...f.days, d].sort() })}>{dayName(d)}</button>)}
+            </div>
+          </div>
           <label className="sr-check"><input type="checkbox" checked={f.offer} onChange={(e) => set({ offer: e.target.checked })} /><span>{s('srOffer')}</span></label>
           <label className="sr-check"><input type="checkbox" checked={f.cancelled} onChange={(e) => set({ cancelled: e.target.checked })} /><span>{s('srCancelled')}</span></label>
+          <label className="sr-check"><input type="checkbox" checked={f.discount} onChange={(e) => set({ discount: e.target.checked })} /><span>{s('srDiscount')}</span></label>
+          <label className="sr-check"><input type="checkbox" checked={f.gift} onChange={(e) => set({ gift: e.target.checked })} /><span>{s('srGift')}</span></label>
         </div>
       </Card>
 

@@ -475,6 +475,11 @@ button.d-chip.on { background: var(--d-ink); color: #fff; }
 .sr-grid .d-field input.bad { border-color: #b3261e; }
 .sr-check { display: flex; align-items: center; gap: 0.55rem; min-height: 3.1rem; color: var(--d-ink); }
 .sr-check input { width: 1.15rem; height: 1.15rem; accent-color: var(--navy); }
+.sr-days { grid-column: span 2; display: flex; flex-direction: column; gap: 0.35rem; }
+.sr-days > span { font-size: 0.72rem; color: var(--d-mute); padding-inline-start: 0.4rem; }
+.sr-days > div { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.sr-days button { min-width: 3rem; min-height: 2.4rem; padding: 0.3rem 0.7rem; border: 1px solid rgba(32, 52, 105, 0.3); border-radius: 999px; background: var(--d-surface); color: var(--d-ink); font: inherit; font-size: 0.86rem; }
+.dash .sr-days button.on { background: var(--navy); border-color: var(--navy); color: #fff; }
 .sr-stats { margin: 1rem 0; }
 .sr-scroll { overflow-x: auto; }
 .sr-table th.end, .sr-table td.end { text-align: end; }
@@ -483,4 +488,4 @@ button.d-chip.on { background: var(--d-ink); color: #fff; }
 .sr-table tbody th { white-space: nowrap; max-width: 14rem; overflow: hidden; text-overflow: ellipsis; }
 .sr-table td a { color: inherit; }
 .sr-more { margin-top: 0.8rem; }
-@media (max-width: 560px) { .sr-grid .d-field.wide, .sr-items { grid-column: auto; } }
+@media (max-width: 560px) { .sr-grid .d-field.wide, .sr-items, .sr-days { grid-column: auto; } }

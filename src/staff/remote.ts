@@ -197,12 +197,12 @@ export async function deliveredOrders(branch: string, from: number, to: number):
 export async function customerReport(branch: string | null, from: number, to: number, items: string[], catItems: string[]): Promise<Customer[] | null> {
   const sb = await getClient()
   if (!sb) return null
-  type Row = { phone: string; name: string; branch: string; orders: number; spent: number; cancelled: number; delivery: number; pickup: number; offers: number; morning: number; afternoon: number; evening: number; item_orders: number; cat_orders: number; fav: string; ever: number; first_at: string | null; last_at: string | null }
+  type Row = { phone: string; name: string; branch: string; orders: number; spent: number; cancelled: number; delivery: number; pickup: number; offers: number; morning: number; afternoon: number; evening: number; item_orders: number; cat_orders: number; fav: string; ever: number; first_at: string | null; last_at: string | null; dow: number[] | null; couriers: string[] | null; discounts: number | null; gifts: number | null }
   const out: Customer[] = []
   for (let page = 0; page < 60; page++) {
     const { data, error } = await sb.rpc('customer_report', { p_branch: branch, p_from: new Date(Math.max(0, from)).toISOString(), p_to: new Date(to).toISOString(), p_items: items, p_cat_items: catItems }).order('phone').range(page * 1000, page * 1000 + 999)
     if (error) { console.warn('[backend] smart report not read:', error.message); return null }
-    for (const r of (data ?? []) as Row[]) out.push({ phone: r.phone, name: r.name, branch: r.branch, orders: r.orders, spent: Number(r.spent), cancelled: r.cancelled, delivery: r.delivery, pickup: r.pickup, offers: r.offers, morning: r.morning, afternoon: r.afternoon, evening: r.evening, itemOrders: r.item_orders, catOrders: r.cat_orders, fav: r.fav, ever: r.ever, firstAt: r.first_at ? Date.parse(r.first_at) : undefined, lastAt: r.last_at ? Date.parse(r.last_at) : undefined })
+    for (const r of (data ?? []) as Row[]) out.push({ phone: r.phone, name: r.name, branch: r.branch, orders: r.orders, spent: Number(r.spent), cancelled: r.cancelled, delivery: r.delivery, pickup: r.pickup, offers: r.offers, morning: r.morning, afternoon: r.afternoon, evening: r.evening, itemOrders: r.item_orders, catOrders: r.cat_orders, fav: r.fav, dow: r.dow ?? [0, 0, 0, 0, 0, 0, 0], couriers: r.couriers ?? [], discounts: r.discounts ?? 0, gifts: r.gifts ?? 0, ever: r.ever, firstAt: r.first_at ? Date.parse(r.first_at) : undefined, lastAt: r.last_at ? Date.parse(r.last_at) : undefined })
     if ((data ?? []).length < 1000) break
   }
   return out
