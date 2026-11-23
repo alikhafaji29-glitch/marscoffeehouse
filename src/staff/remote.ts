@@ -3,6 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { localPreviousPins, replenishLocal, setOrderCourierLocal, setOrderDiscountLocal, setOrderPinLocal, setOrderStatus } from '../account'
 import type { GeoPoint, Order, ReplenishReason } from '../account'
 import { backendOn, getClient } from '../backend'
+import { PRE_AHEAD, countAt } from '../orders'
 import type { Stage } from '../orders'
 import { fromRow } from '../sync'
 import { seedConfig } from './store'
@@ -49,7 +50,8 @@ export async function readDay(day: string): Promise<void> {
   const from = new Date(y, m - 1, d).toISOString()
   const to = new Date(y, m - 1, d + 1).toISOString()
   const { data, error } = await sb.from('orders').select('*')
-    .or(`and(created_at.gte.${from},created_at.lt.${to}),and(arrive_at.gte.${from},arrive_at.lt.${to})`)
+    // a pre-order's time is in its offer, in milliseconds (13 digits, so comparing as text is comparing as numbers)
+    .or(`and(created_at.gte.${from},created_at.lt.${to}),and(arrive_at.gte.${from},arrive_at.lt.${to}),and(offer->>wantAt.gte.${Date.parse(from)},offer->>wantAt.lt.${Date.parse(to)})`)
     .order('created_at', { ascending: false }).limit(1000)
   if (error) { console.warn('[backend] could not read that day:', error.message); return }
   daysRead.add(day)
@@ -184,9 +186,10 @@ export async function deliveredOrders(branch: string, from: number, to: number):
   const sb = await getClient()
   if (!sb) return null
   const { data, error } = await sb.from('orders').select('*').eq('branch', branch).eq('fulfil', 'delivery').in('status', ['delivered', 'onway'])
-    .gte('created_at', new Date(from).toISOString()).lt('created_at', new Date(to).toISOString()).order('created_at').limit(3000)
+    .gte('created_at', new Date(from - PRE_AHEAD).toISOString()).lt('created_at', new Date(to).toISOString()).order('created_at').limit(3000)
   if (error) { console.warn('[backend] deliveries not read:', error.message); return null }
-  return (data as OrderRow[]).map(fromRow)
+  // a pre-order belongs to the day it is for, not the day it was placed (2026-11-23)
+  return (data as OrderRow[]).map(fromRow).filter((o) => countAt(o) >= from && countAt(o) < to).sort((a, b) => countAt(a) - countAt(b))
 }
 /** every order of a branch placed between two times, for Analytics (2026-11-23): the dashboard itself keeps only the
  *  latest 300, so a week or a month was counted short; null = could not read */

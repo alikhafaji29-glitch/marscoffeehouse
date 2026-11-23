@@ -3,6 +3,7 @@ import { useLang } from '../i18n'
 import { iqd, latinDigits, validPhone } from '../account'
 import type { Order } from '../account'
 import { backendOn } from '../backend'
+import { countAt } from '../orders'
 import { branchName, settingsFor, useStaff } from './store'
 import type { CourierShare, Driver } from './store'
 import { companyStatement, deliveredOrders, setCourier } from './remote'
@@ -54,7 +55,7 @@ export function Deliveries({ orders: here }: { orders: Order[] }) {
     setFailed(false)
     if (!backendOn) {
       // the demo: this device's orders
-      setRows(here.filter((o) => (o.branch ?? 'erbil') === branch && o.fulfil === 'delivery' && (o.status === 'delivered' || o.status === 'onway') && o.at >= from && o.at < end))
+      setRows(here.filter((o) => (o.branch ?? 'erbil') === branch && o.fulfil === 'delivery' && (o.status === 'delivered' || o.status === 'onway') && countAt(o) >= from && countAt(o) < end))
       return
     }
     setRows(null)
@@ -90,8 +91,8 @@ export function Deliveries({ orders: here }: { orders: Order[] }) {
 
   const csv = () => {
     const out = [['company', 'date', 'order', 'customer', 'collected_iqd', 'share_iqd', 'note'].join(',')]
-    for (const g of groups) for (const l of g.lines) out.push([g.name, time(l.o.at), l.o.id, l.o.customer?.name ?? '', l.o.total, l.share, note(l.o)].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(','))
-    for (const o of loose) out.push(['', time(o.at), o.id, o.customer?.name ?? '', o.total, 0, s('courierNone')].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(','))
+    for (const g of groups) for (const l of g.lines) out.push([g.name, time(countAt(l.o)), l.o.id, l.o.customer?.name ?? '', l.o.total, l.share, note(l.o)].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(','))
+    for (const o of loose) out.push(['', time(countAt(o)), o.id, o.customer?.name ?? '', o.total, 0, s('courierNone')].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(','))
     return out.join('\n')
   }
   const exportCsv = () => {
@@ -139,7 +140,7 @@ export function Deliveries({ orders: here }: { orders: Order[] }) {
     const body = groups.filter((g) => g.lines.length).map((g) => `
       <h2>${esc(g.name)}</h2><p>${esc(shareText(g.d))}</p>
       <table><thead><tr><th>${esc(s('repTime'))}</th><th>${esc(s('repOrder'))}</th><th>${esc(s('secCustomer'))}</th><th>${esc(s('repCollected'))}</th><th>${esc(s('repShare'))}</th><th></th></tr></thead><tbody>
-      ${g.lines.map((l) => `<tr><td>${time(l.o.at)}</td><td>#${esc(l.o.id)}</td><td>${esc(l.o.customer?.name ?? '')}</td><td>${iqd(l.o.total)}</td><td>${iqd(l.share)}</td><td>${esc(note(l.o))}</td></tr>`).join('')}
+      ${g.lines.map((l) => `<tr><td>${time(countAt(l.o))}</td><td>#${esc(l.o.id)}</td><td>${esc(l.o.customer?.name ?? '')}</td><td>${iqd(l.o.total)}</td><td>${iqd(l.share)}</td><td>${esc(note(l.o))}</td></tr>`).join('')}
       </tbody><tfoot><tr><td colspan="3">${esc(s('delivN', { n: g.lines.length }))}</td><td>${iqd(g.collected)}</td><td>${iqd(g.share)}</td><td></td></tr></tfoot></table>
       <p class="sum">${esc(s('marsGets'))}: <b>${iqd(g.collected - g.share)} IQD</b></p>`).join('')
     const w = window.open('', '_blank')
@@ -182,7 +183,7 @@ export function Deliveries({ orders: here }: { orders: Order[] }) {
                       <summary>{s('delivShowOrders', { n: g.lines.length })}</summary>
                       <table>
                         <thead><tr><th>{s('repTime')}</th><th>{s('repOrder')}</th><th>{s('secCustomer')}</th><th>{s('repCollected')}</th><th>{s('repShare')}</th><th /><th>{s('courierLabel')}</th></tr></thead>
-                        <tbody>{g.lines.map((l) => <tr key={l.o.uid ?? l.o.id}><td dir="ltr">{time(l.o.at)}</td><td dir="ltr">#{l.o.id}</td><td>{l.o.customer?.name}</td><td dir="ltr">{iqd(l.o.total)}</td><td dir="ltr">{iqd(l.share)}</td><td>{note(l.o)}</td><td>{pick(l.o)}</td></tr>)}</tbody>
+                        <tbody>{g.lines.map((l) => <tr key={l.o.uid ?? l.o.id}><td dir="ltr">{time(countAt(l.o))}</td><td dir="ltr">#{l.o.id}</td><td>{l.o.customer?.name}</td><td dir="ltr">{iqd(l.o.total)}</td><td dir="ltr">{iqd(l.share)}</td><td>{note(l.o)}</td><td>{pick(l.o)}</td></tr>)}</tbody>
                       </table>
                     </details>
                   )}
@@ -194,7 +195,7 @@ export function Deliveries({ orders: here }: { orders: Order[] }) {
                   <ul className="deliv-loose">
                     {loose.map((o) => (
                       <li key={o.uid ?? o.id}>
-                        <span dir="ltr">{time(o.at)}</span> · <b dir="ltr">#{o.id}</b> · {o.customer?.name} · <span dir="ltr">{iqd(o.total)} IQD</span>{o.status === 'onway' && <> · {s('delivOnway')}</>}
+                        <span dir="ltr">{time(countAt(o))}</span> · <b dir="ltr">#{o.id}</b> · {o.customer?.name} · <span dir="ltr">{iqd(o.total)} IQD</span>{o.status === 'onway' && <> · {s('delivOnway')}</>}
                         {pick(o)}
                       </li>
                     ))}
