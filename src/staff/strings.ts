@@ -43,6 +43,7 @@ const S = {
   srCourier: ['Delivered by', 'وصّلته شركة', 'گەیاندن لەلایەن'],
   srDiscount: ['Got a discount', 'حصل على خصم', 'داشکاندنی وەرگرتووە'],
   srGift: ['Got a free gift', 'حصل على هدية مجانية', 'دیاریی بێبەرامبەری وەرگرتووە'],
+  srPreSpenders: ['Top spenders', 'الأكثر إنفاقاً', 'زۆرترین خەرجکەران'],
   srPreRegulars: ['Regulars', 'الزبائن الدائمون', 'کڕیارە هەمیشەییەکان'],
   srPreQuiet: ['Gone quiet', 'انقطعوا', 'دابڕاون'],
   srPreNew: ['New this week', 'جدد هذا الأسبوع', 'نوێی ئەم هەفتەیە'],

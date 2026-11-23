@@ -23,7 +23,8 @@ const dateValue = (t: number) => { const d = new Date(t); return `${d.getFullYea
 const WEEK = [6, 0, 1, 2, 3, 4, 5] // Saturday first, as the week runs here; the numbers are JavaScript's (Sunday = 0)
 const fromValue = (v: string) => { const [y, m, d] = v.split('-').map(Number); return new Date(y, m - 1, d).getTime() }
 // one tap fills the filters; nothing is saved
-const PRESETS: { key: SKey; period: Period; f: Partial<Filters> }[] = [
+const PRESETS: { key: SKey; period: Period; f: Partial<Filters>; sort?: SortKey }[] = [
+  { key: 'srPreSpenders', period: '30', f: {}, sort: 'spent' }, // no filter: the period's customers, biggest spender first (owner, 2026-11-24)
   { key: 'srPreRegulars', period: '30', f: { minOrders: '5' } },
   { key: 'srPreQuiet', period: 'all', f: { minOrders: '3', lastOver: '14' } },
   { key: 'srPreNew', period: '7', f: { firstWithin: '7' } },
@@ -73,9 +74,9 @@ export function SmartReport({ orders, owner }: { orders: Order[]; owner: boolean
   // the delivery companies to choose from: the ones in the list, and the one chosen
   const couriers = useMemo(() => [...new Set([...(rows ?? []).flatMap((c) => c.couriers), ...(f.courier ? [f.courier] : [])])].sort((a, b) => a.localeCompare(b)), [rows, f.courier])
   const dayName = (d: number) => new Intl.DateTimeFormat(lang === 'ku' ? 'ckb' : lang, { weekday: 'short' }).format(new Date(2026, 10, 1 + d)) // 1 Nov 2026 is a Sunday
-  const preset = (p: (typeof PRESETS)[number]) => { setPeriod(p.period); setF({ ...NO_FILTERS, ...p.f }); setSort(p.f.lastOver ? { key: 'lastAt', desc: true } : { key: 'orders', desc: true }) }
-  const isPreset = (p: (typeof PRESETS)[number]) => period === p.period && JSON.stringify(f) === JSON.stringify({ ...NO_FILTERS, ...p.f })
-  const clean = period === '30' && JSON.stringify(f) === JSON.stringify(NO_FILTERS)
+  const preset = (p: (typeof PRESETS)[number]) => { setPeriod(p.period); setF({ ...NO_FILTERS, ...p.f }); setSort({ key: p.sort ?? (p.f.lastOver ? 'lastAt' : 'orders'), desc: true }) }
+  const isPreset = (p: (typeof PRESETS)[number]) => period === p.period && JSON.stringify(f) === JSON.stringify({ ...NO_FILTERS, ...p.f }) && (!p.sort || (sort.key === p.sort && sort.desc))
+  const clean = period === '30' && JSON.stringify(f) === JSON.stringify(NO_FILTERS) && sort.key === 'orders' && sort.desc
   const day = (t?: number) => (t === undefined ? '-' : new Date(t).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' }))
   const exportCsv = () => {
     const text = smartCsv(list, now, branchName)
