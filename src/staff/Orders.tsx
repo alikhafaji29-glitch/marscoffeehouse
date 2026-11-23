@@ -410,6 +410,28 @@ export function sameCustomer(o: Order, all: Order[]): Order[] {
   return all.filter((x) => x !== o && (x.uid ?? x.id) !== (o.uid ?? o.id) && isActive(x) && (x.branch ?? '') === (o.branch ?? '') && Math.abs(x.at - o.at) <= SAME_WINDOW && phoneKey(x) === k).sort((a, b) => a.at - b.at)
 }
 
+/** when the order reached each status, and how long the step before it took: "Received 8:00 · Preparing 8:03 (3 min) ·
+ *  Done 8:10 (7 min)" (owner, 2026-11-23). From the order's own history, in the order things happened. */
+export function OrderTimes({ o }: { o: Order }) {
+  const { t, lang } = useLang()
+  const hist = (o.history?.length ? o.history : [{ stage: 'received' as const, at: o.at }]).slice().sort((a, b) => a.at - b.at)
+  // a status tapped twice in a row is one step
+  const steps = hist.filter((h, i) => i === 0 || h.stage !== hist[i - 1].stage)
+  if (steps.length < 2 && !o.history?.length) return null
+  const gap = (ms: number) => { const m = ms / 60000; return m < 1 ? `${Math.max(1, Math.round(m * 60))}s` : m < 60 ? `${Math.round(m)}m` : `${Math.floor(m / 60)}h ${Math.round(m % 60)}m` }
+  return (
+    <ol className="staff-times" aria-label="timeline">
+      {steps.map((h, i) => (
+        <li key={i} className={'s-' + h.stage}>
+          <b>{h.stage === 'cancelled' ? t('stCancelled') : t(STAGE_LABEL[h.stage])}</b>
+          <span dir="ltr">{timeText(h.at, lang)}</span>
+          {i > 0 && <em dir="ltr">+{gap(h.at - steps[i - 1].at)}</em>}
+        </li>
+      ))}
+    </ol>
+  )
+}
+
 export function OrderCard({ o, lead = LEAD_MIN, all = [] }: { o: Order; lead?: number; all?: Order[] }) {
   const { t, lang } = useLang()
   const s = useS()
@@ -458,6 +480,7 @@ export function OrderCard({ o, lead = LEAD_MIN, all = [] }: { o: Order; lead?: n
         {o.offer?.pre && <span className="staff-how pre">{s('preOrderBadge')}</span>}
         {dueOf(o) && isActive(o) && (o.status ?? 'received') === 'received' && !isLater(o, now, lead) && <span className="staff-how now">{s('makeNow')}</span>}
       </p>
+      <OrderTimes o={o} />
       {o.replenish && (
         <p className="staff-rep-for">
           {s('repFor', { code: o.replenish.ofCode, reason: s(('repR_' + o.replenish.reason) as SKey) })}

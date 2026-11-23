@@ -188,6 +188,21 @@ export async function deliveredOrders(branch: string, from: number, to: number):
   if (error) { console.warn('[backend] deliveries not read:', error.message); return null }
   return (data as OrderRow[]).map(fromRow)
 }
+/** every order of a branch placed between two times, for Analytics (2026-11-23): the dashboard itself keeps only the
+ *  latest 300, so a week or a month was counted short; null = could not read */
+export async function ordersInRange(branch: string, from: number, to: number): Promise<Order[] | null> {
+  const sb = await getClient()
+  if (!sb) return null
+  const out: Order[] = []
+  for (let page = 0; page < 40; page++) {
+    const { data, error } = await sb.from('orders').select('*').eq('branch', branch)
+      .gte('created_at', new Date(from).toISOString()).lt('created_at', new Date(to).toISOString()).order('created_at').range(page * 1000, page * 1000 + 999)
+    if (error) { console.warn('[backend] analytics orders not read:', error.message); return null }
+    out.push(...(data as OrderRow[]).map(fromRow))
+    if ((data ?? []).length < 1000) break
+  }
+  return out
+}
 /** a discount on an active order (order_set_discount; 2026-10-28): '' when saved, else why not */
 export async function setDiscount(o: Order, kind: 'pct' | 'fixed' | 'none', value = 0): Promise<string> {
   if (!backendOn || !o.uid) return setOrderDiscountLocal(o.id, kind, value) ? '' : 'invalid'

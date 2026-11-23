@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useLang } from '../i18n'
 import { iqd } from '../account'
 import { REPLENISH_REASONS } from '../account'
@@ -6,7 +6,10 @@ import type { Order } from '../account'
 import { isCancelled } from '../orders'
 import { useNow } from '../orders'
 import { catLabel } from '../components/MenuSection'
-import { RANGES, dayKey, rangeStart, rowsFromOrders, summarize, toCsv, traffic } from './stats'
+import { RANGES, dayKey, rangeStart, rowsFromOrders, stepTimes, summarize, toCsv, traffic } from './stats'
+import type { StepKey } from './stats'
+import { backendOn } from '../backend'
+import { ordersInRange } from './remote'
 import type { Range } from './stats'
 import { useStaff } from './store'
 import { useS } from './strings'
@@ -19,13 +22,44 @@ const RANGE_LABEL: Record<Range, SKey> = { today: 'rToday', '7': 'r7', '30': 'r3
 const SOURCE_COLOR: Record<string, string> = { Instagram: '#e0336e', Direct: '#8a94a6', Referral: '#dc8638', Google: '#4d97cf', Facebook: '#203469' }
 const shortDay = (t: number) => new Date(t).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 
-export function Analytics({ orders }: { orders: Order[] }) {
+const STEP_LABEL: Record<StepKey, SKey> = { accept: 'stepAccept', prepare: 'stepPrepare', wait: 'stepWait', out: 'stepOut', road: 'stepRoad', handover: 'stepHandover', total: 'stepTotal' }
+/** minutes as people say them: "45 sec", "7 min", "1 h 20 min" */
+const mins = (m: number) => (m < 1 ? `${Math.round(m * 60)} sec` : m < 60 ? `${m < 10 ? Math.round(m * 10) / 10 : Math.round(m)} min` : `${Math.floor(m / 60)} h ${Math.round(m % 60)} min`)
+
+export function Analytics({ orders: live }: { orders: Order[] }) {
   const s = useS()
   const { lang } = useLang()
   const data = useStaff()
   const now = useNow(60000)
   const [range, setRange] = useState<Range>('30')
   const [copied, setCopied] = useState(false)
+  const [how, setHow] = useState<'delivery' | 'pickup'>('delivery')
+  // the whole period from the database (the dashboard keeps only the latest 300 orders, so a week or a month was
+  // counted short until 2026-11-23); the orders already on screen are laid over it, so a new order shows at once
+  const [fetched, setFetched] = useState<{ key: string; list: Order[] } | null>(null)
+  const today = dayKey(now)
+  const key = `${data.branch}|${range}|${today}`
+  useEffect(() => {
+    if (!backendOn) return
+    let off = false
+    const from = range === 'all' ? 0 : rangeStart(range, Date.now())
+    void ordersInRange(data.branch, from, Date.now() + 60000).then((list) => { if (!off && list) setFetched({ key, list }) })
+    return () => { off = true }
+  }, [key, data.branch, range])
+  const loading = backendOn && fetched?.key !== key
+  const orders = useMemo(() => {
+    if (!fetched || fetched.key !== key) return live
+    const id = (o: Order) => o.uid ?? o.id
+    const seen = new Set(live.map(id))
+    return [...live, ...fetched.list.filter((o) => !seen.has(id(o)))]
+  }, [fetched, key, live])
+  const steps = useMemo(() => {
+    const from = rangeStart(range, now, orders.length ? Math.min(...orders.map((o) => o.at)) : undefined)
+    return stepTimes(orders, how, from, now)
+  }, [orders, how, range, now])
+  const single = (k: StepKey) => k !== 'total' && k !== 'out' && k !== 'road' // the bars compare the shop's own steps
+  const slowest = Math.max(1, ...steps.steps.filter((x) => single(x.key)).map((x) => x.avg))
+  const headline = steps.steps.find((x) => x.key === (how === 'delivery' ? 'out' : 'total'))
   // replenishments are free orders sent to make up for another (2026-10-28): not sales, so not in orders, revenue or items
   const rows = useMemo(() => rowsFromOrders(orders.filter((o) => !o.replenish)), [orders])
   const given = useMemo(() => {
@@ -66,6 +100,7 @@ export function Analytics({ orders }: { orders: Order[] }) {
         </div>
         <button type="button" className="d-btn outline" onClick={exportCsv}><I.download />{copied ? s('csvCopied') : s('exportCsv')}</button>
       </div>
+      {loading && <p className="d-hint">{s('anLoading')}</p>}
 
       <h2 className="d-h2">{s('sales')}</h2>
       <div className="d-stats">
@@ -101,6 +136,34 @@ export function Analytics({ orders }: { orders: Order[] }) {
           <Bars tone="caramel" rows={sum.cats.map((c) => ({ label: catLabel(c.id, lang), value: c.value, share: sum.units ? Math.round((c.value / sum.units) * 100) : 0 }))} empty={s('noOrdersRange')} />
         </Card>
       </div>
+
+      <h2 className="d-h2">{s('stepTimes')}</h2>
+      <Card title={s('stepTimesTitle')} sub={s('stepTimesSub', { n: steps.orders })} icon={<I.clock />}
+        right={<div className="d-seg small" role="tablist" aria-label={s('deliveryPickup')}>
+          <button type="button" role="tab" aria-selected={how === 'delivery'} className={how === 'delivery' ? 'on' : ''} onClick={() => setHow('delivery')}>{s('stepDelivery')}</button>
+          <button type="button" role="tab" aria-selected={how === 'pickup'} className={how === 'pickup' ? 'on' : ''} onClick={() => setHow('pickup')}>{s('stepPickup')}</button>
+        </div>}>
+        {steps.orders ? (
+          <>
+            <table className="d-steps">
+              <thead><tr><th>{s('stepCol')}</th><th>{s('stepAvg')}</th><th aria-hidden="true" /><th>{s('stepMedian')}</th><th>{s('stepSlow')}</th><th>{s('orders')}</th></tr></thead>
+              <tbody>
+                {steps.steps.map((x) => (
+                  <tr key={x.key} className={x.key === 'total' || x.key === 'out' ? 'total' : ''}>
+                    <th scope="row">{s(STEP_LABEL[x.key])}</th>
+                    <td><b>{x.n ? mins(x.avg) : '-'}</b></td>
+                    <td className="d-steps-bar">{single(x.key) && x.n > 0 && <i style={{ width: `${Math.max(2, (x.avg / slowest) * 100)}%` }} />}</td>
+                    <td>{x.n ? mins(x.median) : '-'}</td>
+                    <td>{x.n ? mins(x.slow) : '-'}</td>
+                    <td>{x.n}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p className="d-hint">{s('stepNote')}{how === 'delivery' && steps.skippedRoad > 0 ? ` ${s('stepRoadSkipped', { n: steps.skippedRoad })}` : ''}{headline && headline.n ? ` ${s(how === 'delivery' ? 'stepOutNote' : 'stepTotalNote', { t: mins(headline.avg) })}` : ''}{how === 'delivery' ? ` ${s('stepRoadNote')}` : ''}</p>
+          </>
+        ) : <p className="d-empty">{s('noOrdersRange')}</p>}
+      </Card>
 
       <h2 className="d-h2">{s('traffic')}</h2>
       <div className="d-stats">
