@@ -9,6 +9,7 @@ import { fromRow } from '../sync'
 import { seedConfig } from './store'
 import type { Feedback } from '../feedback'
 import type { OrderRow } from '../sync'
+import type { Customer } from './smart'
 
 /*
  * The staff dashboard's side of the shared backend. With the backend on, staff sign in with an email and password
@@ -190,6 +191,21 @@ export async function deliveredOrders(branch: string, from: number, to: number):
   if (error) { console.warn('[backend] deliveries not read:', error.message); return null }
   // a pre-order belongs to the day it is for, not the day it was placed (2026-11-23)
   return (data as OrderRow[]).map(fromRow).filter((o) => countAt(o) >= from && countAt(o) < to).sort((a, b) => countAt(a) - countAt(b))
+}
+/** Smart report: one row per customer of a branch (null = every branch, the owner only), counted for a period by the
+ *  database (`customer_report`, managers only); null = could not read */
+export async function customerReport(branch: string | null, from: number, to: number, items: string[], catItems: string[]): Promise<Customer[] | null> {
+  const sb = await getClient()
+  if (!sb) return null
+  type Row = { phone: string; name: string; branch: string; orders: number; spent: number; cancelled: number; delivery: number; pickup: number; offers: number; morning: number; afternoon: number; evening: number; item_orders: number; cat_orders: number; fav: string; ever: number; first_at: string | null; last_at: string | null }
+  const out: Customer[] = []
+  for (let page = 0; page < 60; page++) {
+    const { data, error } = await sb.rpc('customer_report', { p_branch: branch, p_from: new Date(Math.max(0, from)).toISOString(), p_to: new Date(to).toISOString(), p_items: items, p_cat_items: catItems }).order('phone').range(page * 1000, page * 1000 + 999)
+    if (error) { console.warn('[backend] smart report not read:', error.message); return null }
+    for (const r of (data ?? []) as Row[]) out.push({ phone: r.phone, name: r.name, branch: r.branch, orders: r.orders, spent: Number(r.spent), cancelled: r.cancelled, delivery: r.delivery, pickup: r.pickup, offers: r.offers, morning: r.morning, afternoon: r.afternoon, evening: r.evening, itemOrders: r.item_orders, catOrders: r.cat_orders, fav: r.fav, ever: r.ever, firstAt: r.first_at ? Date.parse(r.first_at) : undefined, lastAt: r.last_at ? Date.parse(r.last_at) : undefined })
+    if ((data ?? []).length < 1000) break
+  }
+  return out
 }
 /** every order of a branch placed between two times, for Analytics (2026-11-23): the dashboard itself keeps only the
  *  latest 300, so a week or a month was counted short; null = could not read */
