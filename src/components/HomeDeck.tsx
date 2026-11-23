@@ -178,7 +178,21 @@ export function HomeDeck({ onOrder, onPick }: { onOrder: () => void; onPick: (it
   // the side panel: a season item (menu item + its card)
   const [panel, setPanel] = useState<{ kind: 'item'; item: MenuItem; img: string; title: string } | null>(null)
   const openItem = (it: MenuItem, img: string, title: string) => setPanel({ kind: 'item', item: it, img, title })
-  const related = (except: string) => SEASON.filter((f) => f.title !== except).slice(0, 3).map((f) => ({ title: f.title, img: f.img, onClick: () => { const it = item(f.names[0]); if (it) openItem(it, f.img, f.names.length > 1 ? it.name : f.title) } }))
+  // the New Season cards: the branch's active event's items, each with its picture (staff's, else the campaign photo
+  // that came with the site, else its menu photo) and its name in the customer's language
+  const seasonCards = () => {
+    const ev = activeEvent()
+    if (!ev) return []
+    return ev.items.map((n) => {
+      const it = item(n)
+      if (!it) return null
+      const base = SEASON.find((f) => f.names.includes(n)), own = ev.photos?.[n]
+      return { it, title: nameOf(it.name, lang), img: (own ? mediaUrl(own) : base?.img ?? photoOf(it.name)) ?? '', plain: !own && !base, bg: own ? '#f1ede7' : base?.bg ?? '#fff' }
+    }).filter((c): c is NonNullable<typeof c> => !!c)
+  }
+  // "You might also like" in an item's side panel: the other cards of the same event (it listed the site's first three
+  // campaign cards whatever the event held; owner, 2026-11-23: "it still shows the old new season")
+  const related = (except: string) => seasonCards().filter((c) => c.title !== except).slice(0, 3).map((c) => ({ title: c.title, img: c.img, onClick: () => openItem(c.it, c.img, c.title) }))
   const addProduct = (key: TKey, p: number) => { add({ name: t(key), price: p }, 1); setAdded(key); setTimeout(() => setAdded(''), 1600) }
 
   const hoursSlide = (
@@ -233,7 +247,7 @@ export function HomeDeck({ onOrder, onPick }: { onOrder: () => void; onPick: (it
       {(() => {
         const ev = activeEvent()
         if (!ev) return null
-        const cards = ev.items.map((n) => ({ it: item(n), base: SEASON.find((f) => f.names.includes(n)), own: ev.photos?.[n] })).filter((c): c is { it: MenuItem; base: (typeof SEASON)[number] | undefined; own: string | undefined } => !!c.it)
+        const cards = seasonCards()
         if (!cards.length) return null
         return (
           <section className="slide slide-fav" id="seasonal" aria-labelledby="fav-title">
@@ -243,13 +257,11 @@ export function HomeDeck({ onOrder, onPick }: { onOrder: () => void; onPick: (it
             </div>
             <Track>
               <div className="fav-set">
-                {cards.map(({ it, base, own }) => {
-                  const title = nameOf(it.name, lang)
-                  const img = own ? mediaUrl(own) : base?.img ?? photoOf(it.name)
-                  const plain = !own && !base // no campaign picture: the menu photo on white, as Coffee of the day does
-                  const open = () => openItem(it, img ?? '', title)
+                {cards.map(({ it, title, img, plain, bg }) => {
+                  // plain = no campaign picture: the menu photo on white, as Coffee of the day does
+                  const open = () => openItem(it, img, title)
                   return (
-                    <article className={'fav-card season-card light' + (plain ? ' menu-pic' : '')} key={it.name} style={{ background: own ? '#f1ede7' : base?.bg ?? '#fff' }} onClick={open}>
+                    <article className={'fav-card season-card light' + (plain ? ' menu-pic' : '')} key={it.name} style={{ background: bg }} onClick={open}>
                       {img && <img src={img} alt="" draggable={false} style={plain ? photoStyle(it.name) : undefined} />}
                       <div className="fav-card-text season-text">
                         <h3>{title}</h3>
