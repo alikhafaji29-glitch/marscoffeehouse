@@ -104,8 +104,6 @@ const S = {
   r30: ['30 Days', '30 يوماً', '30 ڕۆژ'],
   r90: ['90 Days', '90 يوماً', '90 ڕۆژ'],
   rAll: ['All Time', 'كل الفترات', 'هەموو کات'],
-  sampleData: ['Sample data', 'بيانات تجريبية', 'داتای نموونە'],
-  sampleNote: ['Sample data: made-up numbers, so the charts can be judged before there are real orders. Switch it off to see this browser\'s own orders and visits.', 'بيانات تجريبية: أرقام افتراضية لتقييم الرسوم قبل وجود طلبات حقيقية. أوقفها لعرض طلبات وزيارات هذا المتصفح.', 'داتای نموونە: ژمارەی دروستکراون بۆ ئەوەی هێڵکارییەکان پێش داواکاریی ڕاستەقینە ببینرێن. بیکوژێنەوە بۆ بینینی داواکاری و سەردانەکانی ئەم وێبگەڕە.'],
   exportCsv: ['Export CSV', 'تصدير CSV', 'هەناردەی CSV'],
   csvCopied: ['CSV copied', 'تم نسخ CSV', 'CSV کۆپی کرا'],
   sales: ['Sales', 'المبيعات', 'فرۆشتن'],

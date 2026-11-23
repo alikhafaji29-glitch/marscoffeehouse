@@ -6,15 +6,15 @@ import type { Order } from '../account'
 import { isCancelled } from '../orders'
 import { useNow } from '../orders'
 import { catLabel } from '../components/MenuSection'
-import { RANGES, dayKey, rangeStart, rowsFromOrders, sampleRows, sampleVisits, summarize, toCsv, traffic } from './stats'
+import { RANGES, dayKey, rangeStart, rowsFromOrders, summarize, toCsv, traffic } from './stats'
 import type { Range } from './stats'
 import { useStaff } from './store'
 import { useS } from './strings'
 import type { SKey } from './strings'
-import { Bars, Card, Columns, I, Stat, Switch } from './ui'
+import { Bars, Card, Columns, I, Stat } from './ui'
 
 /* Analytics, after the live panel: a range, then Sales (orders, revenue, what sells, when) and Traffic (visits and
- * where they come from). Real numbers are this browser's orders and visits; "Sample data" shows made-up ones. */
+ * where they come from). Always the real orders and visits. */
 const RANGE_LABEL: Record<Range, SKey> = { today: 'rToday', '7': 'r7', '30': 'r30', '90': 'r90', all: 'rAll' }
 const SOURCE_COLOR: Record<string, string> = { Instagram: '#e0336e', Direct: '#8a94a6', Referral: '#dc8638', Google: '#4d97cf', Facebook: '#203469' }
 const shortDay = (t: number) => new Date(t).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
@@ -25,10 +25,9 @@ export function Analytics({ orders }: { orders: Order[] }) {
   const data = useStaff()
   const now = useNow(60000)
   const [range, setRange] = useState<Range>('30')
-  const [sample, setSample] = useState(orders.length < 3)
   const [copied, setCopied] = useState(false)
   // replenishments are free orders sent to make up for another (2026-10-28): not sales, so not in orders, revenue or items
-  const rows = useMemo(() => (sample ? sampleRows(data.branch, now) : rowsFromOrders(orders.filter((o) => !o.replenish))), [sample, data.branch, orders, now])
+  const rows = useMemo(() => rowsFromOrders(orders.filter((o) => !o.replenish)), [orders])
   const given = useMemo(() => {
     const from = rangeStart(range, now, orders.length ? Math.min(...orders.map((o) => o.at)) : undefined)
     const inRange = orders.filter((o) => o.at >= from && o.at <= now && !isCancelled(o))
@@ -41,7 +40,7 @@ export function Analytics({ orders }: { orders: Order[] }) {
       off: disc.reduce((n, o) => n + o.discount!.amount, 0),
     }
   }, [orders, range, now])
-  const visits = useMemo(() => (sample ? sampleVisits(data.branch, now) : data.visits), [sample, data.branch, data.visits, now])
+  const visits = data.visits
   const sum = useMemo(() => summarize(rows, range, now), [rows, range, now])
   const tr = useMemo(() => traffic(visits, range, now), [visits, range, now])
   const hourly = range === 'today'
@@ -65,10 +64,8 @@ export function Analytics({ orders }: { orders: Order[] }) {
         <div className="d-seg" role="tablist" aria-label={s('range')}>
           {RANGES.map((r) => <button key={r} role="tab" aria-selected={r === range} className={r === range ? 'on' : ''} onClick={() => setRange(r)}>{s(RANGE_LABEL[r])}</button>)}
         </div>
-        <label className="d-inline-switch"><Switch on={sample} onChange={setSample} label={s('sampleData')} /><span>{s('sampleData')}</span></label>
         <button type="button" className="d-btn outline" onClick={exportCsv}><I.download />{copied ? s('csvCopied') : s('exportCsv')}</button>
       </div>
-      {sample && <p className="d-banner">{s('sampleNote')}</p>}
 
       <h2 className="d-h2">{s('sales')}</h2>
       <div className="d-stats">
@@ -77,7 +74,7 @@ export function Analytics({ orders }: { orders: Order[] }) {
         <Stat icon={<I.bag />} tone="caramel" value={sum.units.toLocaleString('en-US')} label={s('itemsSold')} note={sum.orders ? `${s('perOrder', { n: (sum.units / sum.orders).toFixed(1) })}${sum.combos ? ` · ${s('nCombos', { n: sum.combos })}` : ''}` : undefined} />
         <Stat icon={<I.bike />} tone="sky" value={`${sum.delivery} / ${sum.pickup}`} label={s('deliveryPickup')} />
       </div>
-      {!sample && (given.reps > 0 || given.disc > 0) && (
+      {(given.reps > 0 || given.disc > 0) && (
         <div className="d-stats">
           <Stat icon={<I.receipt />} tone="green" value={given.reps.toLocaleString('en-US')} label={s('anReps')} note={given.why.map(([r, n]) => `${s(('repR_' + r) as SKey)} ${n}`).join(' · ') || undefined} />
           <Stat icon={<I.money />} tone="caramel" value={iqd(given.off)} label={s('anDiscIqd')} note={s('anDiscN', { n: given.disc })} />

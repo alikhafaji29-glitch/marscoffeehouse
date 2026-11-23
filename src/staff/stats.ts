@@ -1,12 +1,10 @@
-import { MENU } from '../menu'
 import type { Order } from '../account'
 import { categoryOf } from '../menuMeta'
-import type { BranchId, StaffData } from './store'
+import type { StaffData } from './store'
 
 /*
- * The numbers behind Analytics. Real rows come from the orders stored in this browser and the visits it counted.
- * Sample rows (the "Sample data" switch) are made up here from the menu with a fixed seed, so the charts can be
- * judged before there are real orders; they are NOT Mars sales figures.
+ * The numbers behind Analytics: the orders this screen holds and the visits it counted. (The "Sample data" switch
+ * and its made-up rows were removed on the owner's word, 2026-11-23: the site has been live for a month.)
  */
 export interface Row { at: number; total: number; items: { name: string; qty: number }[]; delivery: boolean; done: boolean; wallet: boolean; combo?: boolean }
 export type Range = 'today' | '7' | '30' | '90' | 'all'
@@ -24,56 +22,6 @@ function parseLine(line: string) {
 export const rowsFromOrders = (orders: Order[]): Row[] => orders.filter((o) => o.status !== 'cancelled').map((o) => ({ // a cancelled order is not a sale
   at: o.at, total: o.total, items: o.items.map(parseLine), delivery: o.fulfil === 'delivery', done: (o.status ?? 'received') === 'delivered', wallet: o.pay === 'wallet', combo: !!o.offer,
 }))
-
-// a small seeded generator (mulberry32) so the sample never changes between visits
-function rng(seed: number) {
-  return () => { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296 }
-}
-const SAMPLE_ITEMS = MENU.filter((c) => c.id !== 'extra').flatMap((c) => c.items)
-const HOUR_WEIGHT = [0, 0, 0, 0, 0, 0, 0, 3, 8, 12, 11, 9, 6, 5, 4, 4, 5, 6, 6, 5, 4, 3, 1, 0]
-const HOURS = HOUR_WEIGHT.flatMap((w, h) => Array<number>(w).fill(h))
-const SOURCES: [string, number][] = [['Instagram', 46], ['Direct', 24], ['Referral', 16], ['Google', 10], ['Facebook', 4]]
-
-export function sampleRows(branch: BranchId, now: number): Row[] {
-  const r = rng(branch === 'erbil' ? 7 : 19)
-  const rows: Row[] = []
-  const today = startOf(now)
-  // favourites sell more: the first third of a shuffled menu gets most of the picks
-  const pool = [...SAMPLE_ITEMS].sort(() => r() - 0.5)
-  const pickItem = () => pool[Math.floor(Math.pow(r(), 2.2) * pool.length)]
-  for (let d = 89; d >= 0; d--) {
-    const start = today - d * DAY
-    const weekend = [5, 6].includes(new Date(start).getDay())
-    const n = Math.round((branch === 'erbil' ? 14 : 9) * (weekend ? 1.35 : 1) * (0.7 + r() * 0.6) * (1 + (89 - d) / 220))
-    for (let i = 0; i < n; i++) {
-      const at = start + HOURS[Math.floor(r() * HOURS.length)] * 3600000 + Math.floor(r() * 3600000)
-      if (at > now) continue
-      const lines = 1 + Math.floor(r() * 2.4)
-      const items: Row['items'] = []
-      let total = 0
-      for (let k = 0; k < lines; k++) {
-        const it = pickItem()
-        const qty = r() < 0.15 ? 2 : 1
-        const p = Array.isArray(it.price) ? it.price[r() < 0.6 ? 0 : 1] : it.price
-        total += p * qty
-        items.push({ name: it.name, qty })
-      }
-      rows.push({ at, total, items, delivery: r() < 0.7, done: now - at > 3600000, wallet: r() < 0.25 })
-    }
-  }
-  return rows
-}
-export function sampleVisits(branch: BranchId, now: number): StaffData['visits'] {
-  const r = rng(branch === 'erbil' ? 31 : 43)
-  const out: StaffData['visits'] = {}
-  for (let d = 89; d >= 0; d--) {
-    const n = Math.round((branch === 'erbil' ? 90 : 55) * (0.6 + r() * 0.9) * (1 + (89 - d) / 160))
-    const day: Record<string, number> = {}
-    for (const [src, w] of SOURCES) day[src] = Math.round((n * w) / 100 * (0.8 + r() * 0.4))
-    out[dayKey(startOf(now) - d * DAY)] = day
-  }
-  return out
-}
 
 /** the first day the range covers (for "all": the first row's day, at least the last 7 days) */
 export function rangeStart(range: Range, now: number, firstAt?: number): number {
