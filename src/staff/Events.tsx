@@ -5,7 +5,7 @@ import { catLabel } from '../components/MenuSection'
 import { THEMES, branchName, eventsFor, l3, setEvents, uid, useStaff } from './store'
 import type { EventX, L3 } from './store'
 import { useS } from './strings'
-import { mediaUrl, nameOf, uploadEventPhoto } from '../menuAdmin'
+import { mediaUrl, nameOf, photoOf, uploadEventPhoto } from '../menuAdmin'
 import { Thumb } from './Catalog'
 import { SEASON } from '../seasonCards'
 import { Field, I, Modal, Switch } from './ui'
@@ -170,6 +170,7 @@ function EventEditor({ ev, isNew, onClose }: { ev: EventX; isNew: boolean; onClo
 /** a card picture per item of the event, for Home's New Season cards: upload, change, or go back to the site's own */
 function EventPhotos({ d, setD }: { d: EventX; setD: (e: EventX) => void }) {
   const s = useS()
+  const data = useStaff()
   const fileRef = useRef<HTMLInputElement>(null)
   const [target, setTarget] = useState('')
   const [busy, setBusy] = useState('')
@@ -194,8 +195,8 @@ function EventPhotos({ d, setD }: { d: EventX; setD: (e: EventX) => void }) {
           const own = d.photos?.[n]
           return (
             <li key={n}>
-              {own || base(n) ? <img className="d-event-photo" src={own ? mediaUrl(own) : base(n)} alt="" /> : <span className="d-event-photo"><Thumb name={n} size={64} /></span>}
-              <span><b>{n}</b><small>{own ? s('eventImageOwn') : s('eventImageDefault')}</small></span>
+              {own || base(n) || photoOf(n, data.branch) ? <img className={'d-event-photo' + (own || base(n) ? '' : ' menu')} src={own ? mediaUrl(own) : base(n) ?? photoOf(n, data.branch)} alt="" /> : <span className="d-event-photo"><Thumb name={n} size={48} /></span>}
+              <span><b>{n}</b><small>{own ? s('eventImageOwn') : base(n) ? s('eventImageDefault') : s('eventImageMenu')}</small></span>
               <button type="button" className="d-btn outline small" disabled={!!busy} onClick={() => { setTarget(n); fileRef.current?.click() }}>{busy === n ? s('photoBusy') : own ? s('changePhoto') : s('uploadPhoto')}</button>
               {own && <button type="button" className="d-btn text small" disabled={!!busy} onClick={() => clear(n)}>{s('eventImageReset')}</button>}
             </li>
