@@ -76,6 +76,13 @@ export function arrivalSlots(now: number, until?: number): number[] {
 }
 /** when the customer wants the order: a pickup's arrival or a pre-order's chosen time (ms), else undefined */
 export const dueOf = (o: Order): number | undefined => o.arriveAt ?? o.offer?.wantAt
+/** the moment an order is counted on (owner, 2026-11-23: "when someone preorders today for tomorrow, the order is
+ *  considered for today, not for tomorrow"): a pre-order counts at the time it is for, every other order when placed.
+ *  Analytics, the Deliveries report, the nightly statements and the weekly / monthly reports all follow this. */
+export const countAt = (o: Order): number => (o.offer?.pre && o.offer.wantAt) || o.at
+/** a pre-order can be placed up to this long before its time (the offer's next hours: tomorrow at the latest), so a
+ *  read of a period's orders starts this much earlier and keeps what counts inside the period */
+export const PRE_AHEAD = 2 * 86400000
 export const LEAD_MIN = 20 // default: a timed order moves from Later to Active this many minutes before its time
 /** waiting in Later (owner, 2026-10-22): not started yet and its time more than `lead` minutes away; once staff start
  *  it, or its time comes within `lead`, it is an active order like any other */

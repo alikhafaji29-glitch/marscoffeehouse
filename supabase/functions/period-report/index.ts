@@ -22,7 +22,7 @@ type Driver = { name?: string; phone?: string; share?: Share }
 type Row = {
   status: string; fulfil: string; total: number; items: string[]; created_at: string; customer_name: string | null; customer_phone: string | null
   delivery_phone: string | null; note: string | null; cancel_reason: string | null; history: { stage: string; at: number }[] | null
-  courier: string | null; replenish: unknown | null; discount: { amount?: number } | null; offer: { fee?: number; name?: string } | null
+  courier: string | null; replenish: unknown | null; discount: { amount?: number } | null; offer: { fee?: number; name?: string; pre?: boolean; wantAt?: number } | null
 }
 
 const iqd = (n: number) => Math.round(n).toLocaleString('en-US')
@@ -30,8 +30,10 @@ const intl = (to: string) => { let n = to.replace(/\D/g, ''); if (n.startsWith('
 const isTest = (o: Row) => [o.customer_name, o.note, o.cancel_reason].some((x) => /test/i.test(x ?? ''))
 const shareOf = (o: Row, s?: Share) => (!s ? 0 : s.kind === 'fixed' ? s.value : s.kind === 'pct' ? Math.round((o.total * s.value) / 100) : s.kind === 'both' ? s.value + Math.round((o.total * (s.pct ?? 0)) / 100) : o.offer?.fee ?? 0)
 const iso = (t: number) => new Date(t).toISOString().slice(0, 10) // of a time already moved to Iraq
-const dayOf = (o: Row) => iso(Date.parse(o.created_at) + IRAQ)
-const hourOf = (o: Row) => new Date(Date.parse(o.created_at) + IRAQ).getUTCHours()
+// the moment an order is counted on (owner, 2026-11-23): a pre-order at the time it is for, every other order when placed
+const forAt = (o: Row) => (o.offer?.pre && o.offer.wantAt) || Date.parse(o.created_at)
+const dayOf = (o: Row) => iso(forAt(o) + IRAQ)
+const hourOf = (o: Row) => new Date(forAt(o) + IRAQ).getUTCHours()
 const phoneOf = (o: Row) => (o.delivery_phone || o.customer_phone || '').replace(/\D/g, '').slice(-9)
 const short = (t: number, year = false) => new Date(t).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', ...(year && { year: 'numeric' }), timeZone: 'UTC' })
 const median = (xs: number[]) => { if (!xs.length) return null; const s = [...xs].sort((a, b) => a - b); const m = s.length >> 1; return Math.round((s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2) * 10) / 10 }
@@ -158,7 +160,7 @@ Deno.serve(async (req: Request) => {
     for (let page = 0; ; page++) {
       const { data, error } = await db.from('orders')
         .select('status,fulfil,total,items,created_at,customer_name,customer_phone,delivery_phone,note,cancel_reason,history,courier,replenish,discount,offer')
-        .eq('branch', branch).gte('created_at', new Date(beforeFrom - IRAQ).toISOString()).lt('created_at', new Date(end - IRAQ).toISOString()).order('created_at').range(page * 1000, page * 1000 + 999)
+        .eq('branch', branch).gte('created_at', new Date(beforeFrom - IRAQ - 2 * DAY).toISOString()).lt('created_at', new Date(end - IRAQ).toISOString()).order('created_at').range(page * 1000, page * 1000 + 999)
       if (error) { out.push({ branch, error: error.message }); break }
       rows.push(...((data ?? []) as Row[]))
       if ((data ?? []).length < 1000) break

@@ -3,7 +3,7 @@ import { useLang } from '../i18n'
 import { iqd } from '../account'
 import { REPLENISH_REASONS } from '../account'
 import type { Order } from '../account'
-import { isCancelled } from '../orders'
+import { PRE_AHEAD, countAt, isCancelled } from '../orders'
 import { useNow } from '../orders'
 import { catLabel } from '../components/MenuSection'
 import { RANGES, dayKey, rangeStart, rowsFromOrders, stepTimes, summarize, toCsv, traffic } from './stats'
@@ -43,7 +43,8 @@ export function Analytics({ orders: live }: { orders: Order[] }) {
     if (!backendOn) return
     let off = false
     const from = range === 'all' ? 0 : rangeStart(range, Date.now())
-    void ordersInRange(data.branch, from, Date.now() + 60000).then((list) => { if (!off && list) setFetched({ key, list }) })
+    // a pre-order counts on the day it is for, so one placed just before the period can belong to it
+    void ordersInRange(data.branch, Math.max(0, from - PRE_AHEAD), Date.now() + 60000).then((list) => { if (!off && list) setFetched({ key, list }) })
     return () => { off = true }
   }, [key, data.branch, range])
   const loading = backendOn && fetched?.key !== key
@@ -54,7 +55,7 @@ export function Analytics({ orders: live }: { orders: Order[] }) {
     return [...live, ...fetched.list.filter((o) => !seen.has(id(o)))]
   }, [fetched, key, live])
   const steps = useMemo(() => {
-    const from = rangeStart(range, now, orders.length ? Math.min(...orders.map((o) => o.at)) : undefined)
+    const from = rangeStart(range, now, orders.length ? Math.min(...orders.map(countAt)) : undefined)
     return stepTimes(orders, how, from, now)
   }, [orders, how, range, now])
   const single = (k: StepKey) => k !== 'total' && k !== 'out' && k !== 'road' // the bars compare the shop's own steps
@@ -63,8 +64,8 @@ export function Analytics({ orders: live }: { orders: Order[] }) {
   // replenishments are free orders sent to make up for another (2026-10-28): not sales, so not in orders, revenue or items
   const rows = useMemo(() => rowsFromOrders(orders.filter((o) => !o.replenish)), [orders])
   const given = useMemo(() => {
-    const from = rangeStart(range, now, orders.length ? Math.min(...orders.map((o) => o.at)) : undefined)
-    const inRange = orders.filter((o) => o.at >= from && o.at <= now && !isCancelled(o))
+    const from = rangeStart(range, now, orders.length ? Math.min(...orders.map(countAt)) : undefined)
+    const inRange = orders.filter((o) => countAt(o) >= from && countAt(o) <= now && !isCancelled(o))
     const reps = inRange.filter((o) => o.replenish)
     const disc = inRange.filter((o) => o.discount)
     return {

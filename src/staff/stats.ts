@@ -1,4 +1,5 @@
 import type { Order } from '../account'
+import { countAt } from '../orders'
 import { categoryOf } from '../menuMeta'
 import type { StaffData } from './store'
 
@@ -20,7 +21,7 @@ function parseLine(line: string) {
   return { name, qty }
 }
 export const rowsFromOrders = (orders: Order[]): Row[] => orders.filter((o) => o.status !== 'cancelled').map((o) => ({ // a cancelled order is not a sale
-  at: o.at, total: o.total, items: o.items.map(parseLine), delivery: o.fulfil === 'delivery', done: (o.status ?? 'received') === 'delivered', wallet: o.pay === 'wallet', combo: !!o.offer,
+  at: countAt(o), total: o.total, items: o.items.map(parseLine), delivery: o.fulfil === 'delivery', done: (o.status ?? 'received') === 'delivered', wallet: o.pay === 'wallet', combo: !!o.offer,
 }))
 
 /** the first day the range covers (for "all": the first row's day, at least the last 7 days) */
@@ -124,11 +125,12 @@ export function stageAt(o: Order, stage: Order['status']): number | undefined {
   return hits.length ? (stage === 'delivered' ? Math.max(...hits) : Math.min(...hits)) : undefined
 }
 export function stepTimes(orders: Order[], how: 'delivery' | 'pickup', from: number, to: number): { steps: StepTime[]; orders: number; skippedRoad: number } {
-  const mine = orders.filter((o) => o.at >= from && o.at <= to && o.status === 'delivered' && (o.fulfil === 'delivery') === (how === 'delivery'))
+  const mine = orders.filter((o) => countAt(o) >= from && countAt(o) <= to && o.status === 'delivered' && (o.fulfil === 'delivery') === (how === 'delivery'))
   let skippedRoad = 0
   const steps = STEPS.filter((st) => st.how === 'both' || st.how === how).map((st) => {
     const mins: number[] = []
     for (const o of mine) {
+      if (o.offer?.pre && st.from === 'received') continue // a pre-order waits for its day: that wait is not the shop's time
       const a = stageAt(o, st.from), b = stageAt(o, st.to)
       if (a === undefined || b === undefined || b < a) continue
       const m = (b - a) / 60000

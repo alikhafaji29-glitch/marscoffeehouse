@@ -32,7 +32,7 @@ type Driver = { name?: string; phone?: string; share?: Share }
 type Row = {
   code: string; status: string; total: number; created_at: string; customer_name: string | null; customer_phone: string | null
   delivery_phone: string | null; address: string | null; note: string | null; cancel_reason: string | null; courier: string | null
-  replenish: unknown | null; discount: { kind?: string; value?: number } | null; offer: { fee?: number } | null
+  replenish: unknown | null; discount: { kind?: string; value?: number } | null; offer: { fee?: number; pre?: boolean; wantAt?: number } | null
 }
 type Line = { time: string; code: string; name: string; phone: string; address: string; total: number; share: number; note: string; gift: boolean; onway: boolean }
 
@@ -40,10 +40,17 @@ const iqd = (n: number) => Math.round(n).toLocaleString('en-US')
 const isTest = (o: Row) => [o.customer_name, o.note, o.cancel_reason].some((x) => /test/i.test(x ?? ''))
 const shareOf = (o: Row, s?: Share) => (!s ? 0 : s.kind === 'fixed' ? s.value : s.kind === 'pct' ? Math.round((o.total * s.value) / 100) : s.kind === 'both' ? s.value + Math.round((o.total * (s.pct ?? 0)) / 100) : o.offer?.fee ?? 0)
 const ruleOf = (s?: Share) => !s ? 'share not set in Tools' : s.kind === 'fixed' ? `${iqd(s.value)} IQD per order` : s.kind === 'pct' ? `${s.value}% of each order` : s.kind === 'both' ? `${iqd(s.value)} IQD + ${s.pct ?? 0}% of each order` : 'the delivery fee of each order'
-const hhmm = (iso: string) => new Date(new Date(iso).getTime() + IRAQ).toISOString().slice(11, 16)
+const hhmm = (t: number) => new Date(t + IRAQ).toISOString().slice(11, 16)
+// the moment an order is counted on (owner, 2026-11-23): a pre-order at the time it is for, every other order when placed.
+// A pre-order for tomorrow was on no nightly statement: still waiting on the night it was placed, "placed yesterday" the next.
+const forAt = (o: Row) => (o.offer?.pre && o.offer.wantAt) || Date.parse(o.created_at)
+const AHEAD = 2 * 24 * 3600e3 // a pre-order is placed two days before its time at the most
+/** the orders counted from one moment up to another, in the order they are counted */
+const within = (rows: Row[], from: string, until: string) => rows.filter((o) => !isTest(o) && forAt(o) >= Date.parse(from) && forAt(o) < Date.parse(until)).sort((a, b) => forAt(a) - forAt(b))
+const earlier = (iso: string) => new Date(Date.parse(iso) - AHEAD).toISOString()
 const intl = (to: string) => { let n = to.replace(/\D/g, ''); if (n.startsWith('00')) n = n.slice(2); if (n.startsWith('0')) n = '964' + n.slice(1); return n }
 const line = (o: Row, d?: Driver, onwayNote = 'On the way at 00:00'): Line => ({
-  time: hhmm(o.created_at), code: o.code, name: o.customer_name ?? '', phone: o.delivery_phone || o.customer_phone || '', address: o.address ?? '',
+  time: hhmm(forAt(o)), code: o.code, name: o.customer_name ?? '', phone: o.delivery_phone || o.customer_phone || '', address: o.address ?? '',
   total: o.total, share: shareOf(o, d?.share), gift: !!o.replenish, onway: o.status === 'onway',
   note: [o.status === 'onway' ? onwayNote : '', o.replenish ? 'Free gift' : o.discount?.kind === 'pct' ? `Discount ${o.discount.value}%` : o.discount?.kind === 'fixed' ? `Discount ${iqd(o.discount.value ?? 0)} IQD` : ''].filter(Boolean).join(' · '),
 })
@@ -171,10 +178,10 @@ async function byStaff(req: Request, db: SupabaseClient) {
   const until = new Date(new Date(to + 'T00:00:00Z').getTime() + 24 * 3600e3 - IRAQ).toISOString()
   const query = db.from('orders')
     .select('code,status,total,created_at,customer_name,customer_phone,delivery_phone,address,note,cancel_reason,courier,replenish,discount,offer')
-    .eq('branch', branch).eq('fulfil', 'delivery').in('status', ['delivered', 'onway']).gte('created_at', since).lt('created_at', until).order('created_at').limit(5000)
+    .eq('branch', branch).eq('fulfil', 'delivery').in('status', ['delivered', 'onway']).gte('created_at', earlier(since)).lt('created_at', until).order('created_at').limit(5000)
   const { data, error } = await (company ? query.eq('courier', company) : query.is('courier', null))
   if (error) return json(200, { ok: false, reason: 'read' })
-  const rows = ((data ?? []) as Row[]).filter((o) => !isTest(o))
+  const rows = within((data ?? []) as Row[], since, until)
   if (!rows.length) return json(200, { ok: false, reason: 'no_orders' })
   const { data: cfg } = await db.from('branch_config').select('settings').eq('branch', branch).maybeSingle()
   const settings = (cfg?.settings ?? {}) as { drivers?: Driver[]; phone?: string }
@@ -219,9 +226,9 @@ Deno.serve(async (req: Request) => {
     const { data, error } = await db.from('orders')
       .select('code,status,total,created_at,customer_name,customer_phone,delivery_phone,address,note,cancel_reason,courier,replenish,discount,offer')
       .eq('branch', branch).eq('fulfil', 'delivery').in('status', ['delivered', 'onway'])
-      .gte('created_at', from).lt('created_at', until).order('created_at').limit(5000)
+      .gte('created_at', earlier(from)).lt('created_at', until).order('created_at').limit(5000)
     if (error) { out.push({ branch, error: error.message }); continue }
-    const rows = ((data ?? []) as Row[]).filter((o) => !isTest(o))
+    const rows = within((data ?? []) as Row[], from, until)
     // the companies by name, then the orders with none ('')
     for (const c of [...new Set(rows.map((o) => o.courier ?? ''))].sort((a, b) => (!a ? 1 : !b ? -1 : a.localeCompare(b)))) {
       const company = c || 'No company set'
