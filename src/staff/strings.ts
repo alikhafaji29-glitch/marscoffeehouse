@@ -242,6 +242,7 @@ const S = {
   eventImagesHint: ['The picture each item shows on the home page. A tall picture (3 wide by 4 high) fills the card best. It is made smaller before it is stored.', 'الصورة التي يظهر بها كل صنف في الصفحة الرئيسية. الصورة الطولية (3 عرضاً في 4 ارتفاعاً) تملأ البطاقة أفضل. تُصغَّر قبل الحفظ.', 'ئەو وێنەیەی هەر بابەتێک لە پەڕەی سەرەکی پیشانی دەدات. وێنەی درێژ (٣ بە ٤) کارتەکە باشتر پڕ دەکاتەوە. پێش هەڵگرتن بچووک دەکرێتەوە.'],
   eventImageOwn: ['Your picture', 'صورتك', 'وێنەی خۆت'],
   eventImageDefault: ['The site\'s own picture', 'صورة الموقع', 'وێنەی ماڵپەڕ'],
+  eventImageMenu: ['Its menu photo (no card picture yet)', 'صورة القائمة (لا صورة بطاقة بعد)', 'وێنەی لیستەکە (هێشتا وێنەی کارت نییە)'],
   eventImageReset: ['Use the site\'s', 'استخدم صورة الموقع', 'هی ماڵپەڕ بەکاربهێنە'],
   eventItems: ['Items in this event', 'أصناف هذه الفعالية', 'بابەتەکانی ئەم بۆنەیە'],
   addItems: ['Search the menu to add…', 'ابحث في القائمة للإضافة…', 'لە مینیو بگەڕێ بۆ زیادکردن…'],

@@ -445,4 +445,6 @@ button.d-chip.on { background: var(--d-ink); color: #fff; }
 .d-event-photos li { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; }
 .d-event-photos li > span { flex: 1 1 10rem; display: flex; flex-direction: column; min-width: 0; }
 .d-event-photos li small { color: var(--d-muted, #6b7280); font-size: 0.8rem; }
-.d-event-photo { width: 64px; height: 84px; border-radius: 0.6rem; object-fit: cover; background: #f1ede7; flex: none; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; }
+.d-event-photo { width: 64px; max-width: 64px; height: 84px; border-radius: 0.6rem; object-fit: cover; background: #f1ede7; flex: none; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; }
+.d-event-photo.menu { object-fit: contain; background: #fff; border: 1px solid var(--d-line, #e2e7ef); }
+.d-event-photos li > span.d-event-photo { flex: none; }
