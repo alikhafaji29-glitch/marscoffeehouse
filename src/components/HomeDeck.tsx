@@ -6,6 +6,8 @@ import { MENU } from '../menu'
 import type { Deal, MenuItem } from '../menu'
 import { useCart } from '../cart'
 import { activeEvent, cotdFor, positiveOffer, useStaff } from '../staff/store'
+import { mediaUrl, nameOf, photoOf, photoStyle } from '../menuAdmin'
+import { SEASON } from '../seasonCards'
 import { CoffeeOfTheDay } from './CoffeeOfTheDay'
 import { PositiveHoursMark } from './PositiveHoursMark'
 import { FEATURES } from '../features'
@@ -39,16 +41,6 @@ const DESC: Record<string, TKey> = {
   'Strawberry Milkshake': 'descStrawberry', 'Pistachio Milkshake': 'descPistachio', 'Lotus Milkshake': 'descLotus',
 }
 
-/* "New this season": the cards that drift right-to-left (owner's photos). */
-// New this season: the first three only (owner, 2026-09-28). One look (owner, 2026-09-28): every card is the owner's cup-on-white-table photo with the drink
-// recoloured per item (the reference photo docs/reference/season/cup-reference.webp is in git history before commit 2026-09-30 "Delete unused files"; recolour script in that session's scratchpad season/make.py)
-// 2026-10-22 (owner's two campaign photos): Pink + and Kakaw Crunch replace the mojito / smoothie / milkshake;
-// `light` = a bright photo with its own title on top, so the card skips the dark top shade
-const SEASON: { names: string[]; title: string; img: string; bg: string; cropTop?: boolean; light?: boolean }[] = [
-  { names: ['Pink +'], title: 'Pink +', img: '/assets/featured/season-pink.jpg', bg: '#c9e8fb', light: true },
-  { names: ['Kakaw Crunch'], title: 'Kakaw Crunch', img: '/assets/featured/season-kakaw.jpg', bg: '#e9c7a5', light: true },
-  { names: ['Carrot Cake'], title: 'Carrot Cake', img: '/assets/featured/season-carrot.jpg', bg: '#dc863e', light: true }, // owner's poster, 2026-10-22
-]
 // Demo products from the owner's photos; prices are placeholders until Mars confirms (TODO B)
 /* Build Your Drink asks how (owner, 2026-09-27): from your mood (the mood game) or be the barista (the drink builder) */
 function BuildAsk({ onClose, onMood, onBarista }: { onClose: () => void; onMood: () => void; onBarista: () => void }) {
@@ -157,7 +149,7 @@ function Track({ children }: { children: React.ReactNode }) {
 
 
 export function HomeDeck({ onOrder, onPick }: { onOrder: () => void; onPick: (item: MenuItem, o?: { checkout?: boolean; deal?: Deal }) => void }) {
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const u = useS()
   useStaff()
   const offer = positiveOffer() // staff dashboard → Offers: its hours (useCountdown reads them), price and switch
@@ -234,52 +226,45 @@ export function HomeDeck({ onOrder, onPick }: { onOrder: () => void; onPick: (it
       {/* 2. Positive Hours while it runs (7:30-12:00); once it ends, Lunch Hours takes the top and Positive Hours moves under Mars Shop (owner, 2026-09-27) */}
       {hero}
 
-      {/* 3. New this season: full-bleed photos drifting right-to-left under a fixed title; a tap orders */}
-      {activeEvent() && <section className="slide slide-fav" id="seasonal" aria-labelledby="fav-title">
-        {/* the title sits above the photos since 2026-10-22: the season photos are bright and carry their own lettering */}
-        <div className="slide-text fav-head">
-          <p className="eyebrow">{t('coffeeEyebrow')}</p>
-          <h2 className="slide-title" id="fav-title">{t('seasonEyebrow')}</h2>
-        </div>
-        <Track>
-          <div className="fav-set">
-              {SEASON.map((f) => {
-                const items = f.names.map(item).filter((x): x is MenuItem => !!x)
-                if (!items.length) return null
-                // Blank Street look (owner, 2026-09-28): just the name and a "+"; a tap anywhere on the card opens the drink
-                if (items.length === 1) {
-                  const open = () => openItem(items[0], f.img, f.title)
+      {/* 3. New this season: full-bleed photos drifting right-to-left under a fixed title; a tap orders.
+          The branch's active event (dashboard → Events) decides it since 2026-11-23: its items are the cards, each with
+          the picture staff uploaded for it, else the campaign photo that came with the site, else its menu photo; the
+          heading and the small line above it are the event's when staff typed them. */}
+      {(() => {
+        const ev = activeEvent()
+        if (!ev) return null
+        const cards = ev.items.map((n) => ({ it: item(n), base: SEASON.find((f) => f.names.includes(n)), own: ev.photos?.[n] })).filter((c): c is { it: MenuItem; base: (typeof SEASON)[number] | undefined; own: string | undefined } => !!c.it)
+        if (!cards.length) return null
+        return (
+          <section className="slide slide-fav" id="seasonal" aria-labelledby="fav-title">
+            <div className="slide-text fav-head">
+              <p className="eyebrow">{ev.eyebrow?.[lang] || ev.eyebrow?.en || t('coffeeEyebrow')}</p>
+              <h2 className="slide-title" id="fav-title">{ev.title?.[lang] || ev.title?.en || t('seasonEyebrow')}</h2>
+            </div>
+            <Track>
+              <div className="fav-set">
+                {cards.map(({ it, base, own }) => {
+                  const title = nameOf(it.name, lang)
+                  const img = own ? mediaUrl(own) : base?.img ?? photoOf(it.name)
+                  const plain = !own && !base // no campaign picture: the menu photo on white, as Coffee of the day does
+                  const open = () => openItem(it, img ?? '', title)
                   return (
-                    <article className={'fav-card season-card' + (f.cropTop ? ' crop-top' : '') + (f.light ? ' light' : '')} key={f.title} style={{ background: f.bg }} onClick={open}>
-                      <img src={f.img} alt="" draggable={false} />
+                    <article className={'fav-card season-card light' + (plain ? ' menu-pic' : '')} key={it.name} style={{ background: own ? '#f1ede7' : base?.bg ?? '#fff' }} onClick={open}>
+                      {img && <img src={img} alt="" draggable={false} style={plain ? photoStyle(it.name) : undefined} />}
                       <div className="fav-card-text season-text">
-                        <h3>{f.title}</h3>
-                        <button type="button" className="season-plus" aria-label={`${t('orderNow')} ${f.title}`} onClick={(e) => { e.stopPropagation(); open() }}>
+                        <h3>{title}</h3>
+                        <button type="button" className="season-plus" aria-label={`${t('orderNow')} ${title}`} onClick={(e) => { e.stopPropagation(); open() }}>
                           <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M12 4v16M4 12h16" /></svg>
                         </button>
                       </div>
                     </article>
                   )
-                }
-                return (
-                  <article className={'fav-card' + (f.cropTop ? ' crop-top' : '')} key={f.title} style={{ background: f.bg }}>
-                    <img src={f.img} alt="" draggable={false} />
-                    <div className="fav-card-text">
-                      <h3>{f.title}</h3>
-                      <div className="pills">
-                        {items.map((it) => (
-                          <button key={it.name} type="button" className="pill soft small" onClick={() => openItem(it, f.img, items.length === 1 ? f.title : it.name)}>
-                            {items.length === 1 ? t('orderNow') : it.name.replace(' Milkshake', '')}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </article>
-                )
-              })}
-          </div>
-        </Track>
-      </section>}
+                })}
+              </div>
+            </Track>
+          </section>
+        )
+      })()}
 
       {/* Coffee of the day (owner, 2026-10-23): a slide like New this season with Mars' photos (CoffeeOfTheDay.tsx) */}
       <CoffeeOfTheDay items={cotdItems} onPick={onPick} Shelf={Track} />
