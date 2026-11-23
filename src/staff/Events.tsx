@@ -1,16 +1,20 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLang } from '../i18n'
 import { ALL_ITEMS, MENU } from '../menu'
 import { catLabel } from '../components/MenuSection'
-import { THEMES, branchName, l3, uid, update, useStaff } from './store'
+import { THEMES, branchName, eventsFor, l3, setEvents, uid, useStaff } from './store'
 import type { EventX, L3 } from './store'
 import { useS } from './strings'
-import { nameOf } from '../menuAdmin'
+import { mediaUrl, nameOf, uploadEventPhoto } from '../menuAdmin'
 import { Thumb } from './Catalog'
+import { SEASON } from '../seasonCards'
 import { Field, I, Modal, Switch } from './ui'
 
 /* Events, after the live panel: limited-time seasonal menus. The active event is the website's New Season section
- * (its name, its items) and its promo text shows as a strip on top of the menu. One event runs at a time. */
+ * (its name, its items) and its promo text shows as a strip on top of the menu. One event runs at a time.
+ * Since 2026-11-23 (owner: "let the new season to be able to be edited, and to change commercial images") a branch's
+ * events are kept with its settings in the database, so an edit reaches every customer; the event also carries Home's
+ * heading, the small line above it, and a card picture per item. */
 
 /** three inputs for one text: English, Arabic, Kurdish */
 export function L3Fields({ label, value, onChange, area, rows = 2 }: { label: string; value: L3; onChange: (v: L3) => void; area?: boolean; rows?: number }) {
@@ -136,7 +140,10 @@ function EventEditor({ ev, isNew, onClose }: { ev: EventX; isNew: boolean; onClo
   const [bad, setBad] = useState(false)
   const save = () => {
     if (!d.name.en.trim()) { setBad(true); return }
-    update((st) => ({ events: isNew ? [...st.events, d] : st.events.map((e) => (e.id === d.id ? d : e)) }))
+    // a picture kept for an item that is no longer in the event is dropped
+    const photos = Object.fromEntries(Object.entries(d.photos ?? {}).filter(([n]) => d.items.includes(n)))
+    const out = { ...d, photos }
+    setEvents((list) => (isNew ? [...list, out] : list.map((e) => (e.id === out.id ? out : e))))
     onClose()
   }
   return (
@@ -151,7 +158,52 @@ function EventEditor({ ev, isNew, onClose }: { ev: EventX; isNew: boolean; onClo
       <p className="d-form-title">{s('promoStrip')}</p>
       <L3Fields label={s('promoText')} value={d.promo} onChange={(promo) => setD({ ...d, promo })} />
       <ItemPicker label={s('eventItems')} value={d.items} onChange={(items) => setD({ ...d, items })} />
+      <p className="d-form-title">{s('eventHome')}</p>
+      <p className="d-hint">{s('eventHomeHint')}</p>
+      <L3Fields label={s('eventHomeTitle')} value={d.title ?? l3()} onChange={(title) => setD({ ...d, title })} />
+      <L3Fields label={s('eventHomeEyebrow')} value={d.eyebrow ?? l3()} onChange={(eyebrow) => setD({ ...d, eyebrow })} />
+      {d.items.length > 0 && <EventPhotos d={d} setD={setD} />}
     </Modal>
+  )
+}
+
+/** a card picture per item of the event, for Home's New Season cards: upload, change, or go back to the site's own */
+function EventPhotos({ d, setD }: { d: EventX; setD: (e: EventX) => void }) {
+  const s = useS()
+  const fileRef = useRef<HTMLInputElement>(null)
+  const [target, setTarget] = useState('')
+  const [busy, setBusy] = useState('')
+  const [err, setErr] = useState('')
+  const pick = async (file: File | undefined) => {
+    if (!file || !target) return
+    setBusy(target); setErr('')
+    const res = await uploadEventPhoto(target, file, d.photos?.[target])
+    setBusy('')
+    if (!res.ok) { setErr(s(res.why === 'bad' ? 'photoBad' : 'photoFailed')); return }
+    setD({ ...d, photos: { ...d.photos, [target]: res.photo } })
+  }
+  const base = (n: string) => SEASON.find((f) => f.names.includes(n))?.img
+  const clear = (n: string) => { const photos = { ...d.photos }; delete photos[n]; setD({ ...d, photos }) }
+  return (
+    <div className="d-event-photos">
+      <p className="d-form-title">{s('eventImages')}</p>
+      <p className="d-hint">{s('eventImagesHint')}</p>
+      <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => { void pick(e.target.files?.[0]); e.target.value = '' }} />
+      <ul>
+        {d.items.map((n) => {
+          const own = d.photos?.[n]
+          return (
+            <li key={n}>
+              {own || base(n) ? <img className="d-event-photo" src={own ? mediaUrl(own) : base(n)} alt="" /> : <span className="d-event-photo"><Thumb name={n} size={64} /></span>}
+              <span><b>{n}</b><small>{own ? s('eventImageOwn') : s('eventImageDefault')}</small></span>
+              <button type="button" className="d-btn outline small" disabled={!!busy} onClick={() => { setTarget(n); fileRef.current?.click() }}>{busy === n ? s('photoBusy') : own ? s('changePhoto') : s('uploadPhoto')}</button>
+              {own && <button type="button" className="d-btn text small" disabled={!!busy} onClick={() => clear(n)}>{s('eventImageReset')}</button>}
+            </li>
+          )
+        })}
+      </ul>
+      {err && <p className="d-error">{err}</p>}
+    </div>
   )
 }
 
@@ -163,15 +215,16 @@ export function Events() {
   const [open, setOpen] = useState('')
   const [sure, setSure] = useState('')
   // one event at a time: switching one on switches the others off
-  const toggle = (id: string, on: boolean) => update((st) => ({ events: st.events.map((e) => ({ ...e, active: e.id === id ? on : on ? false : e.active })) }))
-  const remove = (id: string) => { if (sure !== id) { setSure(id); return } update((st) => ({ events: st.events.filter((e) => e.id !== id) })); setSure('') }
+  const events = eventsFor(data.branch)
+  const toggle = (id: string, on: boolean) => setEvents((list) => list.map((e) => ({ ...e, active: e.id === id ? on : on ? false : e.active })))
+  const remove = (id: string) => { if (sure !== id) { setSure(id); return } setEvents((list) => list.filter((e) => e.id !== id)); setSure('') }
   return (
     <>
       <div className="d-toolbar">
         <p className="d-lead">{s('eventsLead')}</p>
         <button type="button" className="d-btn solid" onClick={() => setEdit({ ev: blank(), isNew: true })}><I.plus />{s('newEvent')}</button>
       </div>
-      {data.events.length ? data.events.map((e) => {
+      {events.length ? events.map((e) => {
         const theme = THEMES.find((t) => t.id === e.theme) ?? THEMES[0]
         return (
           <section key={e.id} className={'d-card d-row-card' + (e.active ? ' active' : '')}>

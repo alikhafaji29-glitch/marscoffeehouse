@@ -48,8 +48,10 @@ export interface CourierShare { kind: 'fixed' | 'pct' | 'fee' | 'both'; value: n
 export interface FlavourDef { id: string; name: L3; out?: boolean }
 /** where a branch's shop is (owner, 2026-10-27; Kirkuk has two shops): where delivery routes start */
 export interface Shop { name: string; lat: number; lng: number }
-export interface Settings { reach: 'dashboard' | 'whatsapp'; whatsapp: string; delivery: boolean; pickup: boolean; lead?: number; cotd?: Cotd; drivers?: Driver[]; paused?: boolean; pauseMsg?: L3; flavours?: FlavourDef[]; phone?: string; shops?: Shop[] } // phone: the number customers call (owner, 2026-10-27; in the location-request WhatsApp message; also gets the 10-minute waiting-order alert, server: order-alert) // paused: no new orders, pauseMsg: the apology customers see (owner, 2026-10-26) // lead: minutes before a timed order's time that it moves from Later to Active (LEAD_MIN when missing)
-export interface EventX { id: string; name: L3; theme: string; desc: L3; promo: L3; items: string[]; active: boolean }
+export interface Settings { reach: 'dashboard' | 'whatsapp'; whatsapp: string; delivery: boolean; pickup: boolean; lead?: number; cotd?: Cotd; events?: EventX[]; drivers?: Driver[]; paused?: boolean; pauseMsg?: L3; flavours?: FlavourDef[]; phone?: string; shops?: Shop[] } // phone: the number customers call (owner, 2026-10-27; in the location-request WhatsApp message; also gets the 10-minute waiting-order alert, server: order-alert) // paused: no new orders, pauseMsg: the apology customers see (owner, 2026-10-26) // lead: minutes before a timed order's time that it moves from Later to Active (LEAD_MIN when missing)
+/** title / eyebrow: the Home section's heading and the small line above it (empty = the site's own words);
+ *  photos: an item's own card picture on Home (its path in the `menu` bucket; the demo build keeps the picture itself) */
+export interface EventX { id: string; name: L3; theme: string; desc: L3; promo: L3; items: string[]; active: boolean; title?: L3; eyebrow?: L3; photos?: Record<string, string> }
 // skip: items of the chosen categories left out of the step (owner, 2026-10-26: whole categories, then untick items)
 export interface OfferGroup { id: string; label: L3; pick: number; mode: 'cats' | 'items'; cats: string[]; items: string[]; skip?: string[] }
 export interface Offer {
@@ -254,7 +256,12 @@ export function setBranches(list: Branch[]) {
   if (!BRANCHES.some((b) => b.id === state.branch)) patch.branch = BRANCHES[0].id
   if (Object.keys(patch).length) update(() => patch)
 }
-export function activeEvent(): EventX | undefined { return state.events.find((e) => e.active && e.items.length) } // a declaration: apply() runs before this line
+/** a branch's events: its own from the database once staff have saved them (owner, 2026-11-23: an edit must reach
+ *  the website, not stay in the editor's browser), else the list every device starts with */
+export function eventsFor(b: BranchId = state.customerBranch): EventX[] { return state.settings[b]?.events ?? state.events } // a declaration reading `state` only: apply() runs before `settingsFor` exists
+/** the dashboard's branch gets a new list of events (sent to the database with the branch's other settings) */
+export const setEvents = (fn: (list: EventX[]) => EventX[]) => update((st) => ({ settings: { ...st.settings, [st.branch]: { ...settingsFor(st.branch), events: fn(eventsFor(st.branch)) } } }))
+export function activeEvent(b?: BranchId): EventX | undefined { return eventsFor(b).find((e) => e.active && e.items.length) } // a declaration: apply() runs before this line
 /** a branch's offers: the customer's branch on the website, the dashboard's branch when it passes `data.branch` */
 export function offersFor(b: BranchId = state.customerBranch): Offer[] { return state.offers[b] ?? [] } // a declaration: apply() runs before this line
 export const positiveOffer = (b?: BranchId): Offer | undefined => offersFor(b).find((o) => o.id === 'positive')

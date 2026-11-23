@@ -27,7 +27,7 @@ export function Overview({ orders, go, readOnly = false }: { orders: Order[]; go
   const active = orders.filter((o) => isActive(o) && f.byText(o))
   const dayLabel = f.day ? new Date(f.day + 'T12:00').toLocaleDateString(lang === 'ku' ? 'ckb' : lang, { day: 'numeric', month: 'short' }) : ''
   const offer = positiveOffer(data.branch)
-  const ev = activeEvent()
+  const ev = activeEvent(data.branch)
   const set = settingsFor(data.branch)
   // customer feedback for this branch: the database's (signed-in staff) or this browser's (the demo build)
   const remote = useRemote()

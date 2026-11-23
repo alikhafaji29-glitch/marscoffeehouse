@@ -575,6 +575,29 @@ export async function uploadPhoto(name: string, file: File): Promise<'ok' | 'bad
   if (before.photo && !before.photo.startsWith('data:')) void sb!.storage.from('menu').remove([before.photo]) // the old file is not needed any more
   return 'ok'
 }
+/** where a stored picture is read from: the `menu` bucket's public address (the demo build keeps the picture itself) */
+export const mediaUrl = (p: string) => (p.startsWith('data:') || p.startsWith('/') ? p : `${backendUrl}/storage/v1/object/public/menu/${p}`)
+/** a card picture for an item of an event (Home's New Season cards): made small and stored for the dashboard's
+ *  branch; gives back what to keep on the event (a path, or the picture itself in the demo build) */
+export async function uploadEventPhoto(name: string, file: File, old?: string): Promise<{ ok: true; photo: string } | { ok: false; why: 'bad' | 'failed' }> {
+  const branch = staffData().branch
+  if (!backendOn) {
+    const small = await shrink(file, 720, 0.74, 'image/jpeg') // kept on this device, so kept small
+    return small ? { ok: true, photo: small.url } : { ok: false, why: 'bad' }
+  }
+  const small = await shrink(file, 1400, 0.84, 'image/webp') // the cards fill most of a phone's screen
+  if (!small) return { ok: false, why: 'bad' }
+  const ext = small.blob.type === 'image/webp' ? 'webp' : 'jpg'
+  const blob = ext === 'webp' ? small.blob : (await shrink(file, 1400, 0.84, 'image/jpeg'))?.blob
+  if (!blob || blob.type !== (ext === 'webp' ? 'image/webp' : 'image/jpeg')) return { ok: false, why: 'bad' }
+  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'item'
+  const path = `${branch}/season-${slug}-${Date.now().toString(36)}.${ext}`
+  const sb = await getClient()
+  const up = sb ? await sb.storage.from('menu').upload(path, blob, { contentType: blob.type, cacheControl: '31536000' }) : null
+  if (!up || up.error) { console.warn('[backend] event photo not stored:', up?.error?.message ?? 'no connection'); return { ok: false, why: 'failed' } }
+  if (old && !old.startsWith('data:') && !old.startsWith('/')) void sb!.storage.from('menu').remove([old])
+  return { ok: true, photo: path }
+}
 /** back to the picture that came with the site (or the drawn cup) */
 export function removePhoto(name: string) {
   const old = itemState(name, staffData().branch)?.photo
