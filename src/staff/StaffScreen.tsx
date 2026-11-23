@@ -11,6 +11,7 @@ import { categoryOf } from '../menuMeta'
 import { branchCats, nameOf, useMenuVersion } from '../menuAdmin'
 import { Analytics } from './Analytics'
 import { Deliveries } from './Deliveries'
+import { SmartReport } from './SmartReport'
 import { Category, ItemEditor, NewCategory, NewItem } from './Catalog'
 import { Branches } from './Branches'
 import { Events } from './Events'
@@ -44,6 +45,7 @@ const MAIN: { id: string; key: SKey; icon: () => ReactNode }[] = [
   { id: 'dashboard', key: 'navDashboard', icon: I.dashboard },
   { id: 'orders', key: 'navOrders', icon: I.orders },
   { id: 'analytics', key: 'navAnalytics', icon: I.analytics },
+  { id: 'smart', key: 'navSmart', icon: I.people }, // customers by what they order and when (owner, 2026-11-23); managers only
   { id: 'deliveries', key: 'navDeliveries', icon: I.bike }, // what each delivery company owes Mars and keeps (2026-10-28)
   { id: 'events', key: 'navEvents', icon: I.events },
   { id: 'offers', key: 'navOffers', icon: I.offers },
@@ -288,6 +290,7 @@ export function StaffScreen() {
         {settingsFor(data.branch).paused && kind !== 'tools' && <p className="d-paused-banner" role="status"><button type="button" className="link-btn" onClick={() => go('tools')}>{s('pausedBanner')}</button></p>}
         {kind === 'orders' ? <Orders orders={orders} live={backendOn} />
           : kind === 'analytics' ? <Analytics orders={orders} key={data.branch} />
+          : kind === 'smart' ? <SmartReport orders={all} owner={owner} key={data.branch} />
           : kind === 'deliveries' ? <Deliveries orders={orders} key={data.branch} />
             : kind === 'events' ? <Events />
               : kind === 'offers' ? <Offers />
