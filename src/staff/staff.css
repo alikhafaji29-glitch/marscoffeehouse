@@ -448,3 +448,21 @@ button.d-chip.on { background: var(--d-ink); color: #fff; }
 .d-event-photo { width: 64px; max-width: 64px; height: 84px; border-radius: 0.6rem; object-fit: cover; background: #f1ede7; flex: none; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; }
 .d-event-photo.menu { object-fit: contain; background: #fff; border: 1px solid var(--d-line, #e2e7ef); }
 .d-event-photos li > span.d-event-photo { flex: none; }
+
+/* Analytics: how long each step takes */
+.d-steps { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+.d-steps th, .d-steps td { padding: 0.55rem 0.5rem; text-align: start; border-bottom: 1px solid var(--d-line, #e5e9f0); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.d-steps thead th { font-size: 0.78rem; font-weight: 600; color: var(--d-muted, #6b7280); }
+.d-steps tbody th { font-weight: 600; white-space: normal; }
+.d-steps tr.total th, .d-steps tr.total td { border-top: 2px solid var(--navy, #203469); border-bottom: 0; font-weight: 700; }
+.d-steps-bar { width: 34%; min-width: 4rem; }
+.d-steps-bar i { display: block; height: 0.55rem; border-radius: 999px; background: var(--navy, #203469); }
+.d-seg.small button { padding: 0.35rem 0.8rem; font-size: 0.85rem; }
+@media (max-width: 640px) { .d-steps-bar { display: none; } .d-steps th, .d-steps td { padding: 0.5rem 0.3rem; } }
+
+/* Orders: the time of each status on an order */
+.staff-times { list-style: none; margin: 0.35rem 0 0.2rem; padding: 0; display: flex; flex-wrap: wrap; gap: 0.3rem 0.4rem; font-size: 0.8rem; }
+.staff-times li { display: inline-flex; align-items: baseline; gap: 0.3rem; padding: 0.15rem 0.55rem; border-radius: 999px; background: #f1f3f8; color: #2a3350; }
+.staff-times li b { font-weight: 600; }
+.staff-times li em { font-style: normal; color: #6b7280; }
+.staff-times li.s-cancelled { background: #fdecea; color: #8c1d18; }

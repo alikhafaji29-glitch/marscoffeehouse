@@ -97,3 +97,48 @@ export function toCsv(s: Summary): string {
   const lines = ['Day,Orders,Revenue (IQD)', ...s.perDay.map((d) => `${dayKey(d.day)},${d.orders},${d.revenue}`), '', 'Item,Units', ...s.top.map((t) => `"${t.label.replace(/"/g, '""')}",${t.value}`)]
   return lines.join('\n')
 }
+
+/* ---- the time each step takes (owner, 2026-11-23: "order recieved at 8:00, praparing at 8:03, done at 8:10, on the way
+ * at 8:15 … show analytics of time spent through every step"). An order's `history` already holds the moment of every
+ * status change. A step = from the first time the order reached one status to the first time it reached the next
+ * (delivered: the last time). A step longer than 12 hours is left out (an order forgotten open), and so is "on the way"
+ * shorter than a minute: staff often tap On the way and Delivered together, which says nothing about the road. ---- */
+export type StepKey = 'accept' | 'prepare' | 'wait' | 'out' | 'road' | 'handover' | 'total'
+export interface StepTime { key: StepKey; n: number; avg: number; median: number; slow: number } // minutes; slow = 9 in 10 were faster
+const STEPS: { key: StepKey; from: Order['status']; to: Order['status']; how: 'delivery' | 'pickup' | 'both' }[] = [
+  { key: 'accept', from: 'received', to: 'preparing', how: 'both' },
+  { key: 'prepare', from: 'preparing', to: 'done', how: 'both' },
+  { key: 'wait', from: 'done', to: 'onway', how: 'delivery' },
+  // received → on the way: what the shop itself controls; the road and the Delivered tap come after it. The live data
+  // (2026-11-23) shows why it is the figure to trust: Erbil leaves orders On the way for hours and marks them Delivered
+  // in one go, Kirkuk taps On the way and Delivered together
+  { key: 'out', from: 'received', to: 'onway', how: 'delivery' },
+  { key: 'road', from: 'onway', to: 'delivered', how: 'delivery' },
+  { key: 'handover', from: 'done', to: 'delivered', how: 'pickup' },
+  { key: 'total', from: 'received', to: 'delivered', how: 'both' },
+]
+/** when an order reached a status: the first time, or for delivered the last */
+export function stageAt(o: Order, stage: Order['status']): number | undefined {
+  const hits = (o.history ?? []).filter((h) => h.stage === stage).map((h) => h.at)
+  if (stage === 'received' && !hits.length) return o.at
+  return hits.length ? (stage === 'delivered' ? Math.max(...hits) : Math.min(...hits)) : undefined
+}
+export function stepTimes(orders: Order[], how: 'delivery' | 'pickup', from: number, to: number): { steps: StepTime[]; orders: number; skippedRoad: number } {
+  const mine = orders.filter((o) => o.at >= from && o.at <= to && o.status === 'delivered' && (o.fulfil === 'delivery') === (how === 'delivery'))
+  let skippedRoad = 0
+  const steps = STEPS.filter((st) => st.how === 'both' || st.how === how).map((st) => {
+    const mins: number[] = []
+    for (const o of mine) {
+      const a = stageAt(o, st.from), b = stageAt(o, st.to)
+      if (a === undefined || b === undefined || b < a) continue
+      const m = (b - a) / 60000
+      if (m > 12 * 60) continue
+      if (st.key === 'road' && m < 1) { skippedRoad++; continue }
+      mins.push(m)
+    }
+    mins.sort((x, y) => x - y)
+    const pick = (q: number) => (mins.length ? mins[Math.min(mins.length - 1, Math.floor(q * mins.length))] : 0)
+    return { key: st.key, n: mins.length, avg: mins.length ? mins.reduce((x, y) => x + y, 0) / mins.length : 0, median: pick(0.5), slow: pick(0.9) }
+  })
+  return { steps, orders: mine.length, skippedRoad }
+}
